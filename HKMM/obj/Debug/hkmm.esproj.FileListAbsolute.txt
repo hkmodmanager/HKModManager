@@ -1,0 +1,2 @@
+F:\HKLab\HKMM\HKMM\obj\Debug\hkmm.esproj.SuggestedBindingRedirects.cache
+F:\HKLab\HKMM\HKMM\obj\Debug\hkmm.esproj.CoreCompileInputs.cache
