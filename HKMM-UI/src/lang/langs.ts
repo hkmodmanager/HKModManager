@@ -8,6 +8,7 @@ export const I18nLanguages = {
             allmods: "下载Mods",
             localmods: "本地Mods",
             settings: "设置",
+            modgroups: "Mods分组",
             tasks: {
                 title: "任务",
                 all: "全部",
@@ -15,6 +16,19 @@ export const I18nLanguages = {
                 done: "已完成",
                 running: "进行中"
             }
+        },
+        groups: {
+            current: "当前",
+            create: "创建",
+            newtitle: "创建新的组",
+            name: "组名",
+            use: "使用当前组",
+            remove: "删除组",
+            deleteMsg: "你确定要删除这个组吗？这不可恢复",
+            rename: "重命名组",
+            download: "补充缺失的Mods",
+            ready: "已准备好",
+            unready: "未准备好"
         },
         mods: {
             authors: "贡献者",

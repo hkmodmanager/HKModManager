@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "swz4yblfgNCRw/tLSWx+Yj4KdxXPM1lYvwrWNFwhOBtAiOisZjZYbL/JRNZB2B+zZuxTP6lAcfFQ6FvON1vamQ==",
+  "success": true,
+  "projectFilePath": "F:\\HKLab\\HKMM\\netutils\\netutils.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\29676\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\29676\\.nuget\\packages\\mono.cecil\\0.11.4\\mono.cecil.0.11.4.nupkg.sha512"
+  ],
+  "logs": []
+}

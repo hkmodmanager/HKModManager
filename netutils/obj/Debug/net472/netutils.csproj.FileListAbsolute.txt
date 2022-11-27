@@ -1,0 +1,14 @@
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.csproj.AssemblyReference.cache
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.GeneratedMSBuildEditorConfig.editorconfig
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.AssemblyInfoInputs.cache
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.AssemblyInfo.cs
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.csproj.CoreCompileInputs.cache
+F:\HKLab\HKMM\netutils\bin\Debug\net472\netutils.dll
+F:\HKLab\HKMM\netutils\bin\Debug\net472\netutils.pdb
+F:\HKLab\HKMM\netutils\bin\Debug\net472\Mono.Cecil.Mdb.dll
+F:\HKLab\HKMM\netutils\bin\Debug\net472\Mono.Cecil.Pdb.dll
+F:\HKLab\HKMM\netutils\bin\Debug\net472\Mono.Cecil.Rocks.dll
+F:\HKLab\HKMM\netutils\bin\Debug\net472\Mono.Cecil.dll
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.csproj.CopyComplete
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.dll
+F:\HKLab\HKMM\netutils\obj\Debug\net472\netutils.pdb

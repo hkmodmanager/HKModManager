@@ -8,31 +8,33 @@
       text-white
       bg-dark
       fill-height
+      flex-shrink-0
     ">
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
         <navitem viewpath="/localmods"><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
         <navitem viewpath="/allmods"><i class="bi bi-globe"></i> {{ $t("tabs.allmods") }}</navitem>
-        <RequireExpmode>
-          <li class="nav-item">
-            <a class="nav-link text-white" @click="toggleNavTasks()" href="javascript:;">
-              <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
-            </a>
-            <div class="list-group nav-list collapse" ref="tasksNavGroup">
-              <navitem viewpath="/tasks/all" class="list-group-item" compare-path>{{ $t("tabs.tasks.all") }}
-              </navitem>
-              <navitem viewpath="/tasks/running" class="list-group-item" compare-path>{{ $t("tabs.tasks.running") }}
-              </navitem>
-              <navitem viewpath="/tasks/done" class="list-group-item" compare-path>{{ $t("tabs.tasks.done") }}
-              </navitem>
-              <navitem viewpath="/tasks/failed" class="list-group-item" compare-path>{{ $t("tabs.tasks.failed") }}
-              </navitem>
+        
+        <li class="nav-item">
+          <a class="nav-link text-white" @click="toggleNavTasks()" href="javascript:;">
+            <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
+          </a>
+          <div class="list-group nav-list collapse" ref="tasksNavGroup">
+            <navitem viewpath="/tasks/all" class="list-group-item" compare-path>{{ $t("tabs.tasks.all") }}
+            </navitem>
+            <navitem viewpath="/tasks/running" class="list-group-item" compare-path>{{ $t("tabs.tasks.running") }}
+            </navitem>
+            <navitem viewpath="/tasks/done" class="list-group-item" compare-path>{{ $t("tabs.tasks.done") }}
+            </navitem>
+            <navitem viewpath="/tasks/failed" class="list-group-item" compare-path>{{ $t("tabs.tasks.failed") }}
+            </navitem>
 
-            </div>
-          </li>
-        </RequireExpmode>
-
+          </div>
+        </li>
+        
+        <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
       </ul>
+      
       <hr />
       <ul class="nav nav-pnavills">
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
@@ -76,7 +78,6 @@ html {
 import { defineComponent } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
-import RequireExpmode from "./components/require-expmode.vue";
 
 export default defineComponent({
   data: function () {
@@ -84,8 +85,7 @@ export default defineComponent({
   },
   components: {
     navitem,
-    RequireExpmode,
-},
+  },
   methods: {
     toggleNavTasks() {
       const group = this.$refs.tasksNavGroup as Element;

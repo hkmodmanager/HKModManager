@@ -7,12 +7,17 @@
                     <div class="p-1">
                         {{ mod?.name }}
                     </div>
-                    <span v-if="isInstallMod(mod?.name ?? '')" class="badge bg-success mt-2">
+                    <span v-if="isUsed(mod?.name ?? '')" class="badge bg-success mt-2">
+                        {{ $t("mods.enabled") }}
+                    </span>
+                    <span v-if="isInstallMod(mod?.name ?? '') && !isUsed(mod?.name ?? '')"
+                        class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
                     <span v-if="isRequireUpdate(mod?.name ?? '')" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
                     </span>
+
                     <!--Tags-->
                     <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
                         {{ $t(`mods.tags.${tag}`) }}
@@ -26,23 +31,30 @@
                 <!--accordion body-->
                 <div>
                     <div class="d-flex w-100">
-                        <button class="btn btn-primary flex-grow-1" @click="installMod" ref="btnInstall"
-                            v-if="!isInstallMod(mod?.name ?? '')">{{ $t("mods.install") }}</button>
-                        <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name ?? '')">
+                        <button class="btn btn-primary flex-grow-1" @click="installMod" :disabled="isDownload"
+                            v-if="!isInstallMod(mod?.name as string)">{{ $t("mods.install") }}</button>
+                        <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
                             <div class="flex-grow-1 d-flex">
-                                <button class="btn btn-primary flex-grow-1" v-if="!isUsed(mod?.name ?? '')" @click="toggleMod(true)">
-                                    {{ $t("mods.use") }}
-                                </button>
-                                <button class="btn btn-primary flex-grow-1" v-if="isUsed(mod?.name ?? '')" @click="toggleMod(false)">
-                                    {{ $t("mods.unuse") }}
-                                </button>
-                                <button class="btn btn-danger flex-grow-1" @click="uninstallMod" ref="btnUninstall">
+                                <div class="flex-grow-1 d-flex">
+                                    <button class="btn btn-primary flex-grow-1"
+                                        v-if="!isUsed(mod?.name as string) && canEnable(mod?.name as string)"
+                                        @click="toggleMod(true)">
+                                        {{ $t("mods.use") }}
+                                    </button>
+                                    <button class="btn btn-primary flex-grow-1" v-if="isUsed(mod?.name as string)"
+                                        @click="toggleMod(false)">
+                                        {{ $t("mods.unuse") }}
+                                    </button>
+                                    <button class="btn btn-primary flex-grow-1" @click="installMod"
+                                        v-if="!canEnable(mod?.name as string)" :disabled="isDownload">{{ $t("mods.installDep") }}</button>
+                                </div>
+                                <button class="btn btn-danger flex-grow-1" @click="uninstallMod"  :disabled="isDownload">
                                     {{ $t("mods.uninstall") }}</button>
                             </div>
                         </div>
-                        <div class="flex-grow-1 d-flex" v-if="isRequireUpdate(mod?.name ?? '') && !isLocal">
-                            <button class="btn btn-primary flex-grow-1" ref="btnUpdate">
+                        <div class="flex-grow-1 d-flex" v-if="isRequireUpdate(mod?.name as string) && !isLocal">
+                            <button class="btn btn-primary flex-grow-1"  :disabled="isDownload">
                                 {{ $t("mods.update") }}
                             </button>
                         </div>
@@ -79,7 +91,7 @@
                             </span>
                         </h6>
                     </div>
-                    
+
                     <div v-if="(mod?.authors?.length ?? 0) > 0">
                         <hr />
                         <h5>{{ $t("mods.authors") }}</h5>
@@ -114,10 +126,11 @@
 
 <script lang="ts">
 import { ModLinksManifestData } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods } from '@/renderer/modManager';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
+import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import { remote } from 'electron';
-import { ButtonHTMLAttributes, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     methods: {
@@ -131,7 +144,13 @@ export default defineComponent({
         isInstallMod(name: string) {
             return getLocalMod(name)?.isInstalled() ?? false;
         },
+        canEnable(name: string) {
+            const mg = getLocalMod(name);
+            if (!mg) return false;
+            return mg.canEnable();
+        },
         isRequireUpdate(name: string) {
+            if (this.disableUpdate) return false;
             const lm = getLocalMod(name);
             if (!lm) return false;
             const lv = lm.getLatestVersion();
@@ -140,21 +159,20 @@ export default defineComponent({
         },
         async installMod() {
             if (this.mod === undefined) return;
-            const installBtn = this.$refs.btnInstall as ButtonHTMLAttributes;
-            installBtn.disabled = true;
             const group = getOrAddLocalMod(this.mod.name);
             await group.installNew(this.mod);
-            installBtn.disabled = false;
-            group.getLatest()?.install();
+            this.$forceUpdate();
+        },
+        async installModDep() {
+            if (this.mod === undefined) return;
+            const group = getOrAddLocalMod(this.mod.name);
+            await group.getLatest()?.checkDependencies();
             this.$forceUpdate();
         },
         uninstallMod() {
             if (this.mod === undefined) return;
-            const uninstallBtn = this.$refs.btnUninstall as ButtonHTMLAttributes;
-            uninstallBtn.disabled = true;
             const group = getOrAddLocalMod(this.mod.name);
             group.uninstall(undefined);
-            uninstallBtn.disabled = false;
             this.$forceUpdate();
         },
         isUsed(name: string) {
@@ -167,38 +185,40 @@ export default defineComponent({
             if (this.mod === undefined) return;
             const lm = getLocalMod(this.mod.name);
             if (!lm || !lm.isInstalled()) return;
-            console.log(lm.isActived());
-            if(!actived) {
+            const group = getCurrentGroup();
+            if (!actived) {
                 lm.disableAll();
+                group.removeMod(this.mod.name)
             } else {
                 lm.getLatest()?.install();
+                group.addMod(this.mod.name, this.mod.version);
             }
             this.$forceUpdate();
         },
         async updateMod() {
             if (this.mod === undefined || this.isLocal) return;
-            const updateBtn = this.$refs.btnUpdate as ButtonHTMLAttributes;
-            updateBtn.disabled = true;
             const group = getOrAddLocalMod(this.mod.name);
-            group.uninstall();
+            group.disableAll();
             await group.installNew(this.mod);
             group.getLatest()?.install();
-            updateBtn.disabled = false;
             this.$forceUpdate();
         }
     },
     props: {
         mod: ModLinksManifestData,
-        isLocal: Boolean
+        isLocal: Boolean,
+        disableUpdate: Boolean
     },
     data() {
         return {
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
-            depOnThis: getSubMods(this.mod?.name ?? "")
+            depOnThis: getSubMods(this.mod?.name ?? ""),
+            isDownload: false
         }
     },
     beforeUpdate() {
         this.depOnThis = getSubMods(this.mod?.name ?? "");
+        this.isDownload = isDownloadingMod(this.mod?.name as string);
     },
     unmounted() {
         clearInterval(this.checkTimer);

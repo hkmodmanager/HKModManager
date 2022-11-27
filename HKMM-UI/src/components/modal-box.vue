@@ -1,43 +1,55 @@
 <template>
-  <div
-    class="modal fade"
-    id="app-modal"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="app-modal-title"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="app-modal-title">{{ $t(title ?? "") }}</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+  <Teleport to="body">
+    <div class="modal fade" ref="modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <slot name="title">
+              <h5 class="modal-title">{{ title }}</h5>
+            </slot>
+            <button class="btn" @click="close()"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="modal-body">
+            <slot></slot>
+          </div>
+          <div class="modal-footer">
+            <slot name="footer"></slot>
+          </div>
         </div>
-        <slot></slot>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { Modal } from 'bootstrap'
 
 export default defineComponent({
-    props: {
-        title: String
+  methods: {
+    getModal() {
+      if(this.modal) return this.modal as Modal;
+      const el = this.$refs.modal as HTMLDivElement;
+      return this.modal = new Modal(el);
     },
-    methods: {
-        showModal: function() {
-            
-        }
+    close() {
+      this.getModal().hide();
     }
+  },
+  data() {
+    return {
+      modal: undefined as any
+    }
+  },
+  unmounted() {
+    if(this.modal) {
+      this.modal.dispose();
+      this.modal = undefined;
+    }
+  },
+  props: {
+    title: String
+  }
 })
 </script>
 

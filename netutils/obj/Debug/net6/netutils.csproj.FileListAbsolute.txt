@@ -1,0 +1,12 @@
+F:\HKLab\HKMM\netutils\bin\Debug\net6\netutils.deps.json
+F:\HKLab\HKMM\netutils\bin\Debug\net6\netutils.dll
+F:\HKLab\HKMM\netutils\bin\Debug\net6\netutils.pdb
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.csproj.AssemblyReference.cache
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.GeneratedMSBuildEditorConfig.editorconfig
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.AssemblyInfoInputs.cache
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.AssemblyInfo.cs
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.csproj.CoreCompileInputs.cache
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.dll
+F:\HKLab\HKMM\netutils\obj\Debug\net6\refint\netutils.dll
+F:\HKLab\HKMM\netutils\obj\Debug\net6\netutils.pdb
+F:\HKLab\HKMM\netutils\obj\Debug\net6\ref\netutils.dll

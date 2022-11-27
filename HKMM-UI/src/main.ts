@@ -14,9 +14,11 @@ import viewErrorVue from './view/view-error.vue'
 import viewLocalmodsVue from './view/view-localmods.vue'
 import viewTasksVue from './view/view-tasks.vue'
 import requireExpmodeVue from './components/require-expmode.vue'
+import viewModGroups from './view/view-modgroups.vue'
 import AppVue from './App.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
+import { importGroup } from './renderer/modgroup'
 
 const routes: RouteRecordRaw[] = [
     {
@@ -32,13 +34,19 @@ const routes: RouteRecordRaw[] = [
     {
         name: 'localmods',
         path: '/localmods',
-        component: viewLocalmodsVue
+        alias: '/:',
+        component: viewLocalmodsVue,
     },
     {
         name: 'tasks',
         path: '/tasks/:filter?',
         component: viewTasksVue,
         props: true
+    },
+    {
+        name: 'modgroups',
+        path: '/modgroups',
+        component: viewModGroups
     },
     {
         path: '/:pathMatch(.*)*',
@@ -66,5 +74,7 @@ app.mount('#app');
 ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     const url = new URL(urlStr);
     console.dir(url);
-    
+    if(url.hostname == 'import.group') {
+        importGroup(url);
+    }
 });

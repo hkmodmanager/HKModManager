@@ -17,6 +17,8 @@
     "bootstrap-icons": "^1.10.2",
     "compressing": "^1.6.2",
     "core-js": "^3.8.3",
+    "edge-cs": "^1.2.1",
+    "electron-edge-js": "file:libs/electron-edge-js-master",
     "jest": "^29.3.1",
     "jest-editor-support": "^30.2.1"
   },
