@@ -33,6 +33,7 @@
         </li>
         
         <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
+        <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledAPI()"></i></navitem>
       </ul>
       
       <hr />
@@ -78,6 +79,7 @@ html {
 import { defineComponent } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
+import { getAPIVersion } from '@/renderer/apiManager'
 
 export default defineComponent({
   data: function () {
@@ -91,6 +93,9 @@ export default defineComponent({
       const group = this.$refs.tasksNavGroup as Element;
       const col = new Collapse(group);
       col.toggle();
+    },
+    isInstalledAPI() {
+      return getAPIVersion() > 0;
     }
   },
 });

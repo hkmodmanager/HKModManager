@@ -1,3 +1,4 @@
+import { func } from "electron-edge-js";
 import { dirname, join } from "path"
 
 export function getResPath() {
@@ -9,4 +10,12 @@ export function getResPath() {
 
 export function getNetUtilsPath() {
     return join(getResPath(), "netutils.dll");
+}
+
+export function netfunc(method: string, type: string = "HKMM.NetUtils") {
+    return func({
+        assemblyFile: getNetUtilsPath(),
+        typeName: type,
+        methodName: method
+    })
 }

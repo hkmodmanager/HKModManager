@@ -9,6 +9,7 @@ export const I18nLanguages = {
             localmods: "本地Mods",
             settings: "设置",
             modgroups: "Mods分组",
+            api: "MAPI管理",
             tasks: {
                 title: "任务",
                 all: "全部",
@@ -81,6 +82,13 @@ export const I18nLanguages = {
                 userdir: "用户目录",
                 custom: "自定义"
             }
+        },
+        api: {
+            notfound: "未安装API",
+            found: "已安装API",
+            download: "下载API",
+            enable: "启用API",
+            disable: "禁用API"
         },
         tasks: {
             failed: "失败",

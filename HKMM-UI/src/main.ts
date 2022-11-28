@@ -19,6 +19,7 @@ import AppVue from './App.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
 import { importGroup } from './renderer/modgroup'
+import viewApiVue from './view/view-api.vue'
 
 const routes: RouteRecordRaw[] = [
     {
@@ -47,6 +48,11 @@ const routes: RouteRecordRaw[] = [
         name: 'modgroups',
         path: '/modgroups',
         component: viewModGroups
+    },
+    {
+        name: 'api',
+        path: '/api',
+        component: viewApiVue
     },
     {
         path: '/:pathMatch(.*)*',
