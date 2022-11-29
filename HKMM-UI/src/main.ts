@@ -8,51 +8,45 @@ import "@/renderer/modManager"
 
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
-import viewAllmodsVue from './view/view-allmods.vue'
-import viewSettingsVue from './view/view-settings.vue'
+
 import viewErrorVue from './view/view-error.vue'
-import viewLocalmodsVue from './view/view-localmods.vue'
-import viewTasksVue from './view/view-tasks.vue'
 import requireExpmodeVue from './components/require-expmode.vue'
-import viewModGroups from './view/view-modgroups.vue'
-import AppVue from './App.vue'
+import startupVue from './startup/startup-main.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
 import { importGroup } from './renderer/modgroup'
-import viewApiVue from './view/view-api.vue'
 
 const routes: RouteRecordRaw[] = [
     {
         name: 'allmods',
         path: '/allmods',
-        component: viewAllmodsVue
+        component: () => import('./view/view-allmods.vue')
     },
     {
         name: 'settings',
         path: '/settings',
-        component: viewSettingsVue
+        component: () => import('./view/view-settings.vue')
     },
     {
         name: 'localmods',
         path: '/localmods',
-        alias: '/:',
-        component: viewLocalmodsVue,
+        component: () => import('./view/view-localmods.vue'),
     },
     {
         name: 'tasks',
         path: '/tasks/:filter?',
-        component: viewTasksVue,
+        component: () => import('./view/view-tasks.vue'),
         props: true
     },
     {
         name: 'modgroups',
         path: '/modgroups',
-        component: viewModGroups
+        component: () => import('./view/view-modgroups.vue')
     },
     {
         name: 'api',
         path: '/api',
-        component: viewApiVue
+        component: () => import('./view/view-api.vue')
     },
     {
         path: '/:pathMatch(.*)*',
@@ -70,7 +64,7 @@ export const i18n = createI18n({
     messages: I18nLanguages
 });
 
-export const app = createApp(AppVue);
+export const app = createApp(startupVue);
 
 app.use(route);
 app.use(i18n);

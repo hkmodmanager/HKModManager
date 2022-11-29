@@ -2,7 +2,12 @@
 export const I18nLanguages = {
     zh: {
         error: {
-            missingView: "页面丢失"
+            missingView: "页面丢失",
+            hkcheck: {
+                no_hk: "选中的游戏不是空洞骑士",
+                broken: "游戏文件已损坏",
+                hk_out_of_date: "游戏版本过旧"
+            }
         },
         tabs: {
             allmods: "下载Mods",
@@ -88,7 +93,14 @@ export const I18nLanguages = {
             found: "已安装API",
             download: "下载API",
             enable: "启用API",
-            disable: "禁用API"
+            disable: "禁用API",
+            notfit: "没有合适版本的API",
+            uninstall: "卸载API",
+            install: "安装API",
+            noBackup: "未找到备份文件或备份文件已被污染",
+            isLatestVer: "最新版本",
+            hasLatestVer: "有更新",
+            update: "更新API"
         },
         tasks: {
             failed: "失败",

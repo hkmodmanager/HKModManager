@@ -44,3 +44,11 @@ export async function downloadText(url: string, config?: AxiosRequestConfig<any>
     const r = await downloadFile<string>(url, config, taskinfo, allowChangeProgress, taskName, taskCategory);
     return r.data;
 }
+
+export async function downloadRaw(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo, allowChangeProgress: boolean = false, taskName?: string, taskCategory?: TaskCategory) {
+    if (config) config = { ...config };
+    else config = {};
+    config.responseType = "arraybuffer";
+    const r = await downloadFile<ArrayBuffer>(url, config, taskinfo, allowChangeProgress, taskName, taskCategory);
+    return Buffer.from(r.data);
+}

@@ -7,13 +7,7 @@
       <button class="btn btn-danger" @click="clearModLinksCache()">{{ $t("settings.cache.clearModLinks") }}</button>
     </div>
     <hr />
-    <div class="form-group p-3">
-      <label class="form-label">{{ $t("settings.gamepath.title") }}</label>
-      <div class="input-group">
-        <input type="text" class="form-control" :value="settings.gamepath" readonly disabled />
-        <a class="btn btn-success" @click="selectHKPath()"><i class="bi bi-folder2-open"></i></a>
-      </div>
-    </div>
+    <HkpathChange v-model:gamepath="settings.gamepath" @onsave="save()"></HkpathChange>
     <div class="form-group p-3">
       <label class="form-label">{{ $t("settings.modsavepath.title") }}</label>
       <select class="form-select" @change="changeModsSavePathMode()" ref="modssavepathmode">
@@ -70,7 +64,7 @@ import { clearCache } from "@/renderer/modlinks/modlinks";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
 import { remote } from "electron";
-import { parse } from "path";
+import HkpathChange from "@/components/hkpath-change.vue";
 
 export default defineComponent({
   data() {
@@ -80,8 +74,9 @@ export default defineComponent({
   },
   components: {
     mirrorlist,
-    RequireExpmode
-  },
+    RequireExpmode,
+    HkpathChange
+},
   mounted() {
     let checkbox = this.$refs.expModeSwitch as InputHTMLAttributes;
     checkbox.checked = this.settings.enabled_exp_mode ?? false;
@@ -117,23 +112,6 @@ export default defineComponent({
     restart() {
       remote.app.relaunch();
       remote.app.exit();
-    },
-
-    selectHKPath() {
-      const result = remote.dialog.showOpenDialogSync({
-        filters: [
-          {
-              name: this.$t("settings.gamepath.hkexe"),
-              extensions: [ "exe" ]
-          }
-        ],
-        properties: [ "dontAddToRecent", "openFile" ]
-      });
-      if(!result) return;
-      const p = parse(result[0]);
-      console.log(p);
-      if(p.base != "hollow_knight.exe") return;
-      this.settings.gamepath = p.dir;
     },
     selectModsSavePath() {
       const result = remote.dialog.showOpenDialogSync({

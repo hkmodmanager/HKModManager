@@ -4,7 +4,7 @@ import { join, parse } from "path";
 import { getModLinkMod, getModLinks, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
 import { GetSettings, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
-import { downloadFile } from "./utils/downloadFile";
+import { downloadFile, downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
 
@@ -17,8 +17,8 @@ export function getModsPath(name: string) {
 export function getCacheModsPath() {
     let mods = "";
     const settings = GetSettings();
-    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(process.execPath, "managedMods");
-    else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath("appData"), "managedMods");
+    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(remote.app.getPath("exe"), "managedMods");
+    else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
     return mods;
@@ -151,8 +151,7 @@ export class LocalModsVersionGroup {
         const download = new URL(mod.link);
         const dp = parse(download.pathname);
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
-        const result = await downloadFile<ArrayBuffer>(mod.link, { responseType: "arraybuffer" }, task);
-        const buffer = Buffer.from(result.data);
+        const result = await downloadRaw(mod.link, undefined, task);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });
@@ -163,10 +162,10 @@ export class LocalModsVersionGroup {
         info.path = verdir;
         info.modinfo = mod;
         if (dp.ext == ".dll") {
-            writeFileSync(join(verdir, dp.base), buffer);
+            writeFileSync(join(verdir, dp.base), result);
         } else {
             const zdp = join(verdir, "mod" + dp.ext);
-            writeFileSync(zdp, buffer);
+            writeFileSync(zdp, result);
             if (dp.ext == ".zip") {
                 await zip.uncompress(zdp, verdir);
             }
