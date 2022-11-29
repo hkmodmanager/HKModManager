@@ -90,13 +90,24 @@ export function copyBackup() {
 export function resotreBackup() {
     const bp = getBackupPath();
     if(!existsSync(bp)) return;
-    copyFileSync(join(dirname(bp), "Assembly-CSharp.dll"), getBackupPath());
+    copyFileSync(getBackupPath(), join(dirname(bp), "Assembly-CSharp.dll"));
 }
 
 export function getBackupPath() {
     const mp = dirname(getAPIPath());
     const bp = join(mp, "Backup-API.backup");
     return bp;
+}
+
+export function isVaildBackup() {
+    const bp = getBackupPath();
+    if(!existsSync(bp)) return false;
+    try {
+        return getAPIVersion(bp) <= 0;
+    } catch(e) {
+        console.error(e);
+        return false;
+    }
 }
 
 export async function downloadAPI() {

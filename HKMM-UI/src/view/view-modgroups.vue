@@ -24,13 +24,13 @@
                 <input v-model="group_name_t" class="form-control" />
             </div>
         </form>
-        <template v-slot:footer>
+        <template #footer>
             <button class="btn btn-primary" @click="createNewGroup()">{{ $t("groups.create") }}</button>
         </template>
     </ModalBox>
     <ModalBox :title="$t('groups.remove')" ref="modal_delete_group">
         <strong>{{ $t("groups.deleteMsg") }}</strong>
-        <template v-slot:footer>
+        <template #footer>
             <button class="btn btn-danger w-100" @click="removeGroup()">{{ $t('groups.remove') }}</button>
         </template>
     </ModalBox>
@@ -38,7 +38,7 @@
         <form>
             <input class="form-control" v-model="group_name_t" />
         </form>
-        <template v-slot:footer>
+        <template #footer>
             <button class="btn btn-danger w-100" @click="renameGroup()">{{ $t('groups.rename') }}</button>
         </template>
     </ModalBox>

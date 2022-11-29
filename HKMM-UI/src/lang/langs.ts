@@ -100,7 +100,8 @@ export const I18nLanguages = {
             noBackup: "未找到备份文件或备份文件已被污染",
             isLatestVer: "最新版本",
             hasLatestVer: "有更新",
-            update: "更新API"
+            update: "更新API",
+            uninstallMsg: "你确定要卸载API吗？"
         },
         tasks: {
             failed: "失败",

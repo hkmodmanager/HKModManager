@@ -41,6 +41,7 @@ async function createWindow() {
       contextIsolation: false,
       webSecurity: false,
       enableRemoteModule: true,
+      allowRunningInsecureContent: true
     }
   });
 
