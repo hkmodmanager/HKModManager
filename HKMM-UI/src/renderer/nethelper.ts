@@ -1,11 +1,18 @@
+import { remote } from "electron";
 import { func } from "electron-edge-js";
-import { dirname, join } from "path"
+import { dirname, join, parse } from "path"
 
 export function getResPath() {
-    if(process.env.WEBPACK_SERVE) {
+    if (process.env.WEBPACK_SERVE) {
         return join(dirname(process.env.npm_package_json as string), "resources");
     }
-    return 'F:\\HKLab\\HKMM\\HKMM-UI\\resources';
+    const exename = parse(remote.app.getPath("exe"));
+
+    return exename.name === 'electron' ? (
+        join(dirname(dirname(dirname(exename.dir))), "resources") //Debug
+    ) : (
+        join(exename.dir, "resources", "res")
+    );
 }
 
 export function getNetUtilsPath() {

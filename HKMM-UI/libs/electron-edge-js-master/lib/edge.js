@@ -4,7 +4,7 @@ import { parse, dirname, resolve, join } from 'path';
 let edge;
 
 const exename = parse(remote.app.getPath("exe"));
-console.log(exename);
+
 let rootPath = exename.name === 'electron' ? (
     join(dirname(dirname(dirname(exename.dir))), "resources", "edge") //Debug
 ) : (

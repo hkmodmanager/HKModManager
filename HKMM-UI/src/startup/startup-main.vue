@@ -1,8 +1,8 @@
 <template>
-    <div class="vh-100" v-if="appVue != undefined">
-        <component :is="appVue"></component>
+    <div class="vh-100" v-if="getApp() != undefined">
+        <component :is="getApp()"></component>
     </div>
-    <div class="vh-100" v-if="appVue == undefined">
+    <div class="vh-100" v-if="getApp() == undefined">
         <HkpathChange v-model:gamepath="gamepath" @onsave="check()"></HkpathChange>
     </div>
 </template>
@@ -13,6 +13,8 @@ import { checkGameFile } from '@/renderer/apiManager';
 import { GetSettings, SaveSettings } from '@/renderer/settings';
 import { Component, defineComponent } from 'vue';
 
+let appVue: Component | undefined;
+
 export default defineComponent({
     methods: {
         async check() {
@@ -20,17 +22,19 @@ export default defineComponent({
             const gs = this.gamepath;
             if(checkGameFile(gs) === true) {
                 this.throughCheck = true;
-                this.appVue = (await import('@/App.vue')).default;
-                console.log(this.appVue);
+                appVue = (await import('@/App.vue')).default;
                 
                 GetSettings().gamepath = this.gamepath;
                 SaveSettings();
+                this.$forceUpdate();
             }
+        },
+        getApp() {
+            return appVue;
         }
     },
     data() {
         return {
-            appVue: undefined as any as Component,
             throughCheck: false,
             gamepath: GetSettings().gamepath
         };

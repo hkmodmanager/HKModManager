@@ -5,6 +5,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
+import { readFile } from 'fs';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
@@ -28,6 +29,43 @@ app.setAsDefaultProtocolClient("hkmm", undefined, url_args);
 
 export let mainWindow: BrowserWindow | undefined;
 
+function registerAppScheme() {
+    protocol.registerBufferProtocol("app", (request, callback) => {
+      let pathName = request.url.substring(6);
+      const hash = pathName.lastIndexOf('#');
+      if(hash > 0) {
+        pathName = pathName.substring(0, hash);
+      }
+      pathName = decodeURI(pathName);
+      readFile(path.join(__dirname, pathName), (error, data) => {
+        if (error) {
+          dialog.showErrorBox(
+            `Failed to read ${pathName} on app protocol`,
+            error.message
+          );
+        }
+        const extension = path.extname(pathName).toLowerCase()
+        let mimeType = ''
+
+        if (extension === '.js') {
+          mimeType = 'text/javascript'
+        } else if (extension === '.html') {
+          mimeType = 'text/html'
+        } else if (extension === '.css') {
+          mimeType = 'text/css'
+        } else if (extension === '.svg' || extension === '.svgz') {
+          mimeType = 'image/svg+xml'
+        } else if (extension === '.json') {
+          mimeType = 'application/json'
+        } else if (extension === '.wasm') {
+          mimeType = 'application/wasm'
+        }
+
+        callback({ mimeType, data })
+      })
+    });
+}
+
 async function createWindow() {
   // Create the browser window.
   const win = mainWindow = new BrowserWindow({
@@ -50,7 +88,6 @@ async function createWindow() {
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
-    createProtocol('app');
     // Load the index.html when not in development
     win.loadURL('app://./index.html');
   }
@@ -75,16 +112,10 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      //await installExtension(VUEJS3_DEVTOOLS);
-    } catch (e: any) {
-      if (e) console.error('Vue Devtools failed to install:', e.toString());
-    }
-  }
-  parseCmd(process.argv);
+  registerAppScheme()
+  
   createWindow();
+  parseCmd(process.argv);
 })
 
 app.on("second-instance", (ev, argv, wd) => {
