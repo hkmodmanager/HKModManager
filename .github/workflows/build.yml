@@ -11,17 +11,15 @@ jobs:
     steps:
       - name: Check out git repository
         uses: actions/checkout@v2
-      
       - name: Install Node.js
         uses: actions/setup-node@v2
-      - name: Work Dir
-        run: |
-          cd HKMM-UI
       - name: npm install
         run: |
+          cd HKMM-UI
           npm install
       - name: Build
         run: |
+          cd HKMM-UI
           npm run electron:build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
