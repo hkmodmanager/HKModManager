@@ -5,7 +5,7 @@ let edge;
 
 const exename = parse(remote.app.getPath("exe"));
 
-let rootPath = exename.name === 'electron' ? (
+let rootPath = !remote.app.isPackaged ? (
     join(dirname(dirname(dirname(exename.dir))), "resources", "edge") //Debug
 ) : (
     join(exename.dir, "resources", "res", "edge")

@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import HkpathChange from '@/components/hkpath-change.vue';
-import { checkGameFile } from '@/renderer/apiManager';
+import { checkGameFile, getAPIVersion } from '@/renderer/apiManager';
 import { GetSettings, SaveSettings } from '@/renderer/settings';
 import { Component, defineComponent } from 'vue';
 
@@ -27,6 +27,11 @@ export default defineComponent({
                 GetSettings().gamepath = this.gamepath;
                 SaveSettings();
                 this.$forceUpdate();
+                if(getAPIVersion() > 0) {
+                    this.$router.replace({ name: "modgroups" });
+                } else {
+                    this.$router.replace({ name: "api" })
+                }
             }
         },
         getApp() {

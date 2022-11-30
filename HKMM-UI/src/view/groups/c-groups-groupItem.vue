@@ -17,7 +17,9 @@
             <div class="accordion-body">
                 <!--accordion body-->
                 <div class="w-100 d-flex p-1">
-                    <button class="btn btn-primary" @click="copyShareUrl(groupctrl as ModGroupController)"><i class="bi bi-share"></i></button>
+                    <button class="btn btn-primary" @click="copyShareUrl(groupctrl as ModGroupController)" :title="$t('groups.copyShareMsg')">
+                        <i class="bi bi-share"></i>
+                    </button>
                     <!----<button class="btn btn-primary" @click="rename(groupctrl as ModGroupController)">Rename</button>-->
                     <button class="btn btn-primary flex-grow-1" :disabled="isCurrent(groupctrl) || isDownloading" v-if="canUseGroup(groupctrl as ModGroupController)"
                         @click="setAsCurrent(groupctrl)">{{ $t("groups.use") }}</button>
@@ -54,6 +56,7 @@ import { Collapse } from 'bootstrap';
 import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/renderer/modManager';
 import { URL } from 'url';
 import { getModLinkMod } from '@/renderer/modlinks/modlinks';
+import { clipboard } from 'electron';
 
 export default defineComponent({
     props: {
@@ -119,8 +122,15 @@ export default defineComponent({
         copyShareUrl(ctrl: ModGroupController) {
             const url = new URL("hkmm://import.group");
             url.searchParams.set("name", ctrl.info.name);
-            url.searchParams.set("mods", ctrl.info.mods.join(';'));
+            
+            const mods: string[] = [];
+            for (const mod of ctrl.info.mods) {
+                if(!mod) continue;
+                mods.push(mod.join(':'));
+            }
+            url.searchParams.set("mods", mods.join(';'));
             console.log(url.toString());
+            clipboard.writeText(url.toString());
         },
         rename(ctrl: ModGroupController) {
             this.$emit("onshowrename", ctrl.info.guid);

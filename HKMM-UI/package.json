@@ -2,6 +2,21 @@
   "name": "hkmm",
   "version": "0.1.0",
   "private": true,
+  "description": "A Hollow Knight Mod Manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HKLab/HKModManager.git"
+  },
+  "author": {
+    "name": "HKLab",
+    "url": "https://github.com/HKLab"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -9,7 +24,8 @@
     "electron:build": "vue-cli-service electron:build",
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps"
+    "postuninstall": "electron-builder install-app-deps",
+    "release": "vue-cli-service electron:build"
   },
   "main": "background.js",
   "dependencies": {

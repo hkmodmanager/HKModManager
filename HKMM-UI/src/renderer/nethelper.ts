@@ -8,7 +8,7 @@ export function getResPath() {
     }
     const exename = parse(remote.app.getPath("exe"));
 
-    return exename.name === 'electron' ? (
+    return !remote.app.isPackaged ? (
         join(dirname(dirname(dirname(exename.dir))), "resources") //Debug
     ) : (
         join(exename.dir, "resources", "res")

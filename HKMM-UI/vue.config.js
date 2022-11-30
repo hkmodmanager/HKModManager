@@ -17,7 +17,8 @@ module.exports = defineConfig({
                     }
                 ],
                 win: {
-                    icon: "./MZ_Death_Skull.ico"
+                    icon: "./MZ_Death_Skull.ico",
+                    publish: [ 'github' ]
                 },
                 extraResources: {
                     from: "./resources",
@@ -25,6 +26,13 @@ module.exports = defineConfig({
                     filter: [
                         "**/*"
                     ]
+                },
+                nsis: {
+                    oneClick: false,
+                    allowToChangeInstallationDirectory: true,
+                    createStartMenuShortcut: true,
+                    shortcutName: "HKMM",
+                    artifactName: "${productName}-${version}-Setup.${ext}"
                 }
             }
         }

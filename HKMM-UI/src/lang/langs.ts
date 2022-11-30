@@ -34,7 +34,8 @@ export const I18nLanguages = {
             rename: "重命名组",
             download: "补充缺失的Mods",
             ready: "已准备好",
-            unready: "未准备好"
+            unready: "未准备好",
+            copyShareMsg: "复制分享链接"
         },
         mods: {
             authors: "贡献者",
