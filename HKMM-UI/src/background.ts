@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, crashReporter, dialog } from 'electron'
+import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import * as path from 'path';
@@ -9,17 +9,25 @@ import { readFile } from 'fs';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
-if(!singleLock) {
+if (!singleLock) {
   app.quit();
 }
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { secure: true, standard: true } }
+  {
+    scheme: 'app', privileges: {
+      secure: true,
+      standard: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+
+    }
+  }
 ]);
 
 const url_args = [];
-if(!app.isPackaged) {
+if (!app.isPackaged) {
   url_args.push("\"" + path.resolve(process.argv[1]) + "\"");
 }
 url_args.push("--");
@@ -30,40 +38,40 @@ app.setAsDefaultProtocolClient("hkmm", undefined, url_args);
 export let mainWindow: BrowserWindow | undefined;
 
 function registerAppScheme() {
-    protocol.registerBufferProtocol("app", (request, callback) => {
-      let pathName = request.url.substring(6);
-      const hash = pathName.lastIndexOf('#');
-      if(hash > 0) {
-        pathName = pathName.substring(0, hash);
+  protocol.registerBufferProtocol("app", (request, callback) => {
+    let pathName = request.url.substring(6);
+    const hash = pathName.lastIndexOf('#');
+    if (hash > 0) {
+      pathName = pathName.substring(0, hash);
+    }
+    pathName = decodeURI(pathName);
+    readFile(path.join(__dirname, pathName), (error, data) => {
+      if (error) {
+        dialog.showErrorBox(
+          `Failed to read ${pathName} on app protocol`,
+          error.message
+        );
       }
-      pathName = decodeURI(pathName);
-      readFile(path.join(__dirname, pathName), (error, data) => {
-        if (error) {
-          dialog.showErrorBox(
-            `Failed to read ${pathName} on app protocol`,
-            error.message
-          );
-        }
-        const extension = path.extname(pathName).toLowerCase()
-        let mimeType = ''
+      const extension = path.extname(pathName).toLowerCase()
+      let mimeType = ''
 
-        if (extension === '.js') {
-          mimeType = 'text/javascript'
-        } else if (extension === '.html') {
-          mimeType = 'text/html'
-        } else if (extension === '.css') {
-          mimeType = 'text/css'
-        } else if (extension === '.svg' || extension === '.svgz') {
-          mimeType = 'image/svg+xml'
-        } else if (extension === '.json') {
-          mimeType = 'application/json'
-        } else if (extension === '.wasm') {
-          mimeType = 'application/wasm'
-        }
+      if (extension === '.js') {
+        mimeType = 'text/javascript'
+      } else if (extension === '.html') {
+        mimeType = 'text/html'
+      } else if (extension === '.css') {
+        mimeType = 'text/css'
+      } else if (extension === '.svg' || extension === '.svgz') {
+        mimeType = 'image/svg+xml'
+      } else if (extension === '.json') {
+        mimeType = 'application/json'
+      } else if (extension === '.wasm') {
+        mimeType = 'application/wasm'
+      }
 
-        callback({ mimeType, data })
-      })
-    });
+      callback({ mimeType, data })
+    })
+  });
 }
 
 async function createWindow() {
@@ -113,9 +121,14 @@ app.on('activate', () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
   registerAppScheme()
-  
+  ipcMain.once("renderer-init", () => {
+    parseCmd(process.argv);
+  });
+  ipcMain.on("uncagught-exception", (ev, error) => {
+    dialog.showErrorBox("Uncaught Excpetion", error);
+    console.error(error);
+  });
   createWindow();
-  parseCmd(process.argv);
 })
 
 app.on("second-instance", (ev, argv, wd) => {

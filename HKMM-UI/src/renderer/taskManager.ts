@@ -1,5 +1,4 @@
 
-import { app } from '@/main'
 import { Guid } from 'guid-typescript'
 
 export type TaskCategory = "Download" | "Build" | "Auto";

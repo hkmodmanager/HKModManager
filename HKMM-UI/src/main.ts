@@ -10,8 +10,6 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
 
 import viewErrorVue from './view/view-error.vue'
-import requireExpmodeVue from './components/require-expmode.vue'
-import startupVue from './startup/startup-main.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
 import { importGroup } from './renderer/modgroup'
@@ -64,17 +62,27 @@ export const i18n = createI18n({
     messages: I18nLanguages
 });
 
-export const app = createApp(startupVue);
+process.on("uncaughtException", (error) => {
+    console.error(error);
+    ipcRenderer.send("uncagught-exception", JSON.stringify(error));
+});
 
-app.use(route);
-app.use(i18n);
-app.component("exp-mode", requireExpmodeVue);
-app.mount('#app');
+(async function () {
+    const app = createApp((await import('@/startup/startup-main.vue')).default);
+
+    app.use(route);
+    app.use(i18n);
+    app.mount('#app');
+
+    ipcRenderer.send("renderer-init");
+})();
 
 ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     const url = new URL(urlStr);
     console.dir(url);
-    if(url.hostname == 'import.group') {
+    if (url.hostname == 'import.group') {
         importGroup(url);
     }
 });
+
+

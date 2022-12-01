@@ -17,7 +17,7 @@ export function getModsPath(name: string) {
 export function getCacheModsPath() {
     let mods = "";
     const settings = GetSettings();
-    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(remote.app.getPath("exe"), "managedMods");
+    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(remote.app.getAppPath(), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });

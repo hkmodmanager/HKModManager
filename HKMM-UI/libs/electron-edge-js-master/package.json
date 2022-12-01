@@ -38,7 +38,6 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "edge-cs": "1.2.1",
     "nan": "^2.16.0"
   },
   "devDependencies": {

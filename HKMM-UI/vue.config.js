@@ -18,15 +18,25 @@ module.exports = defineConfig({
                 ],
                 win: {
                     icon: "./MZ_Death_Skull.ico",
-                    publish: [ 'github' ]
+                    publish: ['github']
                 },
-                extraResources: {
-                    from: "./resources",
-                    to: "res",
-                    filter: [
-                        "**/*"
-                    ]
-                },
+                extraResources: [
+                    {
+                        from: "../netutils/bin/Debug",
+                        to: "../managed",
+                        filter: [
+                            "**/*"
+                        ]
+                    },
+                    {
+                        from: "./libs/electron-edge-js-master/lib/native/win32/x64/13.0.0",
+                        to: "../edge",
+                        filter: [
+                            "**/*"
+                        ]
+                    },
+                ]
+                ,
                 nsis: {
                     oneClick: false,
                     allowToChangeInstallationDirectory: true,

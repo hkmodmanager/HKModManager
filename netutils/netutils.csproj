@@ -4,6 +4,8 @@
     <TargetFramework>net472</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>10</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,12 +13,6 @@
     <PackageReference Include="Mono.cecil" Version="0.11.4">
       <Private>true</Private>
     </PackageReference>
-
-    <OutFiles Include="$(ProjectDir)/bin/Debug/net472/*.*" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="@(OutFiles)" DestinationFolder="$(ProjectDir)/../HKMM-UI/resources" />
-  </Target>
 
 </Project>
