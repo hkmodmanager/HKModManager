@@ -1,6 +1,6 @@
 import { remote } from "electron";
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "fs";
-import { join, parse } from "path";
+import { dirname, join, parse } from "path";
 import { getModLinkMod, getModLinks, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
 import { GetSettings, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
@@ -17,7 +17,7 @@ export function getModsPath(name: string) {
 export function getCacheModsPath() {
     let mods = "";
     const settings = GetSettings();
-    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(remote.app.getAppPath(), "managedMods");
+    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
