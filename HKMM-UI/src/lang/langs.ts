@@ -12,6 +12,7 @@ export const I18nLanguages = {
         tabs: {
             allmods: "下载Mods",
             localmods: "本地Mods",
+            requireUpdateMods: "更新Mods",
             settings: "设置",
             modgroups: "Mods分组",
             api: "MAPI管理",

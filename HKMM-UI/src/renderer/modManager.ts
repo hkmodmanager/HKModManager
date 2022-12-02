@@ -1,7 +1,7 @@
 import { remote } from "electron";
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "fs";
 import { dirname, join, parse } from "path";
-import { getModLinkMod, getModLinks, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
+import { getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
 import { GetSettings, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadFile, downloadRaw } from "./utils/downloadFile";
@@ -206,7 +206,7 @@ export class LocalModsVersionGroup {
                 }
                 await Promise.all(req);
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
-                this.getLatest()?.install(true);
+                this.getLatest()?.install(false);
                 task.finish(false);
                 return wp as LocalModInstance;
             } catch (e: any) {
@@ -343,6 +343,21 @@ export function getSubMods(name: string, onlyLatest: boolean = true) {
 
 export function isDownloadingMod(name: string) {
     return LocalModsVersionGroup.downloadingMods.has(name);
+}
+
+export function getRequireUpdateModsSync() {
+    if(!modlinksCache) return [];
+    const result: string[] = [];
+    for (const key in refreshLocalMods()) {
+        const mod = getLocalMod(key);
+        const lv = mod.getLatestVersion();
+        if(!lv) continue;
+        if(isLaterVersion(getModLinkModSync(key)?.version ?? '', lv)) {
+            result.push(key);
+        }
+    }
+
+    return result;
 }
 
 const gl = window as any;

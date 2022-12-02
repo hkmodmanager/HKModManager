@@ -125,7 +125,7 @@
 </style>
 
 <script lang="ts">
-import { ModLinksManifestData } from '@/renderer/modlinks/modlinks';
+import {  getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
@@ -150,17 +150,17 @@ export default defineComponent({
             return mg.canEnable();
         },
         isRequireUpdate(name: string) {
-            if (this.disableUpdate) return false;
+            if (this.disableUpdate || !this.modlinkCache) return false;
             const lm = getLocalMod(name);
             if (!lm) return false;
             const lv = lm.getLatestVersion();
             if (!lv) return;
-            return isLaterVersion(this.mod?.version ?? "", lv);
+            return isLaterVersion(this.modlinkCache.getMod(this.mod?.name as string)?.version ?? "0", lv);
         },
         async installMod() {
             if (this.mod === undefined) return;
             const group = getOrAddLocalMod(this.mod.name);
-            await group.installNew(this.mod);
+            (await group.installNew(this.mod)).install(true);
             this.$forceUpdate();
         },
         async installModDep() {
@@ -213,12 +213,21 @@ export default defineComponent({
         return {
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
             depOnThis: getSubMods(this.mod?.name ?? ""),
-            isDownload: false
+            isDownload: false,
+            modlinkCache: modlinksCache
         }
     },
     beforeUpdate() {
         this.depOnThis = getSubMods(this.mod?.name ?? "");
         this.isDownload = isDownloadingMod(this.mod?.name as string);
+    },
+    mounted() {
+        if(!this.modlinkCache) {
+            getModLinks().then((val) => {
+                this.modlinkCache = val;
+                this.$forceUpdate();
+            });
+        }
     },
     unmounted() {
         clearInterval(this.checkTimer);

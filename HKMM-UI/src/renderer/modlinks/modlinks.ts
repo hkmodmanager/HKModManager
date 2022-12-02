@@ -30,6 +30,9 @@ export class ModLinksManifestData {
 export class ModLinksData {
     public mods: ModLinksManifestData[] = [];
     public lastGet: number = 0;
+    public getMod(name: string) {
+        return this.mods.find(x => x.name == name);
+    }
 }
 
 export class ModdingAPIData {
@@ -131,21 +134,10 @@ export async function getModLinksFromRepo() {
     const p = parseModLinks(content);
     modlinksCache = await p;
     promise_get_modlinks = undefined;
-    localStorage.setItem("cache-modlinks", JSON.stringify(modlinksCache));
     return modlinksCache;
 }
 
 export async function getModLinks() {
-    if (!modlinksCache) {
-        const cache = localStorage.getItem("cache-modlinks");
-        if (cache) {
-            try {
-                modlinksCache = JSON.parse(cache) as ModLinksData;
-            } catch (e: any) {
-                console.log(e);
-            }
-        }
-    }
     const p = promise_get_modlinks ?? getModLinksFromRepo();
     promise_get_modlinks = p;
     if (!modlinksCache) return await p;
@@ -185,31 +177,22 @@ export async function getAPIInfoFromRepo() {
 }
 
 export async function getAPIInfo() {
-    if (!apiInfoCache) {
-        const cache = localStorage.getItem("cache-api-info");
-        if (cache) {
-            try {
-                apiInfoCache = JSON.parse(cache) as ModdingAPIData;
-            } catch (e: any) {
-                console.log(e);
-            }
-        }
-    }
-    const p = getAPIInfoFromRepo();
+    const p = promise_get_api ?? getAPIInfoFromRepo();
     promise_get_api = p;
     if (!apiInfoCache) return await p;
     return p;
 }
 
-export function clearCache() {
-    localStorage.removeItem("cache-modlinks");
-    localStorage.removeItem("cache-api-info");
-    apiInfoCache = undefined;
-    modlinksCache = undefined;
-}
+getAPIInfoFromRepo();
+getModLinksFromRepo();
 
 export async function getModLinkMod(name: string) {
     const modlinks = await getModLinks();
-    return modlinks.mods.find((v) => v.name === name);
+    return modlinks.getMod(name);
+}
+
+export function getModLinkModSync(name: string) {
+    if(!modlinksCache) return undefined;
+    return modlinksCache.getMod(name);
 }
 

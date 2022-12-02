@@ -1,12 +1,5 @@
 <template>
   <form>
-    <div class="form-group p-3">
-      <h3>
-        {{ $t("settings.cache.title") }}
-      </h3>
-      <button class="btn btn-danger" @click="clearModLinksCache()">{{ $t("settings.cache.clearModLinks") }}</button>
-    </div>
-    <hr />
     <HkpathChange v-model:gamepath="settings.gamepath" @onsave="save()"></HkpathChange>
     <div class="form-group p-3">
       <label class="form-label">{{ $t("settings.modsavepath.title") }}</label>
@@ -60,7 +53,6 @@
 import RequireExpmode from "@/components/require-expmode.vue";
 import { SaveSettings, GetSettings, ModSavePathMode } from "@/renderer/settings";
 import { defineComponent, InputHTMLAttributes, SelectHTMLAttributes } from "vue";
-import { clearCache } from "@/renderer/modlinks/modlinks";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
 import { remote } from "electron";
@@ -98,9 +90,6 @@ export default defineComponent({
       sessionStorage.setItem("exp_query_restart", "1");
 
       this.$root?.$forceUpdate();
-    },
-    clearModLinksCache() {
-      clearCache();
     },
     shouldShowCustomModSavePath() {
       return this.settings.modsavepathMode == ModSavePathMode.Custom;

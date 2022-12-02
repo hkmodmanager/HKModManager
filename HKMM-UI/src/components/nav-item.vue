@@ -12,7 +12,11 @@ export default defineComponent({
   props: {
     viewpath: String,
     viewname: String,
-    comparePath: Boolean
+    comparePath: Boolean,
+    textcolor: {
+      type: String,
+      default: "white"
+    }
   },
   data() {
     return {
@@ -23,7 +27,7 @@ export default defineComponent({
     getCssClass: function () {
       if (this.$route.name == this.vname && !this.comparePath) return "nav-link active";
       if (this.$route.path == this.viewpath && this.comparePath) return "nav-link active";
-      else return "nav-link text-white";
+      else return `nav-link text-${this.textcolor ?? 'white'}`;
     },
     onChangeView: function () {
       this.$router.replace(this.viewpath ?? "");

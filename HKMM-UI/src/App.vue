@@ -12,8 +12,12 @@
     ">
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
-        <navitem viewpath="/localmods"><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
-        <navitem viewpath="/allmods"><i class="bi bi-globe"></i> {{ $t("tabs.allmods") }}</navitem>
+        <navitem viewpath="/localmods/all" compare-path><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
+        <div class="list-group nav-list">
+          <navitem viewpath="/localmods/requireUpdate" textcolor="warning" compare-path v-if="isRequireUpdateMods()">&nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
+        </div>
+        
+        <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
         
         <li class="nav-item">
           <a class="nav-link text-white" @click="toggleNavTasks()" href="javascript:;">
@@ -80,6 +84,8 @@ import { defineComponent } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
 import { getAPIVersion } from '@/renderer/apiManager'
+import { getRequireUpdateModsSync } from "./renderer/modManager";
+import { getModLinks, modlinksCache } from "./renderer/modlinks/modlinks";
 
 export default defineComponent({
   data: function () {
@@ -96,7 +102,24 @@ export default defineComponent({
     },
     isInstalledAPI() {
       return getAPIVersion() > 0;
+    },
+    isRequireUpdateMods() {
+      return getRequireUpdateModsSync().length > 0;
     }
   },
+  updated() {
+    if(!modlinksCache) {
+      getModLinks().then(() => {
+        this.$forceUpdate();
+      });
+    }
+  },
+  mounted() {
+    if(!modlinksCache) {
+      getModLinks().then(() => {
+        this.$forceUpdate();
+      });
+    }
+  }
 });
 </script>

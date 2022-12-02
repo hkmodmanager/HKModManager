@@ -27,8 +27,9 @@ const routes: RouteRecordRaw[] = [
     },
     {
         name: 'localmods',
-        path: '/localmods',
+        path: '/localmods/:filter?',
         component: () => import('./view/view-localmods.vue'),
+        props: true
     },
     {
         name: 'tasks',
@@ -62,10 +63,12 @@ export const i18n = createI18n({
     messages: I18nLanguages
 });
 
-process.on("uncaughtException", (error) => {
-    console.error(error);
-    ipcRenderer.send("uncagught-exception", JSON.stringify(error));
+
+window.addEventListener("error", (ev) => {
+    console.error(ev.error);
+    ipcRenderer.send("uncagught-exception", JSON.stringify(ev.error));
 });
+
 
 (async function () {
     const app = createApp((await import('@/startup/startup-main.vue')).default);

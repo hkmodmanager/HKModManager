@@ -52,9 +52,5 @@
   },
   "bugs": {
     "url": "http://github.com/agracio/electron-edge-js/issues"
-  },
-  "scripts": {
-    "install": "node tools/install.js",
-    "test": "node tools/test.js"
   }
 }
