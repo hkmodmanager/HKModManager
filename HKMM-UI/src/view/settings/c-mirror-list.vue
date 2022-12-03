@@ -30,7 +30,8 @@
 </style>
 
 <script lang="ts">
-import { MirrorGroup, MirrorItem } from '@/renderer/settings';
+import {  MirrorGroup, MirrorItem } from '@/common/SettingsStruct';
+import { store } from '@/renderer/settings';
 import { defineComponent } from 'vue';
 
 
@@ -38,18 +39,15 @@ export default defineComponent(
     {
         name: "settings-c-mirror-list",
         props: {
-            group: MirrorGroup
+            keyName: String
         },
         data: function () {
             return {
-                groupCache: this.group ?? new MirrorGroup(),
+                groupCache: store.get(this.keyName as string, new MirrorGroup()),
                 addTemp: new MirrorItem()
             }
         },
         methods: {
-            update: function () {
-                this.$emit("update:group", this.groupCache);
-            },
             addOne: function() {
                 if(!this.addTemp.target || this.addTemp.target.trim() == "") return;
                 
@@ -64,6 +62,9 @@ export default defineComponent(
                 }
                 this.groupCache.items = narr;
                 this.update();
+            },
+            update: function() {
+                store.set(this.keyName as string, this.groupCache);
             }
         }
     }

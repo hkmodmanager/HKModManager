@@ -47,14 +47,16 @@
                                         {{ $t("mods.unuse") }}
                                     </button>
                                     <button class="btn btn-primary flex-grow-1" @click="installMod"
-                                        v-if="!canEnable(mod?.name as string)" :disabled="isDownload">{{ $t("mods.installDep") }}</button>
+                                        v-if="!canEnable(mod?.name as string)" :disabled="isDownload">{{
+                                                $t("mods.installDep")
+                                        }}</button>
                                 </div>
-                                <button class="btn btn-danger flex-grow-1" @click="uninstallMod"  :disabled="isDownload">
+                                <button class="btn btn-danger flex-grow-1" @click="uninstallMod" :disabled="isDownload">
                                     {{ $t("mods.uninstall") }}</button>
                             </div>
                         </div>
                         <div class="flex-grow-1 d-flex" v-if="isRequireUpdate(mod?.name as string) && !isLocal">
-                            <button class="btn btn-primary flex-grow-1"  :disabled="isDownload">
+                            <button class="btn btn-primary flex-grow-1" :disabled="isDownload">
                                 {{ $t("mods.update") }}
                             </button>
                         </div>
@@ -63,6 +65,10 @@
                     <div>
                         <span>{{ $t("mods.version") }}: </span>
                         <span>{{ mod?.version }}</span>
+                    </div>
+                    <div v-if="modSize">
+                        <span>{{ $t("mods.size") }}: </span>
+                        <span>{{ getModSize() }}</span>
                     </div>
                     <div>
                         <span>{{ $t("mods.repo") }}:</span>
@@ -125,12 +131,37 @@
 </style>
 
 <script lang="ts">
-import {  getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
+import { getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import { remote } from 'electron';
 import { defineComponent } from 'vue';
+import { getFileSize } from '@/renderer/utils/downloadFile';
+
+class ModSizeCache {
+    public time: number = new Date().valueOf();
+    public static cache: Record<string, ModSizeCache> = {};
+    public promise?: Promise<number>;
+    public size?: number;
+
+    public static async getSize(url: string) {
+        const ct = new Date().valueOf();
+
+        let c = ModSizeCache.cache[url] ?? new ModSizeCache();
+        if (ct - c.time > 1000 * 60) c = new ModSizeCache();
+        ModSizeCache.cache[url] = c;
+        if (c.size) return c.size;
+        if (c.promise) return await c.promise;
+        c.promise = (async function () {
+            const result = await getFileSize(url);
+            c.size = result;
+            c.promise = undefined;
+            return result;
+        })();
+        return await c.promise;
+    }
+}
 
 export default defineComponent({
     methods: {
@@ -202,6 +233,13 @@ export default defineComponent({
             await group.installNew(this.mod);
             group.getLatest()?.install();
             this.$forceUpdate();
+        },
+        getModSize() {
+            if (!this.modSize) return "0 KB";
+            if (this.modSize > 1024 * 1024 * 1024) return `${Math.round(this.modSize / 1024 / 1024 / 1024)} G`;
+            if (this.modSize > 1024 * 1024) return `${Math.round(this.modSize / 1024 / 1024)} MB`;
+            if (this.modSize > 1024) return `${Math.round(this.modSize / 1024)} KB`;
+            return `${this.modSize} B`;
         }
     },
     props: {
@@ -214,7 +252,8 @@ export default defineComponent({
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
             depOnThis: getSubMods(this.mod?.name ?? ""),
             isDownload: false,
-            modlinkCache: modlinksCache
+            modlinkCache: modlinksCache,
+            modSize: undefined as (undefined | number)
         }
     },
     beforeUpdate() {
@@ -222,12 +261,16 @@ export default defineComponent({
         this.isDownload = isDownloadingMod(this.mod?.name as string);
     },
     mounted() {
-        if(!this.modlinkCache) {
-            getModLinks().then((val) => {
-                this.modlinkCache = val;
+        getModLinks().then((val) => {
+            this.modlinkCache = val;
+            this.$forceUpdate();
+
+            ModSizeCache.getSize(val.getMod(this.mod?.name as string)?.link as string).then((val) => {
+                this.modSize = val;
                 this.$forceUpdate();
             });
-        }
+        });
+
     },
     unmounted() {
         clearInterval(this.checkTimer);

@@ -3,7 +3,7 @@
     <div class="form-group p-3">
         <label class="form-label">{{ $t("settings.gamepath.title") }}</label>
         <div class="input-group">
-            <input type="text" class="form-control" :value="gamepath" readonly disabled />
+            <input type="text" class="form-control" :value="getHKPath()" readonly disabled />
             <a class="btn btn-success" @click="selectHKPath()"><i class="bi bi-folder2-open"></i></a>
         </div>
         <div class="alert alert-danger" v-if="msg != ''">
@@ -17,18 +17,13 @@ import { remote } from 'electron';
 import { parse } from 'path';
 import { defineComponent } from 'vue';
 import { checkGameFile } from '@/renderer/apiManager';
+import { store } from '@/renderer/settings';
 
 export default defineComponent({
     data() {
         return {
             msg: ""
         };
-    },
-    props: {
-        gamepath: {
-            type: String,
-            default: ""
-        }
     },
     methods: {
         selectHKPath() {
@@ -52,10 +47,13 @@ export default defineComponent({
             this.msg = '';
             this.$emit('update:gamepath', p.dir);
             this.$emit('onsave', p.dir);
+        },
+        getHKPath() {
+            return store.get('gamepath', '');
         }
     },
     mounted() {
-        const re = checkGameFile(this.gamepath);
+        const re = checkGameFile(store.get('gamepath', ''));
         if (typeof re == "string") {
             this.msg = re;
             return;

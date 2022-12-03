@@ -1,48 +1,33 @@
 
-export enum ModSavePathMode {
-    AppDir,
-    UserDir,
-    Custom
-}
+import { HKMMSettings } from '@/common/SettingsStruct';
+import Store from 'electron-store';
 
-export class MirrorItem {
-    public target: string = "";
-}
-
-export class MirrorGroup {
-    public items: MirrorItem[] = []
-}
-
-export class HKMMSettings {
-    public mirror_github = new MirrorGroup();
-    public mirror_githubapi = new MirrorGroup();
-    public enabled_exp_mode = false;
-    public gamepath: string = "";
-    public modsavepath: string = "";
-    public modsavepathMode: ModSavePathMode = ModSavePathMode.AppDir;
-}
 
 
 const localStorageName: string = "hkmm-settings";
+export const store = new Store<HKMMSettings>();
 
-let settingsCache: HKMMSettings | null;
 
-export function GetSettings(): HKMMSettings {
-    if (settingsCache) return settingsCache;
+function GetSettingsLocal() {
     const s = localStorage.getItem(localStorageName);
     if (!s) {
-        SaveSettings();
-    } else {
-        settingsCache = JSON.parse(s) as HKMMSettings;
+        return undefined;
     }
-    settingsCache = settingsCache as HKMMSettings;
+    const settingsCache = JSON.parse(s) as HKMMSettings;
     if (typeof settingsCache.enabled_exp_mode !== "boolean") settingsCache.enabled_exp_mode = false;
     return settingsCache as HKMMSettings;
 }
 
-export function SaveSettings(settings?: HKMMSettings) {
-    if (settings) settingsCache = settings;
-    if (!settingsCache) settingsCache = new HKMMSettings();
-    const s = JSON.stringify(settingsCache);
-    localStorage.setItem(localStorageName, s);
+
+function SettingRelocate() {
+    if(store.get("inStore", false)) return;
+    const old = GetSettingsLocal();
+    store.set("inStore", true);
+    if(!old) return;
+    old.inStore = true;
+    store.set(old);
+    localStorage.removeItem(localStorageName);
+    console.log(`Relocate Settings: ${store.path}`);
 }
+
+SettingRelocate();

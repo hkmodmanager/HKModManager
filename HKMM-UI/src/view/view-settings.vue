@@ -1,6 +1,6 @@
 <template>
   <form>
-    <HkpathChange v-model:gamepath="settings.gamepath" @onsave="save()"></HkpathChange>
+    <HkpathChange></HkpathChange>
     <div class="form-group p-3">
       <label class="form-label">{{ $t("settings.modsavepath.title") }}</label>
       <select class="form-select" @change="changeModsSavePathMode()" ref="modssavepathmode">
@@ -9,7 +9,7 @@
         <option value="custom">{{ $t("settings.modsavepath.custom") }}</option>
       </select>
       <div class="input-group p-1" v-if="shouldShowCustomModSavePath()">
-        <input class="form-control" readonly disabled :value="settings.modsavepath" />
+        <input class="form-control" readonly disabled :value="getModPath()" />
         <a class="btn btn-success" @click="selectModsSavePath()"><i class="bi bi-folder2-open"></i></a>
       </div>
     </div>
@@ -24,7 +24,7 @@
           <input class="form-check-input" type="checkbox" @change="changeExpMode" ref="expModeSwitch" />
           <label class="form-check-label">{{ $t("settings.exp.enable") }}</label>
         </div>
-        <div class="alert alert-warning" v-if="settings.enabled_exp_mode">
+        <div class="alert alert-warning" v-if="isEnableExpMode()">
           {{ $t("settings.exp.warning") }}
         </div>
         <div class="alert alert-warning" v-if="shouldShowAlertRestart()">
@@ -41,7 +41,7 @@
           <label class="form-label">{{
               $t("settings.mirror.githubmirror")
           }}</label>
-          <mirrorlist v-model:group="settings.mirror_github"></mirrorlist>
+          <mirrorlist key-name="mirror_github"></mirrorlist>
         </div>
       </div>
       <hr />
@@ -51,50 +51,48 @@
 
 <script lang="ts">
 import RequireExpmode from "@/components/require-expmode.vue";
-import { SaveSettings, GetSettings, ModSavePathMode } from "@/renderer/settings";
+import { store } from "@/renderer/settings";
 import { defineComponent, InputHTMLAttributes, SelectHTMLAttributes } from "vue";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
 import { remote } from "electron";
 import HkpathChange from "@/components/hkpath-change.vue";
+import { ModSavePathMode } from "@/common/SettingsStruct";
+import { join } from "path";
 
 export default defineComponent({
-  data() {
-    return {
-      settings: GetSettings()
-    }
-  },
   components: {
     mirrorlist,
     RequireExpmode,
     HkpathChange
-},
+  },
   mounted() {
     let checkbox = this.$refs.expModeSwitch as InputHTMLAttributes;
-    checkbox.checked = this.settings.enabled_exp_mode ?? false;
+    checkbox.checked = store.get("enabled_exp_mode", false);
 
     const select = this.$refs.modssavepathmode as SelectHTMLAttributes;
-    if(this.settings.modsavepathMode == ModSavePathMode.AppDir) select.value = "appdir";
-    else if(this.settings.modsavepathMode == ModSavePathMode.UserDir) select.value = "userdir";
-    else if(this.settings.modsavepathMode == ModSavePathMode.Custom) select.value = "custom";
+    if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.AppDir) select.value = "appdir";
+    else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.UserDir) select.value = "userdir";
+    else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Custom) select.value = "custom";
   },
   methods: {
-    save() {
-      SaveSettings(this.settings);
-    },
     changeExpMode() {
       let checkbox = this.$refs.expModeSwitch as InputHTMLAttributes;
-      this.settings.enabled_exp_mode = checkbox.checked as boolean;
+      store.set("enabled_exp_mode", checkbox.checked as boolean);
 
-      SaveSettings(this.settings);
       sessionStorage.setItem("exp_query_restart", "1");
-
+      this.$forceUpdate();
       this.$root?.$forceUpdate();
     },
     shouldShowCustomModSavePath() {
-      return this.settings.modsavepathMode == ModSavePathMode.Custom;
+      return store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Custom;
     },
-
+    isEnableExpMode() {
+      return store.get('enabled_exp_mode', false);
+    },
+    getModPath() {
+      return store.get('modsavepath', join(remote.app.getPath('userData'), "managedMods"));
+    },
     shouldShowAlertRestart(): boolean {
       return sessionStorage.getItem("exp_query_restart") ? true : false;
     },
@@ -104,21 +102,18 @@ export default defineComponent({
     },
     selectModsSavePath() {
       const result = remote.dialog.showOpenDialogSync({
-        properties: [ "dontAddToRecent", "openDirectory" ]
+        properties: ["dontAddToRecent", "openDirectory"]
       });
-      if(!result) return;
-      this.settings.modsavepath = result[0];
+      if (!result) return;
+      store.set("modsavepath", result[0]);
     },
     changeModsSavePathMode() {
       const select = this.$refs.modssavepathmode as SelectHTMLAttributes;
       const val = select.value;
-      if(val === "appdir") this.settings.modsavepathMode = ModSavePathMode.AppDir;
-      else if(val === "userdir") this.settings.modsavepathMode = ModSavePathMode.UserDir;
-      else if(val === "custom") this.settings.modsavepathMode = ModSavePathMode.Custom;
+      if (val === "appdir") store.set("modsavepathMode", ModSavePathMode.AppDir);
+      else if (val === "userdir") store.set("modsavepathMode", ModSavePathMode.UserDir);
+      else if (val === "custom") store.set("modsavepathMode", ModSavePathMode.Custom);
     }
-  },
-  unmounted: function () {
-    SaveSettings(this.settings);
   }
 });
 </script>

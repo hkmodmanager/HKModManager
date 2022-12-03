@@ -15,6 +15,9 @@
                     </div>
 
                 </div>
+                <div class="text-end flex-grow-1 text-primary p-1">
+                    {{ getTaskTime() }}s
+                </div>
             </button>
 
         </h2>
@@ -87,6 +90,13 @@ export default defineComponent({
         hideTask() {
             (getTask(this.taskguid ?? "") as TaskInfo).isHidden = true;
             this.$parent?.$forceUpdate();
+        },
+        getTaskTime() {
+            this.updateTask();
+            const task = this.task as TaskInfo;
+            const et = task.stopTime ?? new Date().valueOf();
+            const s = et - task.startTime;
+            return Math.round(s / 1000);
         }
     },
     props: {

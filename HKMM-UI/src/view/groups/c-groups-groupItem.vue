@@ -17,14 +17,24 @@
             <div class="accordion-body">
                 <!--accordion body-->
                 <div class="w-100 d-flex p-1">
-                    <button class="btn btn-primary" @click="copyShareUrl(groupctrl as ModGroupController)" :title="$t('groups.copyShareMsg')">
+                    <button class="btn btn-primary" v-if="canUseGroup(groupctrl as ModGroupController)"
+                        @click="showExportModal(groupctrl?.info.guid as string)" :title="$t('groups.packShareMsg')">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </button>
+                    <button class="btn btn-primary" @click="copyShareUrl(groupctrl as ModGroupController)"
+                        :title="$t('groups.copyShareMsg')">
                         <i class="bi bi-share"></i>
                     </button>
+
                     <!----<button class="btn btn-primary" @click="rename(groupctrl as ModGroupController)">Rename</button>-->
-                    <button class="btn btn-primary flex-grow-1" :disabled="isCurrent(groupctrl) || isDownloading" v-if="canUseGroup(groupctrl as ModGroupController)"
-                        @click="setAsCurrent(groupctrl)">{{ $t("groups.use") }}</button>
-                        <button class="btn btn-primary flex-grow-1" :disabled="isDownloading" v-if="!canUseGroup(groupctrl as ModGroupController)"
-                        @click="downloadMissingMods(groupctrl as ModGroupController)">{{ $t("groups.download") }}</button>
+                    <button class="btn btn-primary flex-grow-1" :disabled="isCurrent(groupctrl) || isDownloading"
+                        v-if="canUseGroup(groupctrl as ModGroupController)" @click="setAsCurrent(groupctrl)">{{
+                                $t("groups.use")
+                        }}</button>
+                    <button class="btn btn-primary flex-grow-1" :disabled="isDownloading"
+                        v-if="!canUseGroup(groupctrl as ModGroupController)"
+                        @click="downloadMissingMods(groupctrl as ModGroupController)">{{ $t("groups.download")
+                        }}</button>
                     <button class="btn btn-danger" v-if="!isDefault(groupctrl)"
                         @click="showRemoveGroupModal(groupctrl?.info.guid as string)">
                         <i class="bi bi-trash3"></i></button>
@@ -54,7 +64,6 @@ import { getCurrentGroup, ModGroupController, changeCurrentGroup } from '@/rende
 import { defineComponent } from 'vue';
 import { Collapse } from 'bootstrap';
 import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/renderer/modManager';
-import { URL } from 'url';
 import { getModLinkMod } from '@/renderer/modlinks/modlinks';
 import { clipboard } from 'electron';
 
@@ -96,7 +105,7 @@ export default defineComponent({
         },
         canUseGroup(ctrl: ModGroupController) {
             for (const mod of ctrl.getModNames()) {
-                if (!this.isInstalled(mod)) return false;
+                if (!this.isInstalled(mod) || !getLocalMod(mod[0]).canEnable()) return false;
             }
             return true;
         },
@@ -110,27 +119,23 @@ export default defineComponent({
             this.setAsCurrent(ctrl);
             let w: Promise<any>[] = [];
             for (const mod of ctrl.getModNames()) {
-                if(this.isInstalled(mod) || isDownloadingMod(mod[0])) continue;
+                if (this.isInstalled(mod) || isDownloadingMod(mod[0])) continue;
                 const mg = getOrAddLocalMod(mod[0]);
                 const m = await getModLinkMod(mod[0]);
-                if(!m) continue;
+                if (!m) continue;
                 w.push(mg.installNew(m));
             }
             await Promise.all(w);
             this.isDownloading = false;
+            this.$forceUpdate();
         },
         copyShareUrl(ctrl: ModGroupController) {
-            const url = new URL("hkmm://import.group");
-            url.searchParams.set("name", ctrl.info.name);
-            
-            const mods: string[] = [];
-            for (const mod of ctrl.info.mods) {
-                if(!mod) continue;
-                mods.push(mod.join(':'));
-            }
-            url.searchParams.set("mods", mods.join(';'));
+            const url = ctrl.getShareUrl();
             console.log(url.toString());
             clipboard.writeText(url.toString());
+        },
+        showExportModal(guid: string) {
+            this.$emit('onshowexport', guid);
         },
         rename(ctrl: ModGroupController) {
             this.$emit("onshowrename", ctrl.info.guid);
@@ -147,7 +152,8 @@ export default defineComponent({
     },
     emits: {
         onshowdelete: null,
-        onshowrename: null
+        onshowrename: null,
+        onshowexport: null
     }
 });
 </script>

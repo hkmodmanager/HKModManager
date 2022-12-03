@@ -7,12 +7,12 @@ import { tmpdir } from 'os';
 import { dirname, join, parse } from 'path';
 import { apiInfoCache, getAPIInfo, ModdingAPIData } from './modlinks/modlinks';
 import { getNetUtilsPath, netfunc } from './nethelper';
-import { GetSettings } from './settings';
+import { store } from './settings';
 import { createTask, startTask } from './taskManager';
 import { downloadFile, downloadRaw } from './utils/downloadFile';
 
 export function getAPIPath(root?: string) {
-    return join(root ?? GetSettings().gamepath, "hollow_knight_Data", "Managed", "Assembly-CSharp.dll");
+    return join(root ?? store.get('gamepath'), "hollow_knight_Data", "Managed", "Assembly-CSharp.dll");
 }
 
 const getapiver = netfunc("GetAPIVersion");
@@ -59,6 +59,9 @@ export function getLatestIsMatchSync(apiInfo?: ModdingAPIData) {
 
 export function checkGameFile(root: string): boolean | string {
     try {
+        if(!existsSync(root)) {
+            return "invaild_path";
+        }
         if (!existsSync(join(root, "hollow_knight.exe"))) {
             return "no_hk";
         }

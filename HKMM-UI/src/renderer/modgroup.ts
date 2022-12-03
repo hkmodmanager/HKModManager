@@ -1,13 +1,23 @@
+import { zip } from "compressing";
+import { fstat, readdirSync, readFileSync, stat, statSync } from "fs";
 import { Guid } from "guid-typescript";
+import { dirname, join } from "path";
 import { URL } from "url";
-import { getModLinkMod, ModLinksManifestData } from "./modlinks/modlinks";
-import { getLocalMod, isLaterVersion, LocalModInstance, localMods, localModsArray, refreshLocalMods } from "./modManager";
+import { getAPIPath, getAPIVersion } from "./apiManager";
+import { apiInfoCache, getModLinkMod, ModLinksManifestData } from "./modlinks/modlinks";
+import { getLocalMod, isLaterVersion, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 
 
 export class ModGroupInfo {
     public name: string = "";
     public guid: string = "";
     public mods: [string, string][] = [];
+}
+
+export interface IExportModGroupZipOptions {
+    includeAPI?: boolean;
+    fullPath?: boolean,
+    onlyModFiles?: boolean
 }
 
 export class ModGroupController {
@@ -35,8 +45,9 @@ export class ModGroupController {
             const name = element[0];
             const local = getLocalMod(name)?.getLatest();
             if (local) {
-                if(isLaterVersion(local.info.version, element[1]) || local.info.version == element[1])
-                result.push(local);
+                if (isLaterVersion(local.info.version, element[1]) || local.info.version == element[1]) {
+                    result.push(local);
+                }
             }
         }
         return result;
@@ -53,6 +64,99 @@ export class ModGroupController {
     public constructor(info: ModGroupInfo) {
         this.info = info;
     }
+    public getShareUrl() {
+        const url = new URL("hkmm://import.group");
+        url.searchParams.set("name", this.info.name);
+
+        const mods: string[] = [];
+        for (const mod of this.info.mods) {
+            if (!mod) continue;
+            mods.push(mod.join(':'));
+        }
+        url.searchParams.set("mods", mods.join(';'));
+        return url;
+    }
+    canUseGroup() {
+        for (const mod of this.getModNames()) {
+            if (!isInstalled(mod) || !getLocalMod(mod[0]).canEnable()) return false;
+        }
+        return true;
+    }
+    public exportAsZip(output: zip.Stream, options?: IExportModGroupZipOptions) {
+        if (!this.canUseGroup()) throw new Error('Try exporting a group that is not available');
+        options = options ?? {};
+        options.fullPath = options.fullPath || options.includeAPI;
+        const moddir = options.fullPath ? 'hollow_knight_Data/Managed/Mods' : '';
+        const modset = new Set<string>();
+        function addMod(mod: LocalModInstance) {
+            if (modset.has(mod.info.name)) return;
+            modset.add(mod.info.name);
+            let files: string[] = [];
+            function fedir(p: string, ol: string[], op: string) {
+                for (const file of readdirSync(p, { encoding: 'utf8' })) {
+                    const stats = statSync(join(p, file));
+                    if(stats.isFile() && file !== modversionFileName) {
+                        ol.push(join(op, file));
+                    } else if(stats.isDirectory()) {
+                        fedir(join(p, file), ol, join(op, file));
+                    }
+                }
+            }
+            if (options?.onlyModFiles) {
+                files = mod.info.files;
+            } else {
+                fedir(mod.info.path, files, '');
+            }
+            for (const f of files) {
+                output.addEntry(join(mod.info.path, f), {
+                    relativePath: join(moddir, mod.info.name, f)
+                });
+            }
+            for (const dm of mod.info.modinfo.dependencies) {
+                const g = getLocalMod(dm);
+                const lm = g.getLatest();
+                if(lm) {
+                    addMod(lm);
+                }
+            }
+        }
+        for (const mod of this.getLocalMods()) {
+            addMod(mod);
+        }
+        if(options?.includeAPI) {
+            if(getAPIVersion() < 0) throw new Error("The API is not installed");
+            const apidir = dirname(getAPIPath());
+            let apifiles: string[] = [ //https://github.com/hk-modding/modlinks/blob/22c5293336524dc760afb57a2ded3bcfabd46864/ApiLinks.xml#L23-L40
+                'Assembly-CSharp.dll',
+                'Assembly-CSharp.xml',
+                'MMHOOK_Assembly-CSharp.dll',
+                'MMHOOK_PlayMaker.dll',
+                'Mono.Cecil.dll',
+                'MonoMod.RuntimeDetour.dll',
+                'MonoMod.Utils.dll',
+                'mscorlib.dll',
+                'mscorlib.xml',
+                'Newtonsoft.Json.dll',
+                'README.md'
+            ];
+            if(apiInfoCache) {
+                apifiles = apiInfoCache.files;
+            }
+
+            for (const f of apifiles) {
+                output.addEntry(join(apidir, f), {
+                    relativePath: join('hollow_knight_Data/Managed', f)
+                });
+            }
+        }
+        return output;
+    }
+}
+
+export function isInstalled(mod: [string, string]) {
+    const mg = getLocalMod(mod[0]);
+    if (!mg) return false;
+    return mg.canEnable() && (mg.getLatestVersion() == mod[1] || isLaterVersion(mg.getLatestVersion() ?? "0.0", mod[1]));
 }
 
 export const groupCache: Record<string, ModGroupController> = {};
@@ -165,11 +269,11 @@ export function getDefaultGroup() {
 
 export function importGroup(url: URL) {
     const name = url.searchParams.get("name") ?? "Import Group";
-    
+
     const mods = url.searchParams.get("mods");
-    if(!mods) return;
+    if (!mods) return;
     const modsArray = mods.split(';');
-    
+
     const group = getOrCreateGroup(undefined, name);
     for (const mod of modsArray) {
         group.info.mods.push(mod.split(':') as [string, string]);

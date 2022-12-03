@@ -1,5 +1,5 @@
 
-import { default as axios, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { default as axios, AxiosRequestConfig, AxiosResponse, AxiosHeaders } from 'axios'
 import { startTask, TaskInfo, TaskCategory } from '@/renderer/taskManager';
 
 export async function downloadFile<T = any>(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo, allowChangeProgress: boolean = false,
@@ -40,6 +40,11 @@ export async function downloadFile<T = any>(url: string, config?: AxiosRequestCo
     return await promise;
 }
 
+export async function getFileSize(url: string) {
+    const r = ((await axios.head(url)).headers as AxiosHeaders ).getContentLength() as string;
+    return Number.parseInt(r);
+}
+
 export async function downloadText(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo, allowChangeProgress: boolean = false, taskName?: string, taskCategory?: TaskCategory) {
     const r = await downloadFile<string>(url, config, taskinfo, allowChangeProgress, taskName, taskCategory);
     return r.data;
@@ -52,3 +57,6 @@ export async function downloadRaw(url: string, config?: AxiosRequestConfig<any>,
     const r = await downloadFile<ArrayBuffer>(url, config, taskinfo, allowChangeProgress, taskName, taskCategory);
     return Buffer.from(r.data);
 }
+
+const w = window as any;
+w.gfs = getFileSize;

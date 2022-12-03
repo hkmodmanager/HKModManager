@@ -36,13 +36,21 @@ export const I18nLanguages = {
             download: "补充缺失的Mods",
             ready: "已准备好",
             unready: "未准备好",
-            copyShareMsg: "复制分享链接"
+            copyShareMsg: "复制分享链接",
+            packShareMsg: "导出一键包",
+            export: "导出一键包",
+            exportOptions: {
+                always_full_path: "总是使用完整路径",
+                include_api: "包含Modding API",
+                only_mod_files: "不包含额外的文件"
+            }
         },
         mods: {
             authors: "贡献者",
             repo: "代码仓库",
             version: "版本",
             dep: "依赖Mods",
+            size: "大小",
             depInstall: "已安装",
             enabled: "已启用",
             disabled: "未启用",

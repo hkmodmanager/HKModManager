@@ -3,7 +3,7 @@
     <div class="accordion">
         <div>
             <CGroupsGroupItem :groupctrl="getCurrentGroup()" :key="getCurrentGroup().info.guid"
-                @onshowdelete="onShowDeleteModal" @onshowrename="onShowRenameModal"
+                @onshowdelete="onShowDeleteModal" @onshowrename="onShowRenameModal" @onshowexport="onShowExportModal"
                 :ref="`group-${getCurrentGroup().info.guid}`"></CGroupsGroupItem>
         </div>
         <hr />
@@ -14,7 +14,7 @@
         </div>
         <div v-for="(group) in getAllGroup()" :key="group.info.guid">
             <CGroupsGroupItem :groupctrl="group" @onshowdelete="onShowDeleteModal" @onshowrename="onShowRenameModal"
-                :ref="`group-${group.info.guid}`"></CGroupsGroupItem>
+                @onshowexport="onShowExportModal" :ref="`group-${group.info.guid}`"></CGroupsGroupItem>
         </div>
     </div>
     <ModalBox :title="$t('groups.newtitle')" ref="modal_cngb_show">
@@ -42,13 +42,53 @@
             <button class="btn btn-danger w-100" @click="renameGroup()">{{ $t('groups.rename') }}</button>
         </template>
     </ModalBox>
+    <ModalBox :title="$t('groups.export')" ref="modal_export_group">
+        <form>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" v-model="pack_feat" value="include-api" :disabled="!installedAPI()" />
+                <label class="form-check-label">{{ $t("groups.exportOptions.include_api") }}</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" v-model="pack_feat" value="always-full-path" />
+                <label class="form-check-label">{{ $t("groups.exportOptions.always_full_path") }}</label>
+            </div>
+
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" v-model="pack_feat" value="only-mod-files" />
+                <label class="form-check-label">{{ $t("groups.exportOptions.only_mod_files") }}</label>
+            </div>
+        </form>
+        <template #footer>
+            <button class="btn btn-primary w-100" @click="exportGroup()">{{ $t('groups.export') }}</button>
+        </template>
+    </ModalBox>
+    <Teleport to="body">
+        <div class="modal-backdrop show mask-0" v-if="show_wm">
+            <div class="spinner spinner-border text-primary high-index mx-auto d-block"></div>
+        </div>
+    </Teleport>
 </template>
+
+<style>
+.high-index {
+    z-index: 2000;
+}
+
+.mask-0 {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+</style>
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
 import { saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup, getCurrentGroup, getOrCreateGroup, removeGroup } from '@/renderer/modgroup';
 import { defineComponent } from 'vue';
+import { remote } from 'electron'
 import CGroupsGroupItem from './groups/c-groups-groupItem.vue';
+import { zip } from 'compressing';
+import { createWriteStream } from 'fs';
+import { getAPIVersion } from '@/renderer/apiManager';
 
 export default defineComponent({
     methods: {
@@ -105,6 +145,15 @@ export default defineComponent({
             const modal = this.$refs.modal_rename_group as any;
             modal.getModal().show();
         },
+        onShowExportModal(guid: string) {
+            const group = getGroup(guid);
+            if (!group) return;
+
+            this.group_guid_t = guid;
+
+            const modal = this.$refs.modal_export_group as any;
+            modal.getModal().show();
+        },
         renameGroup() {
             if (this.group_guid_t == "") return;
             const group = getGroup(this.group_guid_t);
@@ -117,13 +166,58 @@ export default defineComponent({
 
             const modal = this.$refs.modal_rename_group as any;
             modal.getModal().hide();
+        },
+        installedAPI() {
+            return getAPIVersion() > 0
+        },
+        exportGroup() {
+            const modal = this.$refs.modal_export_group as any;
+            modal.getModal().hide();
+
+            if (this.group_guid_t == "") return;
+            const group = getGroup(this.group_guid_t);
+            if (!group) return;
+
+            const s = remote.dialog.showSaveDialogSync(remote.getCurrentWindow(), {
+                filters: [
+                    {
+                        name: "Pack Zip",
+                        extensions: ['zip']
+                    }
+                ]
+            });
+            if (!s) return;
+
+            const stream = new zip.Stream();
+            const fs = createWriteStream(s, 'binary');
+            const feat = this.pack_feat as string[];
+            try {
+                this.show_wm = true;
+                group.exportAsZip(stream, {
+                    onlyModFiles: feat.includes('only-mod-files'),
+                    fullPath: feat.includes('always-full-path'),
+                    includeAPI: feat.includes('include-api') && (getAPIVersion() > 0)
+                });
+                stream.pipe(fs);
+
+                fs.on('finish', () => {
+                    this.show_wm = false;
+                    fs.close();
+                });
+            } catch (e) {
+                console.log(e);
+                this.show_wm = false;
+            }
+            console.log(s);
         }
     },
     data() {
         return {
             checkTimer: setInterval(() => this.$forceUpdate(), 500),
             group_name_t: "",
-            group_guid_t: ""
+            group_guid_t: "",
+            pack_feat: [],
+            show_wm: false
         }
     },
     unmounted() {

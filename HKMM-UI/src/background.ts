@@ -1,8 +1,7 @@
 'use strict'
 
 import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
 import { readFile } from 'fs';
@@ -25,6 +24,8 @@ protocol.registerSchemesAsPrivileged([
     }
   }
 ]);
+
+initRenderer();
 
 const url_args = [];
 if (!app.isPackaged) {
@@ -125,7 +126,7 @@ app.on('ready', async () => {
     parseCmd(process.argv);
   });
   ipcMain.on("uncagught-exception", (ev, error) => {
-    dialog.showErrorBox("Uncaught Excpetion", error);
+    if(app.isPackaged) dialog.showErrorBox("Uncaught Excpetion", error);
     console.error(error);
   });
   createWindow();

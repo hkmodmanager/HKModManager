@@ -14,6 +14,8 @@ export class TaskInfo {
     public isSuccess: boolean = false;
     public isHidden: boolean = false;
     public desc: string = "";
+    public startTime: number = new Date().valueOf();
+    public stopTime?: number;
     public updateHandler: (() => void) | undefined;
     public reportProgress(progress: number) {
         progress = Math.round(progress);
@@ -47,6 +49,7 @@ export class TaskInfo {
         } else {
             this.isSuccess = true;
         }
+        this.stopTime = new Date().valueOf();
     }
 }
 

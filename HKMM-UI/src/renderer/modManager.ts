@@ -1,22 +1,25 @@
 import { remote } from "electron";
-import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, stat, statSync, symlinkSync, writeFileSync } from "fs";
 import { dirname, join, parse } from "path";
 import { getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
-import { GetSettings, ModSavePathMode } from "./settings";
+import { store } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadFile, downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
 
 import "./apiManager";
+import { ModSavePathMode } from "@/common/SettingsStruct";
+
+export const modversionFileName = "modversion.json";
 
 export function getModsPath(name: string) {
-    return join(GetSettings().gamepath, "hollow_knight_Data", "Managed", "Mods", "Managed-" + name);
+    return join(store.store.gamepath, "hollow_knight_Data", "Managed", "Mods", "Managed-" + name);
 }
 
 export function getCacheModsPath() {
     let mods = "";
-    const settings = GetSettings();
+    const settings = store.store;
     if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
     else mods = settings.modsavepath;
@@ -29,6 +32,7 @@ export class LocalModInfo {
     public version: string = "";
     public install: number = 0;
     public path: string = "";
+    public files: string[] = [];
     public modinfo: ModLinksManifestData = undefined as any;
 }
 
@@ -44,6 +48,25 @@ export class LocalModInstance {
             else return false;
         }
         return false;
+    }
+
+    private fixOld() {
+        const zipp = join(this.info.path, "mod.zip");
+        if (existsSync(zipp)) rmSync(zipp, { force: true });
+        if (!this.info.files) {
+            this.fillFileNames();
+        }
+        this.save();
+    }
+
+    public fillFileNames() {
+        this.info.files = [];
+        for (const file of readdirSync(this.info.path, {
+            encoding: 'utf-8'
+        })) {
+            if (file == modversionFileName || !statSync(join(this.info.path, file)).isFile()) continue;
+            this.info.files.push(file);
+        }
     }
 
     public install(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
@@ -85,21 +108,23 @@ export class LocalModInstance {
     public async checkDependencies() {
         if (this.canInstall()) return;
         const g = getLocalMod(this.info.name);
-        if(!g) return;
+        if (!g) return;
         await g.installNew(this.info.modinfo, true);
     }
 
     public save() {
         const info = JSON.stringify(this.info);
-        writeFileSync(join(this.info.path, "modversion.json"), info, "utf-8");
+        writeFileSync(join(this.info.path, modversionFileName), info, "utf-8");
     }
 
     public static loadForm(path: string) {
-        const infopath = join(path, "modversion.json");
+        const infopath = join(path, modversionFileName);
         if (!existsSync(infopath)) return undefined;
         const info = JSON.parse(readFileSync(infopath, "utf-8")) as LocalModInfo;
         info.path = path;
-        return new LocalModInstance(info);
+        const inst = new LocalModInstance(info);
+        inst.fixOld();
+        return inst;
     }
 
     public constructor(info: LocalModInfo) {
@@ -169,9 +194,14 @@ export class LocalModsVersionGroup {
             if (dp.ext == ".zip") {
                 await zip.uncompress(zdp, verdir);
             }
+            rmSync(zdp, {
+                force: true,
+                recursive: true
+            });
         }
         task.pushState(`Download ${mod.name} complete`);
         const inst = this.versions[mod.version] = new LocalModInstance(info);
+        inst.fillFileNames();
         this.versionsArray.push(inst);
         inst.save();
         inst.install(false);
@@ -188,7 +218,7 @@ export class LocalModsVersionGroup {
                 for (let i = 0; i < mod.dependencies.length; i++) {
                     const element = mod.dependencies[i];
                     const dh = LocalModsVersionGroup.downloadingMods.get(element);
-                    if(dh) {
+                    if (dh) {
                         req.push(dh);
                         continue;
                     }
@@ -229,12 +259,12 @@ export class LocalModsVersionGroup {
     public disableAll() {
         if (this.versionsArray.length == 0) return;
         this.versionsArray[0].uninstall(true);
-        for(const v of getSubMods(this.name, false)) {
+        for (const v of getSubMods(this.name, false)) {
             v.uninstall();
         }
     }
     public canEnable() {
-        if(!this.isInstalled()) return false;
+        if (!this.isInstalled()) return false;
         return this.getLatest()?.canInstall() ?? false;
     }
     public uninstall(versions?: string[]) {
@@ -346,13 +376,13 @@ export function isDownloadingMod(name: string) {
 }
 
 export function getRequireUpdateModsSync() {
-    if(!modlinksCache) return [];
+    if (!modlinksCache) return [];
     const result: string[] = [];
     for (const key in refreshLocalMods()) {
         const mod = getLocalMod(key);
         const lv = mod.getLatestVersion();
-        if(!lv) continue;
-        if(isLaterVersion(getModLinkModSync(key)?.version ?? '', lv)) {
+        if (!lv) continue;
+        if (isLaterVersion(getModLinkModSync(key)?.version ?? '', lv)) {
             result.push(key);
         }
     }
