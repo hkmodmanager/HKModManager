@@ -1,12 +1,31 @@
 import { zip } from "compressing";
-import { fstat, readdirSync, readFileSync, stat, statSync } from "fs";
+import { remote } from "electron";
+import { fstat, readdirSync, readJSONSync, outputJSONSync, statSync, existsSync, rm, rmSync, copySync } from "fs-extra";
 import { Guid } from "guid-typescript";
-import { dirname, join } from "path";
+import { tmpdir } from "os";
+import { dirname, join, parse } from "path";
 import { URL } from "url";
-import { getAPIPath, getAPIVersion } from "./apiManager";
-import { apiInfoCache, getModLinkMod, ModLinksManifestData } from "./modlinks/modlinks";
-import { getLocalMod, isLaterVersion, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { copyBackup, getAPIPath, getAPIVersion } from "./apiManager";
+import { apiInfoCache, getModLinkMod, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, LocalModInfo, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { store } from "./settings";
 
+export const metadata_name = '[hkmm-metadata].json';
+
+export function getGroupPath() {
+    return join(remote.app.getPath('userData'), 'modgroups');
+}
+
+export function getGroupPath2(guid: string) {
+    return join(getGroupPath(), guid + '.hkmg');
+}
+
+export class ExportedModGroupMetadata {
+    public info: ModGroupInfo = undefined as any;
+    public mods: LocalModInfo[] = [];
+    public options?: IExportModGroupZipOptions;
+    public api?: ModdingAPIData;
+}
 
 export class ModGroupInfo {
     public name: string = "";
@@ -17,14 +36,15 @@ export class ModGroupInfo {
 export interface IExportModGroupZipOptions {
     includeAPI?: boolean;
     fullPath?: boolean,
-    onlyModFiles?: boolean
+    onlyModFiles?: boolean,
+    includeMetadata?: boolean
 }
 
 export class ModGroupController {
     public info: ModGroupInfo;
     public save() {
         if (!this.info) return;
-        localStorage.setItem(`modgroud-${this.info.guid}`, JSON.stringify(this.info));
+        outputJSONSync(getGroupPath2(this.info.guid), this.info, 'utf-8');
     }
     public addMod(name: string, ver: string) {
         if (this.info.mods.findIndex(v => v && v[0] == name) != -1) return;
@@ -64,6 +84,13 @@ export class ModGroupController {
     public constructor(info: ModGroupInfo) {
         this.info = info;
     }
+    public static loadForm(path: string) {
+        const info = readJSONSync(path, {
+            encoding: 'utf-8',
+            throws: true
+        }) as ModGroupInfo;
+        return new ModGroupController(info);
+    }
     public getShareUrl() {
         const url = new URL("hkmm://import.group");
         url.searchParams.set("name", this.info.name);
@@ -88,16 +115,18 @@ export class ModGroupController {
         options.fullPath = options.fullPath || options.includeAPI;
         const moddir = options.fullPath ? 'hollow_knight_Data/Managed/Mods' : '';
         const modset = new Set<string>();
+        const mods: LocalModInfo[] = [];
         function addMod(mod: LocalModInstance) {
             if (modset.has(mod.info.name)) return;
             modset.add(mod.info.name);
+            mods.push(mod.info);
             let files: string[] = [];
             function fedir(p: string, ol: string[], op: string) {
                 for (const file of readdirSync(p, { encoding: 'utf8' })) {
                     const stats = statSync(join(p, file));
-                    if(stats.isFile() && file !== modversionFileName) {
+                    if (stats.isFile() && file !== modversionFileName) {
                         ol.push(join(op, file));
-                    } else if(stats.isDirectory()) {
+                    } else if (stats.isDirectory()) {
                         fedir(join(p, file), ol, join(op, file));
                     }
                 }
@@ -115,7 +144,7 @@ export class ModGroupController {
             for (const dm of mod.info.modinfo.dependencies) {
                 const g = getLocalMod(dm);
                 const lm = g.getLatest();
-                if(lm) {
+                if (lm) {
                     addMod(lm);
                 }
             }
@@ -123,10 +152,11 @@ export class ModGroupController {
         for (const mod of this.getLocalMods()) {
             addMod(mod);
         }
-        if(options?.includeAPI) {
-            if(getAPIVersion() < 0) throw new Error("The API is not installed");
+        const zip_apifiles: string[] = [];
+        if (options?.includeAPI) {
+            if (getAPIVersion() < 0) throw new Error("The API is not installed");
             const apidir = dirname(getAPIPath());
-            let apifiles: string[] = [ //https://github.com/hk-modding/modlinks/blob/22c5293336524dc760afb57a2ded3bcfabd46864/ApiLinks.xml#L23-L40
+            let apifiles = [ //https://github.com/hk-modding/modlinks/blob/22c5293336524dc760afb57a2ded3bcfabd46864/ApiLinks.xml#L23-L40
                 'Assembly-CSharp.dll',
                 'Assembly-CSharp.xml',
                 'MMHOOK_Assembly-CSharp.dll',
@@ -139,15 +169,37 @@ export class ModGroupController {
                 'Newtonsoft.Json.dll',
                 'README.md'
             ];
-            if(apiInfoCache) {
+            if (apiInfoCache) {
                 apifiles = apiInfoCache.files;
             }
 
             for (const f of apifiles) {
+                const zp = join('hollow_knight_Data/Managed', f);
+                zip_apifiles.push(zp);
                 output.addEntry(join(apidir, f), {
-                    relativePath: join('hollow_knight_Data/Managed', f)
+                    relativePath: zp
                 });
             }
+        }
+        if (options?.includeMetadata) {
+            const metadata = new ExportedModGroupMetadata();
+            metadata.info = this.info;
+            metadata.options = options;
+            for (const mod of mods) {
+                const c = { ...mod };
+                c.path = options.fullPath ? join(moddir, c.name) : c.name;
+                metadata.mods.push(c);
+            }
+            if (options?.includeAPI) {
+                const api = new ModdingAPIData();
+                metadata.api = api;
+                api.version = getAPIVersion();
+                api.lastGet = new Date().valueOf();
+                api.files = zip_apifiles;
+            }
+            output.addEntry(Buffer.from(JSON.stringify(metadata)), {
+                relativePath: metadata_name
+            });
         }
         return output;
     }
@@ -162,7 +214,6 @@ export function isInstalled(mod: [string, string]) {
 export const groupCache: Record<string, ModGroupController> = {};
 
 let useGroupCache: string = undefined as any;
-let allGroups: string[] = undefined as any;
 
 export function changeCurrentGroup(guid: string) {
     useGroupCache = guid;
@@ -177,13 +228,12 @@ export function changeCurrentGroup(guid: string) {
     for (const mod of group.getLocalMods()) {
         mod.install();
     }
-    localStorage.setItem("modgroupcurrent", useGroupCache);
-
+    store.set('current_modgroup', useGroupCache);
 }
 
 export function getCurrentGroup() {
     if (useGroupCache == undefined) {
-        useGroupCache = localStorage.getItem("modgroupcurrent") ?? "default";
+        useGroupCache = store.get('current_modgroup', 'default');
     }
     if (useGroupCache == "default") return getDefaultGroup();
     let result = getGroup(useGroupCache);
@@ -199,17 +249,13 @@ export function getGroup(guid: string) {
     const result = groupCache[guid];
     if (result) return result;
 
-    const r = localStorage.getItem(`modgroud-${guid}`);
-    if (!r) return undefined;
-    return (groupCache[guid] = new ModGroupController(JSON.parse(r) as ModGroupInfo));
+    const r = getGroupPath2(guid);
+    if (!existsSync(r)) return undefined;
+    return (groupCache[guid] = new ModGroupController(readJSONSync(r, 'utf-8')));
 }
 
 export function getAllGroupGuids() {
-    if (allGroups) return allGroups;
-    const l = localStorage.getItem("modgrouplist");
-    if (!l) return [];
-
-    return allGroups = (JSON.parse(l) as string[]);
+    return store.store.modgroups ?? [];
 }
 
 export function getAllGroups() {
@@ -236,8 +282,7 @@ export function saveGroups() {
         if (groupList.indexOf(iterator) != -1) continue;
         groupList.push(iterator);
     }
-
-    localStorage.setItem("modgrouplist", JSON.stringify(groupList));
+    store.set('modgroups', groupList);
 }
 
 export function getOrCreateGroup(guid?: string, name?: string) {
@@ -248,16 +293,19 @@ export function getOrCreateGroup(guid?: string, name?: string) {
         info.guid = guid;
         result = new ModGroupController(info);
         groupCache[guid] = result;
-        allGroups.push(guid);
+        saveGroups();
     }
     if (name) result.info.name = name;
-    saveGroups();
+    result.save();
     return result;
 }
 
 export function removeGroup(guid: string) {
     delete groupCache[guid];
-    localStorage.removeItem(`modgroud-${guid}`);
+    const gp = getGroupPath2(guid);
+    if (existsSync(gp)) {
+        rmSync(gp);
+    }
     const guids = getAllGroupGuids();
     const index = guids.indexOf(guid)
     if (index != -1) delete guids[index];
@@ -267,16 +315,74 @@ export function getDefaultGroup() {
     return getOrCreateGroup("default", "Default");
 }
 
-export function importGroup(url: URL) {
-    const name = url.searchParams.get("name") ?? "Import Group";
+export function importGroup(source: URL | ModGroupInfo) {
+    if (source instanceof URL) {
+        const name = source.searchParams.get("name") ?? "Import Group";
 
-    const mods = url.searchParams.get("mods");
-    if (!mods) return;
-    const modsArray = mods.split(';');
+        const mods = source.searchParams.get("mods");
+        if (!mods) return;
+        const modsArray = mods.split(';');
 
-    const group = getOrCreateGroup(undefined, name);
-    for (const mod of modsArray) {
-        group.info.mods.push(mod.split(':') as [string, string]);
+        const group = getOrCreateGroup(undefined, name);
+        for (const mod of modsArray) {
+            group.info.mods.push(mod.split(':') as [string, string]);
+        }
+    } else {
+        const info = { ...source };
+        info.guid = Guid.create().toString();
+        const inst = new ModGroupController(info);
+        inst.info.guid = Guid.create().toString();
+        groupCache[info.guid] = inst;
     }
     saveGroups();
 }
+
+export function importFromHKMG(path: string) {
+    importGroup(readJSONSync(path, 'utf-8') as ModGroupInfo);
+}
+
+export async function importFromZip(source: string | Buffer) {
+    const od = join(tmpdir(), Guid.create().toString());
+    await zip.uncompress(source, od);
+    try {
+        const mdp = join(od, metadata_name);
+        if (!existsSync(mdp)) {
+            throw new Error('Metadata not found');
+        }
+        const metadata = readJSONSync(mdp) as ExportedModGroupMetadata;
+        importGroup(metadata.info);
+        for (const mod of metadata.mods) {
+            getOrAddLocalMod(mod.name).installLocalMod(mod, join(od, mod.path));
+        }
+        if(metadata.api) {
+            if(getAPIVersion() < metadata.api.version) {
+                copyBackup();
+                const managed = dirname(getAPIPath());
+                for (const f of metadata.api.files) {
+                    const p = join(od, f);
+                    if(!existsSync(p)) continue;
+                    copySync(p, join(managed, parse(f).base));
+                }
+            }
+        }
+    } finally {
+        rmSync(od, {
+            recursive: true
+        });
+    }
+}
+
+(function () {
+    const list = localStorage.getItem('modgrouplist');
+    if (!list) return;
+    localStorage.removeItem('modgrouplist');
+    const gl = JSON.parse(list) as string[];
+    for (const g of gl) {
+        const r = localStorage.getItem(`modgroud-${g}`);
+        if (!r) continue;
+        localStorage.removeItem(`modgroud-${g}`);
+        const inst = new ModGroupController(JSON.parse(r) as ModGroupInfo);
+        groupCache[g] = inst;
+    }
+    saveGroups();
+})();

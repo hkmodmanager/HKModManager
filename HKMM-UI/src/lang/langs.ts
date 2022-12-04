@@ -95,6 +95,7 @@ export const I18nLanguages = {
                 title: "Mods储存目录",
                 appdir: "应用程序目录",
                 userdir: "用户目录",
+                gamepath: "游戏目录",
                 custom: "自定义"
             }
         },

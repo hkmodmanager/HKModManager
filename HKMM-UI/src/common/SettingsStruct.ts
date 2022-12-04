@@ -1,7 +1,8 @@
 export enum ModSavePathMode {
     AppDir,
     UserDir,
-    Custom
+    Custom,
+    Gamepath
 }
 
 export class MirrorItem {
@@ -20,4 +21,6 @@ export class HKMMSettings {
     public modsavepath: string = "";
     public modsavepathMode: ModSavePathMode = ModSavePathMode.AppDir;
     public inStore: boolean = false;
+    public modgroups: string[] = [];
+    public current_modgroup: string = 'default';
 }

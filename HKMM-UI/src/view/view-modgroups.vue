@@ -8,8 +8,10 @@
         </div>
         <hr />
         <div>
-            <button class="btn btn-primary w-100" @click="openCreateNewGroupBox">
-                <i class="bi bi-plus-lg"></i>
+            <button :class="`btn btn-${ show_drag_hkmg ? 'info' : 'primary' } w-100`" @click="openCreateNewGroupBox" @drop="onImportHKMGDrop($event)"  @dragleave="onImportHKMGLeave($event)"
+                @dragover="onImportHKMGDragOver($event)">
+                <i class="bi bi-plus-lg" v-if="!show_drag_hkmg"></i>
+                <i class="bi bi-box-arrow-in-down" v-else></i>
             </button>
         </div>
         <div v-for="(group) in getAllGroup()" :key="group.info.guid">
@@ -82,13 +84,16 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
-import { saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup, getCurrentGroup, getOrCreateGroup, removeGroup } from '@/renderer/modgroup';
+import { saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup, 
+    getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG, importFromZip } from '@/renderer/modgroup';
 import { defineComponent } from 'vue';
 import { remote } from 'electron'
 import CGroupsGroupItem from './groups/c-groups-groupItem.vue';
 import { zip } from 'compressing';
 import { createWriteStream } from 'fs';
 import { getAPIVersion } from '@/renderer/apiManager';
+import { extname } from 'path';
+import { refreshLocalMods } from '@/renderer/modManager';
 
 export default defineComponent({
     methods: {
@@ -167,6 +172,25 @@ export default defineComponent({
             const modal = this.$refs.modal_rename_group as any;
             modal.getModal().hide();
         },
+        onImportHKMGDrop(ev: DragEvent) {
+            const transfer = ev.dataTransfer as DataTransfer;
+            this.show_drag_hkmg = false;
+            for (const file of transfer.files) {
+                if(extname(file.path) === '.hkmg') importFromHKMG(file.path);
+                if(extname(file.path) === '.zip') importFromZip(file.path);
+            }
+            ev.preventDefault();
+            refreshLocalMods(true);
+            this.$forceUpdate();
+        },
+        onImportHKMGDragOver(ev: DragEvent) {
+            this.show_drag_hkmg = true;
+            ev.preventDefault();
+        },
+        onImportHKMGLeave(ev: DragEvent) {
+            this.show_drag_hkmg = false;
+            ev.preventDefault();
+        },
         installedAPI() {
             return getAPIVersion() > 0
         },
@@ -196,7 +220,8 @@ export default defineComponent({
                 group.exportAsZip(stream, {
                     onlyModFiles: feat.includes('only-mod-files'),
                     fullPath: feat.includes('always-full-path'),
-                    includeAPI: feat.includes('include-api') && (getAPIVersion() > 0)
+                    includeAPI: feat.includes('include-api') && (getAPIVersion() > 0),
+                    includeMetadata: true
                 });
                 stream.pipe(fs);
 
@@ -217,7 +242,8 @@ export default defineComponent({
             group_name_t: "",
             group_guid_t: "",
             pack_feat: [],
-            show_wm: false
+            show_wm: false,
+            show_drag_hkmg: false
         }
     },
     unmounted() {

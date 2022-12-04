@@ -6,6 +6,7 @@
       <select class="form-select" @change="changeModsSavePathMode()" ref="modssavepathmode">
         <option value="appdir">{{ $t("settings.modsavepath.appdir") }}</option>
         <option value="userdir">{{ $t("settings.modsavepath.userdir") }}</option>
+        <option value="gamepath">{{ $t("settings.modsavepath.gamepath") }}</option>
         <option value="custom">{{ $t("settings.modsavepath.custom") }}</option>
       </select>
       <div class="input-group p-1" v-if="shouldShowCustomModSavePath()">
@@ -74,6 +75,7 @@ export default defineComponent({
     if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.AppDir) select.value = "appdir";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.UserDir) select.value = "userdir";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Custom) select.value = "custom";
+    else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Gamepath) select.value = "gamepath";
   },
   methods: {
     changeExpMode() {
@@ -113,6 +115,7 @@ export default defineComponent({
       if (val === "appdir") store.set("modsavepathMode", ModSavePathMode.AppDir);
       else if (val === "userdir") store.set("modsavepathMode", ModSavePathMode.UserDir);
       else if (val === "custom") store.set("modsavepathMode", ModSavePathMode.Custom);
+      else if (val === "gamepath") store.set("modsavepathMode", ModSavePathMode.Gamepath);
     }
   }
 });

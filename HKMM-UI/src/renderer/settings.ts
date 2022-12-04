@@ -19,7 +19,7 @@ function GetSettingsLocal() {
 }
 
 
-function SettingRelocate() {
+(function() {
     if(store.get("inStore", false)) return;
     const old = GetSettingsLocal();
     store.set("inStore", true);
@@ -28,6 +28,13 @@ function SettingRelocate() {
     store.set(old);
     localStorage.removeItem(localStorageName);
     console.log(`Relocate Settings: ${store.path}`);
-}
+})();
 
-SettingRelocate();
+(function(){
+    if(!store.store.modgroups) {
+        store.set('modgroups', []);
+    }
+    if(!store.store.current_modgroup) {
+        store.set('current_modgroup', 'default');
+    }
+})();

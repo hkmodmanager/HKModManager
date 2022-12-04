@@ -10,6 +10,7 @@ import { getCurrentGroup } from "./modgroup";
 
 import "./apiManager";
 import { ModSavePathMode } from "@/common/SettingsStruct";
+import { copySync } from "fs-extra";
 
 export const modversionFileName = "modversion.json";
 
@@ -22,6 +23,7 @@ export function getCacheModsPath() {
     const settings = store.store;
     if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
+    else if(settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
     return mods;
@@ -299,14 +301,33 @@ export class LocalModsVersionGroup {
     public isInstalled() {
         return this.versionsArray.length > 0;
     }
+
+    public installLocalMod(mod: LocalModInfo, root: string) {
+        if(this.versions[mod.version]) return false;
+        const info = {...mod};
+        const mp = join(getCacheModsPath(), mod.name, mod.version);
+        info.path = mp;
+        copySync(root, mp, {
+            overwrite: true,
+            recursive: true
+        })
+        const inst = new LocalModInstance(info);
+        inst.save();
+        this.versionsArray.push(inst);
+        this.versions[mod.name] = inst;
+        return true;
+    }
+
 }
 
 export let localMods: Record<string, LocalModsVersionGroup> = undefined as any;
+let lastRefresh: number = 0;
 export let localModsArray: LocalModsVersionGroup[] = undefined as any;
 
-export function refreshLocalMods() {
-    const gl = window as any;
-    gl.mods = localMods = {};
+export function refreshLocalMods(force: boolean = false) {
+    if(!force && localMods && (new Date().valueOf() - lastRefresh) < 2000) return localMods;
+    
+    localMods = {};
 
     const localpath = getCacheModsPath();
     const dirs = readdirSync(localpath, "utf-8");
@@ -320,6 +341,7 @@ export function refreshLocalMods() {
         localMods[inst.name] = inst;
         localModsArray.push(inst);
     }
+    lastRefresh = new Date().valueOf();
     return localMods;
 }
 
