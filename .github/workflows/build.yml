@@ -40,7 +40,7 @@ jobs:
       - name: upload unpacked
         uses: actions/upload-artifact@v3
         with:
-          name: setup
+          name: unpacked
           path: "HKMM-UI/dist_electron/win-unpacked"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
