@@ -17,8 +17,7 @@ module.exports = defineConfig({
                     }
                 ],
                 win: {
-                    icon: "./MZ_Death_Skull.ico",
-                    publish: ['github']
+                    icon: "./MZ_Death_Skull.ico"
                 },
                 extraResources: [
                     {
