@@ -34,14 +34,14 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: setup
-          file: "HKMM-UI/dist_electron/*.exe"
+          path: "HKMM-UI/dist_electron/*.exe"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: upload unpacked
         uses: actions/upload-artifact@v3
         with:
           name: setup
-          file: "HKMM-UI/dist_electron/win-unpacked"
+          path: "HKMM-UI/dist_electron/win-unpacked"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
