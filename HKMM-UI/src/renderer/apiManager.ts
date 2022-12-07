@@ -7,6 +7,7 @@ import { tmpdir } from 'os';
 import { dirname, join, parse } from 'path';
 import { apiInfoCache, getAPIInfo, ModdingAPIData } from './modlinks/modlinks';
 import { getNetUtilsPath, netfunc } from './nethelper';
+import { installGameInject } from './gameinject';
 import { store } from './settings';
 import { createTask, startTask } from './taskManager';
 import { downloadFile, downloadRaw } from './utils/downloadFile';
@@ -123,5 +124,6 @@ export async function downloadAPI() {
         const tf = join(tmpdir(), "api.zip");
         writeFileSync(tf, raw);
         await zip.uncompress(tf, parse(getAPIPath()).dir);
+        installGameInject();
     });
 }

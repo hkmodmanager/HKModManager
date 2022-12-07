@@ -223,12 +223,9 @@ export default defineComponent({
                     includeAPI: feat.includes('include-api') && (getAPIVersion() > 0),
                     includeMetadata: true
                 });
-                stream.pipe(fs);
-
-                fs.on('finish', () => {
-                    this.show_wm = false;
-                    fs.close();
-                });
+                fs.write(stream.read());
+                fs.close();
+                stream.close();
             } catch (e) {
                 console.log(e);
                 this.show_wm = false;

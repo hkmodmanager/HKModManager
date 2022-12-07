@@ -52,6 +52,7 @@ export const I18nLanguages = {
             dep: "依赖Mods",
             size: "大小",
             depInstall: "已安装",
+            installDep: "安装依赖",
             enabled: "已启用",
             disabled: "未启用",
             install: "安装",

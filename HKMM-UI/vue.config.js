@@ -34,6 +34,20 @@ module.exports = defineConfig({
                             "**/*"
                         ]
                     },
+                    {
+                        from: "../gameinject/Output",
+                        to: "../managed",
+                        filter: [
+                            "**/*"
+                        ]
+                    },
+                    {
+                        from: "./managed",
+                        to: "../managed",
+                        filter: [
+                            "**/*"
+                        ]
+                    }
                 ]
                 ,
                 nsis: {

@@ -11,11 +11,24 @@ import { getCurrentGroup } from "./modgroup";
 import "./apiManager";
 import { ModSavePathMode } from "@/common/SettingsStruct";
 import { copySync } from "fs-extra";
+import { installGameInject } from "./gameinject";
+import { getDownloader } from "./mods/customDownloader";
 
 export const modversionFileName = "modversion.json";
 
+export function getModsRoot() {
+    const root = join(store.store.gamepath, "hkmm-mods-cache", "enabled", "mods");
+    if (!existsSync(root)) {
+        mkdirSync(root, {
+            recursive: true
+        });
+    }
+    return root;
+}
+
 export function getModsPath(name: string) {
-    return join(store.store.gamepath, "hollow_knight_Data", "Managed", "Mods", "Managed-" + name);
+    const root = getModsRoot();
+    return join(root, "$$$" + name + "$$$");
 }
 
 export function getCacheModsPath() {
@@ -23,7 +36,7 @@ export function getCacheModsPath() {
     const settings = store.store;
     if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
-    else if(settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");
+    else if (settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
     return mods;
@@ -78,7 +91,11 @@ export class LocalModInstance {
         if (addToCurrentGroup) {
             getCurrentGroup().addMod(this.info.name, this.info.version);
         }
-        if (!installedSet) installedSet = new Set<string>();
+
+        if (!installedSet) {
+            installedSet = new Set<string>();
+            installGameInject();
+        }
         installedSet.add(this.info.name);
         for (let i = 0; i < this.info.modinfo.dependencies.length; i++) {
             const element = this.info.modinfo.dependencies[i];
@@ -175,10 +192,9 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
-        const download = new URL(mod.link);
-        const dp = parse(download.pathname);
+
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
-        const result = await downloadRaw(mod.link, undefined, task);
+        const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });
@@ -188,6 +204,8 @@ export class LocalModsVersionGroup {
         info.version = mod.version;
         info.path = verdir;
         info.modinfo = mod;
+        const download = new URL(mod.link);
+        const dp = parse(download.pathname);
         if (dp.ext == ".dll") {
             writeFileSync(join(verdir, dp.base), result);
         } else {
@@ -303,8 +321,8 @@ export class LocalModsVersionGroup {
     }
 
     public installLocalMod(mod: LocalModInfo, root: string) {
-        if(this.versions[mod.version]) return false;
-        const info = {...mod};
+        if (this.versions[mod.version]) return false;
+        const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
         info.path = mp;
         copySync(root, mp, {
@@ -325,8 +343,8 @@ let lastRefresh: number = 0;
 export let localModsArray: LocalModsVersionGroup[] = undefined as any;
 
 export function refreshLocalMods(force: boolean = false) {
-    if(!force && localMods && (new Date().valueOf() - lastRefresh) < 2000) return localMods;
-    
+    if (!force && localMods && (new Date().valueOf() - lastRefresh) < 2000) return localMods;
+
     localMods = {};
 
     const localpath = getCacheModsPath();
