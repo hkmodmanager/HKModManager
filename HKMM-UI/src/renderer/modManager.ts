@@ -192,7 +192,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
-
+        mod = {...mod};
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
         const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);

@@ -31,4 +31,7 @@ public class NetUtils {
             return ver.Constant;
         }
     }
+    public async Task<object?> SearchHKFile(dynamic input) {
+        return GameFileHelper.FindSteamGamePath(GameFileHelper.HOLLOWKNIGHT_APP_ID, GameFileHelper.HOLLOWKNIGHT_GAME_NAME);
+    }
 }

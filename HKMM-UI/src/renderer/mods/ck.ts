@@ -20,22 +20,10 @@ export class CKDownloader implements ICustomDownloader {
             const zs = new zip.Stream();
             //Main
             url.pathname = join(pbase, "CustomKnight.dll");
-            zs.addEntry(await downloadRaw(url.toString(), undefined, task), {
-                relativePath: 'CustomKnight.dll'
-            });
+            mod.link = url.toString();
 
-            //Pdb
-            try {
-                url.pathname = join(pbase, "CustomKnight.pdb");
-                zs.addEntry(await downloadRaw(url.toString(), undefined, task), {
-                    relativePath: 'CustomKnight.pdb'
-                });
-            } catch (e: any) {
-                task.pushState(e?.toString());
-            }
-
-            task.pushState("Write stream")
-            return zs.read();
+            console.log(zs);
+            return await downloadRaw(url.toString(), undefined, task);
         } catch (e: any) {
             task.pushState(e?.toString());
             task.pushState("Fallback, use default downloader");

@@ -11,6 +11,7 @@ import { installGameInject } from './gameinject';
 import { store } from './settings';
 import { createTask, startTask } from './taskManager';
 import { downloadFile, downloadRaw } from './utils/downloadFile';
+import { gl } from './exportGlobal';
 
 export function getAPIPath(root?: string) {
     return join(root ?? store.get('gamepath'), "hollow_knight_Data", "Managed", "Assembly-CSharp.dll");
@@ -18,6 +19,7 @@ export function getAPIPath(root?: string) {
 
 const getapiver = netfunc("GetAPIVersion");
 const getgamever = netfunc("GetGameVersion");
+const findhkpath = netfunc("SearchHKFile");
 
 export function getAPIVersion(path?: string) {
     return getapiver({
@@ -34,6 +36,12 @@ export function getGameVersion(path?: string) {
         apiPath: path ?? getAPIPath()
     }, true) as string;
 }
+
+export function findHKPath() {
+    return findhkpath({}, true) as string;
+}
+
+gl.findHKPath = findHKPath;
 
 export function matchAPI(api: string) {
     const gv = getGameVersion();

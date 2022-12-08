@@ -8,7 +8,8 @@
         </div>
         <hr />
         <div>
-            <button :class="`btn btn-${ show_drag_hkmg ? 'info' : 'primary' } w-100`" @click="openCreateNewGroupBox" @drop="onImportHKMGDrop($event)"  @dragleave="onImportHKMGLeave($event)"
+            <button :class="`btn btn-${show_drag_hkmg ? 'info' : 'primary'} w-100`" @click="openCreateNewGroupBox"
+                @drop="onImportHKMGDrop($event)" @dragleave="onImportHKMGLeave($event)"
                 @dragover="onImportHKMGDragOver($event)">
                 <i class="bi bi-plus-lg" v-if="!show_drag_hkmg"></i>
                 <i class="bi bi-box-arrow-in-down" v-else></i>
@@ -47,7 +48,8 @@
     <ModalBox :title="$t('groups.export')" ref="modal_export_group">
         <form>
             <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" v-model="pack_feat" value="include-api" :disabled="!installedAPI()" />
+                <input class="form-check-input" type="checkbox" v-model="pack_feat" value="include-api"
+                    :disabled="!installedAPI()" />
                 <label class="form-check-label">{{ $t("groups.exportOptions.include_api") }}</label>
             </div>
             <div class="form-check form-switch">
@@ -84,8 +86,10 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
-import { saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup, 
-    getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG, importFromZip } from '@/renderer/modgroup';
+import {
+    saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup,
+    getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG, importFromZip
+} from '@/renderer/modgroup';
 import { defineComponent } from 'vue';
 import { remote } from 'electron'
 import CGroupsGroupItem from './groups/c-groups-groupItem.vue';
@@ -94,6 +98,7 @@ import { createWriteStream } from 'fs';
 import { getAPIVersion } from '@/renderer/apiManager';
 import { extname } from 'path';
 import { refreshLocalMods } from '@/renderer/modManager';
+import { gl } from '@/renderer/exportGlobal';
 
 export default defineComponent({
     methods: {
@@ -176,8 +181,8 @@ export default defineComponent({
             const transfer = ev.dataTransfer as DataTransfer;
             this.show_drag_hkmg = false;
             for (const file of transfer.files) {
-                if(extname(file.path) === '.hkmg') importFromHKMG(file.path);
-                if(extname(file.path) === '.zip') importFromZip(file.path);
+                if (extname(file.path) === '.hkmg') importFromHKMG(file.path);
+                if (extname(file.path) === '.zip') importFromZip(file.path);
             }
             ev.preventDefault();
             refreshLocalMods(true);
@@ -194,7 +199,7 @@ export default defineComponent({
         installedAPI() {
             return getAPIVersion() > 0
         },
-        exportGroup() {
+        async exportGroup() {
             const modal = this.$refs.modal_export_group as any;
             modal.getModal().hide();
 
@@ -212,10 +217,11 @@ export default defineComponent({
             });
             if (!s) return;
 
-            const stream = new zip.Stream();
-            const fs = createWriteStream(s, 'binary');
+
+
             const feat = this.pack_feat as string[];
             try {
+                const stream = new zip.Stream();
                 this.show_wm = true;
                 group.exportAsZip(stream, {
                     onlyModFiles: feat.includes('only-mod-files'),
@@ -223,12 +229,25 @@ export default defineComponent({
                     includeAPI: feat.includes('include-api') && (getAPIVersion() > 0),
                     includeMetadata: true
                 });
-                fs.write(stream.read());
-                fs.close();
-                stream.close();
+                gl.zs = stream;
+
+                const fs = createWriteStream(s, 'binary');
+                
+                await new Promise<void>((r) => {
+                    stream.pipe(fs);
+                    fs.on('finish', () => {
+                        this.show_wm = false;
+                        fs.close();
+                        console.log(s);
+                        r();
+                    });
+                });
+
             } catch (e) {
                 console.log(e);
-                this.show_wm = false;
+
+            } finally {
+                //this.show_wm = false;
             }
             console.log(s);
         }

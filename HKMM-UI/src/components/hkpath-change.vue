@@ -16,7 +16,7 @@
 import { remote } from 'electron';
 import { parse } from 'path';
 import { defineComponent } from 'vue';
-import { checkGameFile } from '@/renderer/apiManager';
+import { checkGameFile, findHKPath } from '@/renderer/apiManager';
 import { store } from '@/renderer/settings';
 
 export default defineComponent({
@@ -45,7 +45,7 @@ export default defineComponent({
                 return;
             }
             this.msg = '';
-            this.$emit('update:gamepath', p.dir);
+            store.set('gamepath', p.dir);
             this.$emit('onsave', p.dir);
         },
         getHKPath() {
@@ -53,15 +53,30 @@ export default defineComponent({
         }
     },
     mounted() {
-        const re = checkGameFile(store.get('gamepath', ''));
+        let re = checkGameFile(this.getHKPath());
         if (typeof re == "string") {
-            this.msg = re;
-            return;
+            const afh = findHKPath();
+            if(!afh) {
+                this.msg = 'aff';
+                return;
+            }
+            else
+            {
+                re = checkGameFile(afh);
+            }
+            if(typeof re == 'string') {
+                this.msg = 'aff';
+                return;
+            }
+            else
+            {
+                store.set('gamepath', afh);
+                this.$emit('onsave', afh);
+            }
         }
         this.msg = '';
     },
     emits: {
-        'update:gamepath': null,
         'onsave': null
     }
 });

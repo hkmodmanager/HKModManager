@@ -6,7 +6,8 @@ export const I18nLanguages = {
             hkcheck: {
                 no_hk: "选中的游戏不是空洞骑士",
                 broken: "游戏文件已损坏",
-                hk_out_of_date: "游戏版本过旧"
+                hk_out_of_date: "游戏版本过旧",
+                aff: "无法自动寻找游戏文件"
             }
         },
         tabs: {

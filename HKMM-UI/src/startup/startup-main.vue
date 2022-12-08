@@ -30,7 +30,9 @@ export default defineComponent({
                 } else {
                     this.$router.replace({ name: "api" })
                 }
+                return true;
             }
+            return false;
         },
         getApp() {
             return appVue;

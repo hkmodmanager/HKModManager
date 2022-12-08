@@ -14,7 +14,7 @@
                         class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
-                    <span v-if="isRequireUpdate(mod?.name ?? '')" class="badge bg-warning mt-2">
+                    <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
                     </span>
 
@@ -55,8 +55,8 @@
                                     {{ $t("mods.uninstall") }}</button>
                             </div>
                         </div>
-                        <div class="flex-grow-1 d-flex" v-if="isRequireUpdate(mod?.name as string) && !isLocal">
-                            <button class="btn btn-primary flex-grow-1" :disabled="isDownload">
+                        <div class="flex-grow-1 d-flex" v-if="(isRequireUpdate(mod?.name as string) && !disableUpdate)">
+                            <button class="btn btn-primary flex-grow-1" :disabled="isDownload" @click="updateMod()">
                                 {{ $t("mods.update") }}
                             </button>
                         </div>
@@ -131,7 +131,7 @@
 </style>
 
 <script lang="ts">
-import { getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
@@ -227,10 +227,13 @@ export default defineComponent({
             this.$forceUpdate();
         },
         async updateMod() {
-            if (this.mod === undefined || this.isLocal) return;
+            
+            if (this.mod === undefined || this.disableUpdate) return;
+            const ml = await getModLinkMod(this.mod.name);
+            if(!ml) return;
             const group = getOrAddLocalMod(this.mod.name);
             group.disableAll();
-            await group.installNew(this.mod);
+            await group.installNew(ml);
             group.getLatest()?.install();
             this.$forceUpdate();
         },
