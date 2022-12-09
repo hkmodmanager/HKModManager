@@ -13,7 +13,11 @@ jobs:
       - name: Check out git repository
         uses: actions/checkout@v2
       - name: Install Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: 'npm'
+          cache-dependency-path: HKMM-UI/package-lock.json
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v1
         with:
@@ -30,7 +34,7 @@ jobs:
       - name: npm install
         run: |
           cd HKMM-UI
-          npm install
+          npm ci
       - name: Build
         run: |
           cd HKMM-UI
