@@ -19,9 +19,9 @@ export class HKMMSettings {
     public enabled_exp_mode = false;
     public gamepath: string = "";
     public modsavepath: string = "";
-    public modsavepathMode: ModSavePathMode = ModSavePathMode.AppDir;
+    public modsavepathMode: ModSavePathMode = ModSavePathMode.UserDir;
     public inStore: boolean = false;
     public modgroups: string[] = [];
     public current_modgroup: string = 'default';
-    public language?: string;
+    public language?: string = '#';
 }

@@ -16,11 +16,6 @@ import { URL } from 'url'
 import { importGroup } from './renderer/modgroup'
 import { store } from './renderer/settings';
 
-process.addListener("uncaughtException", (ev) => {
-    console.error(ev);
-    ipcRenderer.send("uncagught-exception", ev);
-});
-
 const routes: RouteRecordRaw[] = [
     {
         name: 'allmods',
@@ -67,7 +62,10 @@ const route = createRouter({
 
 searchLanguages();
 
-const lang = store.get('language')?.toLowerCase() ?? navigator.language;
+let lang = store.get('language')?.toLowerCase();
+if(!lang || lang == '#') {
+    lang = navigator.language.toLowerCase();
+}
 store.set('language', lang);
 let clang: string;
 console.log(`[I18n]Current language is ${lang}`);

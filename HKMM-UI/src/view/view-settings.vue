@@ -36,7 +36,7 @@
     </div>
 
     <!--Mirror-->
-    <RequireExpmode>
+    <RequireExpmode v-if="false">
       <div class="form-group p-3">
         <div class="form-group">
           <label class="form-label">{{

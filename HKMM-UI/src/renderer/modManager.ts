@@ -34,6 +34,10 @@ export function getModsPath(name: string) {
 export function getCacheModsPath() {
     let mods = "";
     const settings = store.store;
+    if(settings.modsavepathMode == undefined) {
+        store.set('modsavepathMode', ModSavePathMode.UserDir);
+        settings.modsavepathMode = ModSavePathMode.UserDir;
+    }
     if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");

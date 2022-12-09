@@ -8,6 +8,8 @@ const localStorageName: string = "hkmm-settings";
 export const store = new Store<HKMMSettings>();
 
 
+
+
 function GetSettingsLocal() {
     const s = localStorage.getItem(localStorageName);
     if (!s) {
@@ -21,7 +23,7 @@ function GetSettingsLocal() {
 
 (function() {
     if(store.get("inStore", false)) return;
-    const old = GetSettingsLocal();
+    const old = GetSettingsLocal() ?? new HKMMSettings();
     store.set("inStore", true);
     if(!old) return;
     old.inStore = true;

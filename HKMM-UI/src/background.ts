@@ -126,7 +126,7 @@ app.on('ready', async () => {
     parseCmd(process.argv);
   });
   ipcMain.on("uncagught-exception", (ev, ee) => {
-    if(app.isPackaged) dialog.showErrorBox("Uncaught Excpetion", ee);
+    dialog.showErrorBox("Uncaught Excpetion", ee);
     console.log(ee)
   });
   createWindow();
