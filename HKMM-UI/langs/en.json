@@ -1,0 +1,131 @@
+{
+    "$": {
+        "alias": [
+            "en-us", "en", "en-gb"
+        ],
+        "displayName": "English",
+        "i18nName": "en"
+    },
+    "c_languages": "Language",
+    "c_language_title": "Language",
+    "c_language_apply": "Apply",
+    "error": {
+        "missingView": "Missing page",
+        "hkcheck": {
+            "no_hk": "The selected game is not Hollow Knight",
+            "broken": "The game file is corrupted",
+            "hk_out_of_date": "The game version is outdated",
+            "aff": "Game files cannot be found automatically"
+        }
+    },
+    "tabs": {
+        "allmods": "New Mods",
+        "localmods": "Local Mods",
+        "requireUpdateMods": "Updatable mods",
+        "settings": "Settings",
+        "modgroups": "Mods Group",
+        "api": "MAPI",
+        "tasks": {
+            "title": "Tasks",
+            "all": "All",
+            "failed": "Failed",
+            "done": "Completed",
+            "running": "Running"
+        }
+    },
+    "groups": {
+        "current": "Current",
+        "create": "Create",
+        "newtitle": "New group",
+        "name": "Name of group",
+        "use": "Use the this group",
+        "remove": "Delete group",
+        "deleteMsg": "Are you sure you want to delete this group? This is irreversible.",
+        "rename": "Rename the group",
+        "download": "Download the missing mods",
+        "ready": "Ready",
+        "unready": "Unready",
+        "copyShareMsg": "Copy the share link",
+        "packShareMsg": "Export as zip",
+        "export": "Export as zip",
+        "exportOptions": {
+            "always_full_path": "Always use the full path",
+            "include_api": "Includes the MAPI",
+            "only_mod_files": "Contains only mods files"
+        }
+    },
+    "mods": {
+        "authors": "Authors",
+        "repo": "Repository",
+        "version": "Version",
+        "dep": "Dependencies",
+        "size": "Size",
+        "depInstall": "Installed",
+        "installDep": "Install dependencies",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "install": "Install",
+        "uninstall": "Uninstall",
+        "requireUpdate": "Updatable",
+        "update": "Update",
+        "use": "Enable",
+        "unuse": "Disable",
+        "desc": "Description",
+        "missingDep": "Not installed",
+        "depOnThis": "The following mods depend on this mod",
+        "tags": {
+            "Gameplay": "Gameplay",
+            "Boss": "Boss",
+            "Cosmetic": "Cosmetic",
+            "Expansion": "Expansion",
+            "Library": "Library",
+            "Utility": "Utility"
+        }
+    },
+    "settings": {
+        "mirror": {
+            "githubmirror": "Github 镜像"
+        },
+        "exp": {
+            "title": "Experimental features",
+            "enable": "Enable experimental features",
+            "warning": "Note: Experimental features are unstable and may be removed in a future release",
+            "applyOnRestart": "Changes to this option take effect after the program is restarted",
+            "restartNow": "Reboot"
+        },
+        "gamepath": {
+            "title": "Game Path",
+            "hkexe": "hollow_knight.exe"
+        },
+        "modsavepath": {
+            "title": "Mods storage directory",
+            "appdir": "Application",
+            "userdir": "User",
+            "gamepath": "Game",
+            "custom": "Custom"
+        }
+    },
+    "api": {
+        "notfound": "Not installed",
+        "found": "Installed",
+        "download": "Download the API",
+        "enable": "启用API",
+        "disable": "禁用API",
+        "notfit": "There is no suitable version of the API for the game",
+        "uninstall": "Uninstall",
+        "install": "Install",
+        "noBackup": "The backup file was not found or is contaminated",
+        "isLatestVer": "Latest",
+        "hasLatestVer": "Updatable",
+        "update": "Update",
+        "uninstallMsg": "Are you sure you want to uninstall the API?"
+    },
+    "tasks": {
+        "failed": "Failed",
+        "done": "Completed",
+        "notification": {
+            "failed": "任务 {taskName} 失败",
+            "done": "已完成任务 {taskName} "
+        }
+    }
+}

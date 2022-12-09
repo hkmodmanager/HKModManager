@@ -23,4 +23,5 @@ export class HKMMSettings {
     public inStore: boolean = false;
     public modgroups: string[] = [];
     public current_modgroup: string = 'default';
+    public language?: string;
 }

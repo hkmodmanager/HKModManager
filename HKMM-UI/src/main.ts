@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import { I18nLanguages } from './lang/langs'
+import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
+
 
 import "bootstrap/dist/js/bootstrap.js"
 import "@/renderer/modManager"
@@ -13,6 +14,12 @@ import viewErrorVue from './view/view-error.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
 import { importGroup } from './renderer/modgroup'
+import { store } from './renderer/settings';
+
+process.addListener("uncaughtException", (ev) => {
+    console.error(ev);
+    ipcRenderer.send("uncagught-exception", ev);
+});
 
 const routes: RouteRecordRaw[] = [
     {
@@ -58,15 +65,29 @@ const route = createRouter({
     routes
 });
 
+searchLanguages();
+
+const lang = store.get('language')?.toLowerCase() ?? navigator.language;
+store.set('language', lang);
+let clang: string;
+console.log(`[I18n]Current language is ${lang}`);
+if(!(clang = SupportedLanguages[lang])) {
+    clang = SupportedLanguages['en-us'];
+    store.set('language', 'en-us');
+    
+    if(!clang) {
+        const l = Object.keys(SupportedLanguages)[0];
+        clang = SupportedLanguages[l];
+        store.set('language', l);
+        console.log(`[I18n]Fallback to ${l}`);
+    } else {
+        console.log(`[I18n]Fallback to en-us`);
+    }
+}
+
 export const i18n = createI18n({
-    locale: 'zh',
-    messages: I18nLanguages
-});
-
-
-window.addEventListener("error", (ev) => {
-    console.error(ev.error);
-    ipcRenderer.send("uncagught-exception", JSON.stringify(ev.error));
+    messages: I18nLanguages,
+    locale: clang
 });
 
 

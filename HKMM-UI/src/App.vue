@@ -41,14 +41,28 @@
       </ul>
       
       <hr />
-      <ul class="nav nav-pnavills">
+      <ul class="nav nav-pnills flex-column">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="javascript:;" @click="openModalLanguage">
+            <i class="bi bi-globe"></i> {{ $t("c_languages") }}
+          </a>
+        </li>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
+        
       </ul>
     </div>
     <!--Body-->
     <div class="bg-secondary text-white flex-grow-1 app-body">
       <router-view></router-view>
     </div>
+    <ModalBox ref="modal_language" :title="$t('c_language_title')">
+      <select class="form-select" ref="modssavepathmode" v-model="current_language">
+        <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n" >{{ l_name }}</option>
+      </select>
+      <template #footer>
+        <button class="btn btn-primary w-100" @click="applyLanguage">{{ $t('c_language_apply') }}</button>
+      </template>
+    </ModalBox>
   </div>
 </template>
 
@@ -86,19 +100,40 @@ import navitem from "./components/nav-item.vue";
 import { getAPIVersion } from '@/renderer/apiManager'
 import { getRequireUpdateModsSync } from "./renderer/modManager";
 import { getModLinks, modlinksCache } from "./renderer/modlinks/modlinks";
+import ModalBox from "./components/modal-box.vue";
+import { AllNamedLanaguages } from "./lang/langs";
+import { store } from "./renderer/settings";
 
 export default defineComponent({
   data: function () {
-    return {};
+    return {
+      current_language: this.$i18n.locale
+    };
   },
   components: {
     navitem,
-  },
+    ModalBox
+},
   methods: {
     toggleNavTasks() {
       const group = this.$refs.tasksNavGroup as Element;
       const col = new Collapse(group);
       col.toggle();
+    },
+    getAllNamedLanguage() {
+      return AllNamedLanaguages;
+    },
+    openModalLanguage() {
+      this.current_language = this.$i18n.locale;
+      const modal = this.$refs.modal_language as any;
+      modal.getModal().show();
+    },
+    applyLanguage() {
+      console.log(this.current_language);
+      if(this.$root) this.$root.$i18n.locale = this.current_language;
+      store.set('language', this.current_language);
+      const modal = this.$refs.modal_language as any;
+      modal.getModal().hide();
     },
     isInstalledAPI() {
       return getAPIVersion() > 0;

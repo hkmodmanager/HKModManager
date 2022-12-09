@@ -47,6 +47,13 @@ module.exports = defineConfig({
                         filter: [
                             "**/*"
                         ]
+                    },
+                    {
+                        from: "./langs",
+                        to: "../langs",
+                        filter: [
+                            "**/*"
+                        ]
                     }
                 ]
                 ,
