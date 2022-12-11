@@ -1,6 +1,6 @@
 
 <template>
-    <div class="form-group p-3">
+    <div class="p-3">
         <label class="form-label">{{ $t("settings.gamepath.title") }}</label>
         <div class="input-group">
             <input type="text" class="form-control" :value="getHKPath()" readonly disabled />

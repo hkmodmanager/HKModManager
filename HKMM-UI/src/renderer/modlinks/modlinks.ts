@@ -1,7 +1,8 @@
 
 import process from 'process';
 import { Parser, ast } from 'tsxml'
-import { downloadText } from '../utils/downloadFile';
+import { isLaterVersion } from '../modManager';
+import { downloadFile, downloadText } from '../utils/downloadFile';
 
 type ContainerNode = ast.ContainerNode<ast.Node>;
 type TextNode = ast.TextNode;
@@ -15,23 +16,48 @@ if (cp == "win32") currentPlatform = "Windows";
 else if (cp == "darwin") currentPlatform = "Mac";
 else if (cp == "linux") currentPlatform = "Linux";
 
-export class ModLinksManifestData {
-    public name: string = "";
-    public desc: string = "";
-    public version: string = "";
-    public link: string = "";
-    public dependencies: string[] = [];
-    public repository: string | undefined;
-    public integrations: string[] = [];
-    public tags: ModTag[] = [];
-    public authors: string[] = [];
+export interface ModLinksManifestData {
+    name: string;
+    desc: string;
+    version: string;
+    link: string;
+    dependencies: string[];
+    repository: string | undefined;
+    integrations: string[];
+    tags: ModTag[];
+    authors: string[];
+    date?: string;
+    isDeleted?: boolean;
 }
 
+export type ModVersionCollection = Record<string, ModLinksManifestData>;
+
+
+export interface ModCollection {
+    mods: Record<string, ModVersionCollection>;
+    latestCommit?: string;
+}
+
+
 export class ModLinksData {
-    public mods: ModLinksManifestData[] = [];
+    public constructor(public mods: ModCollection) { }
     public lastGet: number = 0;
-    public getMod(name: string) {
-        return this.mods.find(x => x.name == name);
+    public getModVersions(name: string): ModVersionCollection | undefined {
+        return this.mods.mods[name];
+    }
+    public getAllModNames() {
+        return Object.keys(this.mods.mods);
+    }
+    public getMod(name: string, version?: string) {
+        const ver = this.getModVersions(name);
+        if (!ver) return undefined;
+        let latest = "0.0.0.0";
+        for (const v in ver) {
+            if (isLaterVersion(v, latest)) {
+                latest = v;
+            }
+        }
+        return ver[latest];
     }
 }
 
@@ -54,68 +80,6 @@ function getCDATANodeText(parent: ContainerNode, tagName: string): string | unde
     return (findXmlNode<ContainerNode>(parent, tagName)?.childNodes[0] as (CDataNode | undefined))?.content;
 }
 
-export async function parseModLinks(content: string): Promise<ModLinksData> {
-    const result = new ModLinksData();
-    const xml = await Parser.parseString(content);
-    const root = xml.getAst().childNodes[1] as ContainerNode;
-    if (!root) throw 0;
-    for (let i = 0; i < root.childNodes.length; i++) {
-        const node = root.childNodes[i];
-        if (node instanceof ast.CommentNode) continue;
-        const manifest = node as ContainerNode;
-        const mod = new ModLinksManifestData();
-        mod.name = getXmlNodeText(manifest, "Name") ?? "";
-        mod.desc = getXmlNodeText(manifest, "Description") ?? "";
-        mod.version = getXmlNodeText(manifest, "Version") ?? "";
-        let tlink = getCDATANodeText(manifest, "Link");
-        if (!tlink) {
-            const nlinks = findXmlNode<ContainerNode>(manifest, "Links");
-            tlink = nlinks ? getCDATANodeText(nlinks, currentPlatform) : undefined;
-            if (!tlink) continue;
-        }
-        mod.link = tlink;
-
-        const depNode = findXmlNode<ContainerNode>(manifest, "Dependencies");
-        if (depNode && !(depNode instanceof ast.SelfClosingNode)) {
-            for (let i2 = 0; i2 < depNode.childNodes.length; i2++) {
-                const dep = (depNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.dependencies.push(dep.content);
-            }
-        }
-
-        mod.repository = getCDATANodeText(manifest, "Repository");
-
-        const integrationsNode = findXmlNode<ContainerNode>(manifest, "Integrations");
-        if (integrationsNode) {
-            for (let i2 = 0; i2 < integrationsNode.childNodes.length; i2++) {
-                const integration = (integrationsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.integrations.push(integration.content);
-            }
-        }
-
-        const tagsNode = findXmlNode<ContainerNode>(manifest, "Tags");
-        if (tagsNode) {
-            for (let i2 = 0; i2 < tagsNode.childNodes.length; i2++) {
-                const tag = (tagsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.tags.push(tag.content as ModTag);
-            }
-        }
-
-        const authorsNode = findXmlNode<ContainerNode>(manifest, "Authors");
-        if (authorsNode) {
-            for (let i2 = 0; i2 < authorsNode.childNodes.length; i2++) {
-                const author = (authorsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.authors.push(author.content as ModTag);
-            }
-        }
-
-        result.mods.push(mod);
-    }
-    result.mods.sort((a, b) => a.name.localeCompare(b.name));
-    result.lastGet = new Date().valueOf();
-    return result;
-}
-
 let promise_get_modlinks: Promise<ModLinksData> | undefined;
 export let modlinksCache: ModLinksData | undefined;
 
@@ -125,15 +89,28 @@ export async function getModLinksFromRepo() {
     }
     if (modlinksCache) {
         const ts = new Date().valueOf() - modlinksCache.lastGet;
-        if (ts < 10000) {
+        if (ts < 3600000) {
             promise_get_modlinks = undefined;
             return modlinksCache;
         }
     }
-    const url = "https://raw.githubusercontent.com/hk-modding/modlinks/main/ModLinks.xml";
-    const content = await downloadText(url, undefined, undefined, false, "ModLinks", "Download");
-    const p = parseModLinks(content);
-    modlinksCache = await p;
+    const url = "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json";
+    const content = await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download");
+    modlinksCache = new ModLinksData(content.data);
+    modlinksCache.lastGet = new Date().valueOf();
+    for (const key in content.data.mods) {
+        const mv = content.data.mods[key];
+        for (const ver in mv) {
+            const v = mv[ver];
+            if (!v.repository) {
+                const url = new URL(v.link);
+                if (url.hostname == 'github.com') {
+                    url.pathname = url.pathname.substring(0, url.pathname.indexOf('/releases/download/'));
+                    v.repository = url.toString();
+                }
+            }
+        }
+    }
     promise_get_modlinks = undefined;
     return modlinksCache;
 }
@@ -175,7 +152,7 @@ export async function getAPIInfoFromRepo() {
     if (!link) throw new Error("Invalid ApiLinks.xml");
 
     const files = findXmlNode<ContainerNode>(manifest, "Files");
-    if(!files) throw new Error("Invalid ApiLinks.xml");
+    if (!files) throw new Error("Invalid ApiLinks.xml");
     for (const node of files.childNodes) {
         const text = (node as ast.ContainerNode<TextNode>).childNodes[0].content;
         result.files.push(text);
@@ -204,7 +181,7 @@ export async function getModLinkMod(name: string) {
 }
 
 export function getModLinkModSync(name: string) {
-    if(!modlinksCache) return undefined;
+    if (!modlinksCache) return undefined;
     return modlinksCache.getMod(name);
 }
 

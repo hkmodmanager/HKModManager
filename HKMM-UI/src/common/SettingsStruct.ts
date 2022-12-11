@@ -13,6 +13,8 @@ export class MirrorGroup {
     public items: MirrorItem[] = []
 }
 
+export type SettingOptions = 'SHOW_DELETED_MODS';
+
 export class HKMMSettings {
     public mirror_github = new MirrorGroup();
     public mirror_githubapi = new MirrorGroup();
@@ -24,4 +26,5 @@ export class HKMMSettings {
     public modgroups: string[] = [];
     public current_modgroup: string = 'default';
     public language?: string = '#';
+    public options: SettingOptions[] = [];
 }

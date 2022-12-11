@@ -3,7 +3,7 @@
     </div>
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
-            <CModsItem v-if="mod.isInstalled()" :mod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
+            <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
                 :is-local="true"></CModsItem>
         </div>
     </div>

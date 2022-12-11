@@ -9,6 +9,8 @@
     "c_languages": "Language",
     "c_language_title": "Language",
     "c_language_apply": "Apply",
+    "hasUpdate": "A new version is available",
+    "downloadUpdate": "Download the update",
     "error": {
         "missingView": "Missing page",
         "hkcheck": {
@@ -73,6 +75,8 @@
         "desc": "Description",
         "missingDep": "Not installed",
         "depOnThis": "The following mods depend on this mod",
+        "isDeleted": "Deprecated",
+        "noSource": "No download source",
         "tags": {
             "Gameplay": "Gameplay",
             "Boss": "Boss",
@@ -103,6 +107,9 @@
             "userdir": "User",
             "gamepath": "Game",
             "custom": "Custom"
+        },
+        "options": {
+            "show_deleted_mods": "Displays mods that have been deleted by the author"
         }
     },
     "api": {

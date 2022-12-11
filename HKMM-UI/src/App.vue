@@ -14,11 +14,12 @@
       <ul class="nav nav-pnavills flex-column mb-auto">
         <navitem viewpath="/localmods/all" compare-path><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
         <div class="list-group nav-list">
-          <navitem viewpath="/localmods/requireUpdate" textcolor="warning" compare-path v-if="isRequireUpdateMods()">&nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
+          <navitem viewpath="/localmods/requireUpdate" textcolor="warning" compare-path v-if="isRequireUpdateMods()">
+            &nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
         </div>
-        
+
         <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
-        
+
         <li class="nav-item">
           <a class="nav-link text-white" @click="toggleNavTasks()" href="javascript:;">
             <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
@@ -35,11 +36,12 @@
 
           </div>
         </li>
-        
+
         <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
-        <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledAPI()"></i></navitem>
+        <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i
+            class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledAPI()"></i></navitem>
       </ul>
-      
+
       <hr />
       <ul class="nav nav-pnills flex-column">
         <li class="nav-item">
@@ -48,7 +50,7 @@
           </a>
         </li>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
-        
+
       </ul>
     </div>
     <!--Body-->
@@ -57,7 +59,7 @@
     </div>
     <ModalBox ref="modal_language" :title="$t('c_language_title')">
       <select class="form-select" ref="modssavepathmode" v-model="current_language">
-        <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n" >{{ l_name }}</option>
+        <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n">{{ l_name }}</option>
       </select>
       <template #footer>
         <button class="btn btn-primary w-100" @click="applyLanguage">{{ $t('c_language_apply') }}</button>
@@ -103,17 +105,20 @@ import { getModLinks, modlinksCache } from "./renderer/modlinks/modlinks";
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
 import { store } from "./renderer/settings";
+import { checkUpdate, installUpdate } from "./renderer/updater";
+import { remote } from "electron";
 
 export default defineComponent({
   data: function () {
     return {
-      current_language: this.$i18n.locale
+      current_language: this.$i18n.locale,
+      hasUpdate: false
     };
   },
   components: {
     navitem,
     ModalBox
-},
+  },
   methods: {
     toggleNavTasks() {
       const group = this.$refs.tasksNavGroup as Element;
@@ -130,7 +135,7 @@ export default defineComponent({
     },
     applyLanguage() {
       console.log(this.current_language);
-      if(this.$root) this.$root.$i18n.locale = this.current_language;
+      if (this.$root) this.$root.$i18n.locale = this.current_language;
       store.set('language', this.current_language);
       const modal = this.$refs.modal_language as any;
       modal.getModal().hide();
@@ -143,18 +148,32 @@ export default defineComponent({
     }
   },
   updated() {
-    if(!modlinksCache) {
+    if (!modlinksCache) {
       getModLinks().then(() => {
         this.$forceUpdate();
       });
     }
   },
   mounted() {
-    if(!modlinksCache) {
+    if (!modlinksCache) {
       getModLinks().then(() => {
         this.$forceUpdate();
       });
     }
+    checkUpdate().then((val) => {
+      if (val) {
+        const result = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+          message: `${this.$t('hasUpdate')} (v${remote.app.getVersion()} -> v${val[1]})`,
+          type: 'question',
+          buttons: [this.$t('downloadUpdate'), 'Cancel'],
+          cancelId: 1
+        });
+        if(result == 0) {
+          installUpdate();
+        }
+        this.$forceUpdate();
+      }
+    });
   }
 });
 </script>

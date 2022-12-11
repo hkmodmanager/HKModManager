@@ -11,6 +11,8 @@
     "c_languages": "语言",
     "c_language_title": "更换语言",
     "c_language_apply": "确定",
+    "hasUpdate": "有新版本可用",
+    "downloadUpdate": "下载更新",
     "error": {
         "missingView": "页面丢失",
         "hkcheck": {
@@ -75,6 +77,8 @@
         "desc": "描述",
         "missingDep": "未安装",
         "depOnThis": "以下Mods依赖于该Mod",
+        "isDeleted": "已废弃",
+        "noSource": "无下载源",
         "tags": {
             "Gameplay": "Gameplay",
             "Boss": "Boss",
@@ -85,6 +89,7 @@
         }
     },
     "settings": {
+        "checkupdate": "检查更新",
         "mirror": {
             "githubmirror": "Github 镜像"
         },
@@ -109,6 +114,9 @@
             "userdir": "用户目录",
             "gamepath": "游戏目录",
             "custom": "自定义"
+        },
+        "options": {
+            "show_deleted_mods": "显示已废弃的Mods"
         }
     },
     "api": {

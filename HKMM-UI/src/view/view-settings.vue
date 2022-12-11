@@ -1,7 +1,7 @@
 <template>
   <form>
     <HkpathChange></HkpathChange>
-    <div class="form-group p-3">
+    <div class="p-3">
       <label class="form-label">{{ $t("settings.modsavepath.title") }}</label>
       <select class="form-select" @change="changeModsSavePathMode()" ref="modssavepathmode">
         <option value="appdir">{{ $t("settings.modsavepath.appdir") }}</option>
@@ -16,11 +16,11 @@
     </div>
     <!--Exp Mode-->
     <hr />
-    <div class="form-group p-3">
+    <div class="p-3">
       <h3>
         {{ $t("settings.exp.title") }}
       </h3>
-      <div class="form-group">
+      <div>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" @change="changeExpMode" ref="expModeSwitch" />
           <label class="form-check-label">{{ $t("settings.exp.enable") }}</label>
@@ -34,10 +34,17 @@
         </div>
       </div>
     </div>
-
+    <RequireExpmode>
+      <div class="p-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS"/>
+          <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
+        </div>
+      </div>
+    </RequireExpmode>
     <!--Mirror-->
     <RequireExpmode v-if="false">
-      <div class="form-group p-3">
+      <div class="p-3">
         <div class="form-group">
           <label class="form-label">{{
               $t("settings.mirror.githubmirror")
@@ -76,6 +83,16 @@ export default defineComponent({
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.UserDir) select.value = "userdir";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Custom) select.value = "custom";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Gamepath) select.value = "gamepath";
+  },
+  data() {
+    return {
+      options: store.get('options', [])
+    }
+  },
+  watch: {
+    options(n) {
+      store.set('options', n);
+    }
   },
   methods: {
     changeExpMode() {

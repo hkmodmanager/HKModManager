@@ -1,5 +1,5 @@
 
-import { HKMMSettings } from '@/common/SettingsStruct';
+import { HKMMSettings, SettingOptions } from '@/common/SettingsStruct';
 import Store from 'electron-store';
 
 
@@ -39,4 +39,12 @@ function GetSettingsLocal() {
     if(!store.store.current_modgroup) {
         store.set('current_modgroup', 'default');
     }
+    if(!store.store.options) {
+        store.set('options', []);
+    }
 })();
+
+export function hasOption(name: SettingOptions) {
+    const options = store.get('options');
+    return options.includes(name);
+}

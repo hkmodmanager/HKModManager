@@ -17,6 +17,12 @@
                     <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
                     </span>
+                    <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
+                        {{ $t("mods.isDeleted") }}
+                    </span>
+                    <span v-if="!modSize && modSizeGet" class="badge bg-danger mt-2">
+                        {{ $t("mods.noSource") }}
+                    </span>
 
                     <!--Tags-->
                     <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
@@ -31,7 +37,7 @@
                 <!--accordion body-->
                 <div>
                     <div class="d-flex w-100">
-                        <button class="btn btn-primary flex-grow-1" @click="installMod" :disabled="isDownload"
+                        <button class="btn btn-primary flex-grow-1" @click="installMod" :disabled="isDownload || !modSize"
                             v-if="!isInstallMod(mod?.name as string)">{{ $t("mods.install") }}</button>
                         <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
@@ -246,17 +252,19 @@ export default defineComponent({
         }
     },
     props: {
-        mod: ModLinksManifestData,
+        inmod: Object,
         isLocal: Boolean,
         disableUpdate: Boolean
     },
     data() {
         return {
+            mod: this.inmod as ModLinksManifestData,
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
             depOnThis: getSubMods(this.mod?.name ?? ""),
             isDownload: false,
             modlinkCache: modlinksCache,
-            modSize: undefined as (undefined | number)
+            modSize: undefined as (undefined | number),
+            modSizeGet: false
         }
     },
     beforeUpdate() {
@@ -270,6 +278,10 @@ export default defineComponent({
 
             ModSizeCache.getSize(val.getMod(this.mod?.name as string)?.link as string).then((val) => {
                 this.modSize = val;
+                this.modSizeGet = true;
+                this.$forceUpdate();
+            }).catch(() => {
+                this.modSizeGet = true;
                 this.$forceUpdate();
             });
         });

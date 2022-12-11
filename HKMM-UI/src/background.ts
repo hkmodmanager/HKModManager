@@ -5,6 +5,7 @@ import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
 import { readFile } from 'fs';
+import { spawn } from 'child_process';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
@@ -102,24 +103,10 @@ async function createWindow() {
   }
 }
 
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-})
 
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-})
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+const startAfterQuit: Set<string> = new Set<string>();
+
 app.on('ready', async () => {
   registerAppScheme()
   ipcMain.once("renderer-init", () => {
@@ -129,8 +116,24 @@ app.on('ready', async () => {
     dialog.showErrorBox("Uncaught Excpetion", ee);
     console.log(ee)
   });
+  ipcMain.on('update-setup-done', (ev, path) => {
+    startAfterQuit.add(path);
+  });
   createWindow();
+});
+
+
+app.on('window-all-closed', () => {
+  for (const s of startAfterQuit.values()) {
+    spawn(s, {
+      shell: false,
+      detached: true
+    });
+    console.log(s);
+  }
+  app.quit();
 })
+
 
 app.on("second-instance", (ev, argv, wd) => {
   parseCmd(argv);
