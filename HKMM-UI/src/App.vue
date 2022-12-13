@@ -49,6 +49,9 @@
             <i class="bi bi-globe"></i> {{ $t("c_languages") }}
           </a>
         </li>
+        <RequireExpmode>
+          <navitem viewpath="/plugins"><i class="bi bi-puzzle"></i> {{ $t("tabs.plugins") }}</navitem>
+        </RequireExpmode>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
 
       </ul>
@@ -108,6 +111,9 @@ import { store } from "./renderer/settings";
 import { checkUpdate, installUpdate } from "./renderer/updater";
 import { remote } from "electron";
 
+import "./renderer/plugins"
+import RequireExpmode from "./components/require-expmode.vue";
+
 export default defineComponent({
   data: function () {
     return {
@@ -117,7 +123,8 @@ export default defineComponent({
   },
   components: {
     navitem,
-    ModalBox
+    ModalBox,
+    RequireExpmode
   },
   methods: {
     toggleNavTasks() {
@@ -168,7 +175,7 @@ export default defineComponent({
           buttons: [this.$t('downloadUpdate'), 'Cancel'],
           cancelId: 1
         });
-        if(result == 0) {
+        if (result == 0) {
           installUpdate();
         }
         this.$forceUpdate();

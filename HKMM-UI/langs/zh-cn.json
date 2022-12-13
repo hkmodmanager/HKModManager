@@ -22,6 +22,9 @@
             "aff": "无法自动寻找游戏文件"
         }
     },
+    "plugins": {
+        "byAuthor": "内置"
+    },
     "tabs": {
         "allmods": "下载Mods",
         "localmods": "本地Mods",
@@ -29,6 +32,7 @@
         "settings": "设置",
         "modgroups": "Mods分组",
         "api": "MAPI管理",
+        "plugins": "插件管理",
         "tasks": {
             "title": "任务",
             "all": "全部",

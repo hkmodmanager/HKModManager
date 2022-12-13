@@ -13,6 +13,9 @@
     "useDefineForClassFields": true,
     "downlevelIteration": true,
     "sourceMap": true,
+    "declaration": true,
+    "declarationDir": "../hkmm-plugin-types",
+    "emitDeclarationOnly": true,
     "baseUrl": ".",
     "types": [
       "webpack-env"
@@ -37,6 +40,8 @@
     "tests/**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/electron",
+    "src/background.ts"
   ]
 }

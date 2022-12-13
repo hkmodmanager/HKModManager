@@ -2,14 +2,13 @@ import { remote } from "electron";
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, stat, statSync, symlinkSync, writeFileSync } from "fs";
 import { dirname, join, parse } from "path";
 import { getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
-import { store } from "./settings";
+import { store, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadFile, downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
 
 import "./apiManager";
-import { ModSavePathMode } from "@/common/SettingsStruct";
 import { copySync } from "fs-extra";
 import { installGameInject } from "./gameinject";
 import { getDownloader } from "./mods/customDownloader";

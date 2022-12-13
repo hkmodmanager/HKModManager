@@ -59,13 +59,12 @@
 
 <script lang="ts">
 import RequireExpmode from "@/components/require-expmode.vue";
-import { store } from "@/renderer/settings";
+import { store, ModSavePathMode } from "@/renderer/settings";
 import { defineComponent, InputHTMLAttributes, SelectHTMLAttributes } from "vue";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
 import { remote } from "electron";
 import HkpathChange from "@/components/hkpath-change.vue";
-import { ModSavePathMode } from "@/common/SettingsStruct";
 import { join } from "path";
 
 export default defineComponent({

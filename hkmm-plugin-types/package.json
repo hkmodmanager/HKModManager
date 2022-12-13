@@ -1,0 +1,7 @@
+{
+  "name": "hkmm-types",
+  "version": "1.0.0",
+  "description": "",
+  "types": "./renderer/plugins.d.ts",
+  "repository": "github:HKLab/HKModManager"
+}

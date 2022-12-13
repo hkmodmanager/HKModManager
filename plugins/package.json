@@ -1,0 +1,11 @@
+{
+  "name": "hkmm-plugins",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^18.11.14",
+    "bootstrap": "^5.2.3",
+    "hkmm-types": "file:../hkmm-plugin-types",
+    "vue": "^3.2.45"
+  }
+}

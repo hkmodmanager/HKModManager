@@ -50,6 +50,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./view/view-api.vue')
     },
     {
+        name: 'plugins',
+        path: '/plugins',
+        component: () => import('./view/view-plugins.vue')
+    },
+    {
         path: '/:pathMatch(.*)*',
         component: viewErrorVue
     }

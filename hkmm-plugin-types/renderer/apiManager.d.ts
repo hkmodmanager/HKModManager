@@ -1,0 +1,15 @@
+import { ModdingAPIData } from './modlinks/modlinks';
+export declare function getAPIPath(root?: string): string;
+export declare function getAPIVersion(path?: string): number;
+export declare function installedAPI(): boolean;
+export declare function getGameVersion(path?: string): string;
+export declare function findHKPath(): string;
+export declare function matchAPI(api: string): boolean;
+export declare function getLatestIsMatch(): Promise<boolean>;
+export declare function getLatestIsMatchSync(apiInfo?: ModdingAPIData): boolean | undefined;
+export declare function checkGameFile(root: string): boolean | string;
+export declare function copyBackup(): boolean;
+export declare function resotreBackup(): void;
+export declare function getBackupPath(): string;
+export declare function isVaildBackup(): boolean;
+export declare function downloadAPI(): Promise<void>;

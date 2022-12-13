@@ -30,8 +30,7 @@
 </style>
 
 <script lang="ts">
-import {  MirrorGroup, MirrorItem } from '@/common/SettingsStruct';
-import { store } from '@/renderer/settings';
+import { store, MirrorGroup, MirrorItem  } from '@/renderer/settings';
 import { defineComponent } from 'vue';
 
 
