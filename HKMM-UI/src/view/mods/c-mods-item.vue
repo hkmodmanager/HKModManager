@@ -20,7 +20,7 @@
                     <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
                         {{ $t("mods.isDeleted") }}
                     </span>
-                    <span v-if="!modSize && modSizeGet" class="badge bg-danger mt-2">
+                    <span v-if="(modSize == undefined) && modSizeGet" class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
                     </span>
 
@@ -37,7 +37,8 @@
                 <!--accordion body-->
                 <div>
                     <div class="d-flex w-100">
-                        <button class="btn btn-primary flex-grow-1" @click="installMod" :disabled="isDownload || !modSize"
+                        <button class="btn btn-primary flex-grow-1" @click="installMod"
+                            :disabled="isDownload || (modSize == undefined)"
                             v-if="!isInstallMod(mod?.name as string)">{{ $t("mods.install") }}</button>
                         <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
@@ -81,6 +82,10 @@
                         <a href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
                     </div>
                     <div>
+                        <span>{{ $t("mods.publishTime") }}:</span>
+                        <span>{{ getModPublishTime(mod).toLocaleString() }}</span>
+                    </div>
+                    <div>
                         <hr />
                         <h5>{{ $t("mods.desc") }}</h5>
                         <div>
@@ -90,18 +95,31 @@
                     <div v-if="(mod?.dependencies?.length ?? 0) > 0">
                         <hr />
                         <h5>{{ $t("mods.dep") }}</h5>
-                        <h6 v-for="(dep, i) in mod?.dependencies" :key="i">
-                            {{ dep }}
-                            <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success">
-                                ({{ $t("mods.depInstall") }})
-                            </span>
-                            <span v-if="!isInstallMod(dep) && isLocal" class="text-danger">
-                                ({{ $t("mods.missingDep") }})
-                            </span>
-                            <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger">
-                                ({{ $t("mods.disabled") }})
-                            </span>
-                        </h6>
+                        <template v-if="isLocal">
+                            <h6 v-for="(dep, i) in mod?.dependencies" :key="i">
+                                {{ dep }}
+                                <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success">
+                                    ({{ $t("mods.depInstall") }})
+                                </span>
+                                <span v-if="!isInstallMod(dep) && isLocal" class="text-danger">
+                                    ({{ $t("mods.missingDep") }})
+                                </span>
+                                <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger">
+                                    ({{ $t("mods.disabled") }})
+                                </span>
+                            </h6>
+                        </template>
+                        <template v-if="!isLocal">
+                            <h6 v-for="(dep, i) in getLowestDep(mod)" :key="i">
+                                {{ dep.name }} (>= {{ dep.version }})
+                                <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-success">
+                                    ({{ $t("mods.requireUpdate") }})
+                                </span>
+                                <span v-if="isInstallMod2(dep.name, dep.version)" class="text-success">
+                                    ({{ $t("mods.depInstall") }})
+                                </span>
+                            </h6>
+                        </template>
                     </div>
 
                     <div v-if="(mod?.authors?.length ?? 0) > 0">
@@ -137,7 +155,7 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks';
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep } from '@/renderer/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
@@ -155,7 +173,7 @@ class ModSizeCache {
         const ct = new Date().valueOf();
 
         let c = ModSizeCache.cache[url] ?? new ModSizeCache();
-        if (ct - c.time > 1000 * 60) c = new ModSizeCache();
+        if (ct - c.time > 1000 * 60 * 60 /* 1 Hour */) c = new ModSizeCache();
         ModSizeCache.cache[url] = c;
         if (c.size) return c.size;
         if (c.promise) return await c.promise;
@@ -180,6 +198,14 @@ export default defineComponent({
         },
         isInstallMod(name: string) {
             return getLocalMod(name)?.isInstalled() ?? false;
+        },
+        isInstallMod2(name: string, minver: string) {
+            const mod = getLocalMod(name);
+            if(!mod) return false;
+            const lv = mod.getLatestVersion();
+            if(!lv) return false;
+            if(isLaterVersion(lv, minver)) return true;
+            return lv == minver;
         },
         canEnable(name: string) {
             const mg = getLocalMod(name);
@@ -232,11 +258,18 @@ export default defineComponent({
             }
             this.$forceUpdate();
         },
+        getModPublishTime(mod?: ModLinksManifestData) {
+            return getModDate(mod?.date ?? '0-0-0-0T0:0:0Z');
+        },
+        getLowestDep(mod?: ModLinksManifestData) {
+            if (!mod) return [];
+            return getLowestDep(mod) ?? [];
+        },
         async updateMod() {
-            
+
             if (this.mod === undefined || this.disableUpdate) return;
             const ml = await getModLinkMod(this.mod.name);
-            if(!ml) return;
+            if (!ml) return;
             const group = getOrAddLocalMod(this.mod.name);
             group.disableAll();
             await group.installNew(ml);

@@ -1,5 +1,6 @@
 
 import Store from 'electron-store';
+import { PluginStatus } from './plugins';
 
 export enum ModSavePathMode {
     AppDir,
@@ -30,6 +31,8 @@ export class HKMMSettings {
     public current_modgroup: string = 'default';
     public language?: string = '#';
     public options: SettingOptions[] = [];
+    public plugins: string[] = [];
+    public pluginsStatus: Record<string, PluginStatus> = {};
 }
 
 
@@ -70,6 +73,12 @@ function GetSettingsLocal() {
     }
     if(!store.store.options) {
         store.set('options', []);
+    }
+    if(!store.store.plugins) {
+        store.set('plugins', []);
+    }
+    if(!store.store.pluginsStatus) {
+        store.set('pluginsStatus', {});
     }
 })();
 

@@ -8,6 +8,17 @@ import env from '@babel/preset-env'
 import ts from '@babel/preset-typescript'
 import { remote } from 'electron';
 import { createHash } from 'crypto';
+import { store } from './settings';
+
+const exportLibs: Record<string, () => any> = {
+    'vue': () => require('vue'),
+    'bootstrap': () => require('bootstrap'),
+    'vue-router': () => require('vue-router')
+};
+
+const internalPlugins: Record<string, any> = {
+    'better-custom-knight-downloader': require('./plugins/better-custom-knight-downloader')
+};
 
 const w_any = window as any;
 const orig_any = w_any.node_require ?? eval('window.require');
@@ -23,11 +34,40 @@ export function getCompileCacheDir() {
     return result;
 }
 
+export class PluginStatus {
+    enabled: boolean = true;
+}
+
+export class PluginContext {
+    public constructor(public status: PluginStatus, private pluginName: string) {
+
+    }
+    public save() {
+        const cstatus = store.store.pluginsStatus;
+        cstatus[this.pluginName] = this.status;
+        store.set('pluginsStatus', cstatus);
+    }
+    public setActive(a?: boolean) {
+        if (this.status.enabled === a) return;
+        if (a != undefined) this.status.enabled = a;
+        this.save();
+        console.log(`${this.status.enabled ? 'Enable' : 'Disable'} plugin: ${this.pluginName}`);
+        const plugin = findPlugin(this.pluginName);
+        if (!plugin) return;
+        if (this.status.enabled) {
+            plugin.enable();
+        } else {
+            plugin.disable();
+        }
+    }
+}
+
 export interface IHKMMPlugin {
     name: string;
+    displayName: string;
     enable(): void;
     disable(): void;
-    desc: string;
+    context: PluginContext;
     author: string;
 }
 
@@ -44,10 +84,11 @@ function _require(name: string) {
         const p = './src/' + mname + ".ts";
         name = p;
     }
-
+    console.log(name);
     try {
         return __webpack_require__(name);
     } catch (e) {
+        console.log(e);
         return orig_any(name);
     }
 
@@ -58,10 +99,14 @@ export function plugin_require(name: string, dir: string) {
         name = name.substring(2);
     } else if (name.startsWith('./renderer/')) {
         name = join('hkmm/', name.substring(11));
-    }
-    if (name.startsWith('.')) {
+    } else if (name.startsWith('.')) {
         name = node_require.resolve(join(dir, name));
         name = getPluginCache(name);
+    } else {
+        const lib = exportLibs[name.toLowerCase()];
+        if (lib) {
+            return lib();
+        }
     }
 
     console.log(name);
@@ -87,7 +132,6 @@ function buildPluginCache(path: string, ocode: string | undefined, cache: string
         return window.plugins.plugin_require(m, __dirname);
     };\n
     ` + code;
-    console.log(code);
     writeFileSync(cache, code ?? '', 'utf-8');
 }
 
@@ -107,17 +151,50 @@ export function findPlugin(name: string) {
     return allPlugins.find(x => x.name === name);
 }
 
-export function loadPlugin(path: string) {
-    if (!path.startsWith('hkmm/plugins/')) path = getPluginCache(path);
-    const plugin = _require(path);
+export function getPluginStatus(name: string) {
+    let result = store.store.pluginsStatus[name];
+    if (!result) {
+        result = new PluginStatus();
+        const status = store.store.pluginsStatus;
+        status[name] = result;
+        store.set('pluginsStatus', status);
+    }
+    return result;
+}
+
+export function loadPlugin(path: string | any) {
+    let plugin: any;
+    if (typeof path === 'string') {
+        if (!path.startsWith('hkmm/renderer/plugins/')) path = getPluginCache(path);
+        plugin = _require(path);
+    } else {
+        plugin = path;
+    }
     const ec = plugin.default;
-    if(!ec) throw new Error('Invalid plugin');
-    const inst: IHKMMPlugin = new ec();
-    if(findPlugin(inst.name)) throw new Error(`Load plugin ${inst.name} repeatedly`);
+    const pname = plugin.pluginName;
+    if (!ec || !pname) throw new Error('Invalid plugin');
+    if (findPlugin(pname)) throw new Error(`Load plugin ${pname} repeatedly`);
+    const status = getPluginStatus(pname);
+    const context = new PluginContext(status, pname);
+    const inst: IHKMMPlugin = new ec(context);
+    inst.name = pname;
+    inst.context = context;
+
     allPlugins.push(inst);
-    inst.enable();
+
+    if (status.enabled) context.setActive();
     return inst;
 }
 
 //@ts-ignore
 w_any.plugins = __webpack_exports__;
+
+(function () {
+    if(!store.store.enabled_exp_mode) return;
+    console.log('Experimental feature: Plugins');
+    for (const key in internalPlugins) {
+        loadPlugin(internalPlugins[key]);
+    }
+})();
+
+

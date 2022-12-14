@@ -1,9 +1,9 @@
 
-import { getFileSize, downloadRaw } from 'hkmm-types/renderer/utils/downloadFile'
-import { ICustomDownloader, downloaders } from 'hkmm-types/renderer/mods/customDownloader'
-import { IHKMMPlugin, PluginContext, PluginStatus } from 'hkmm-types'
-import { ModLinksManifestData } from 'hkmm-types/renderer/modlinks/modlinks'
-import { TaskInfo } from 'hkmm-types/renderer/taskManager'
+import { getFileSize, downloadRaw } from '@/renderer/utils/downloadFile'
+import { ICustomDownloader, downloaders } from '@/renderer/mods/customDownloader'
+import { IHKMMPlugin, PluginContext, PluginStatus } from '@/renderer/plugins'
+import { ModLinksManifestData } from '@/renderer/modlinks/modlinks'
+import { TaskInfo } from '@/renderer/taskManager'
 import { join } from 'path';
 
 class Downloader implements ICustomDownloader {
@@ -37,11 +37,13 @@ export default class PluginMain implements IHKMMPlugin {
 
     }
     public enable(): void {
-        console.log(this.context);
         downloaders.push(this.ck_downloader);
     }
     public disable(): void {
-        
+        const di = downloaders.indexOf(this.ck_downloader);
+        if(di > 0) {
+            delete downloaders[di];
+        }
     }
 }
 

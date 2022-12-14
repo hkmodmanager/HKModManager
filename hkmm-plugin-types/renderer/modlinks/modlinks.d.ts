@@ -40,3 +40,5 @@ export declare function getAPIInfoFromRepo(): Promise<ModdingAPIData>;
 export declare function getAPIInfo(): Promise<ModdingAPIData>;
 export declare function getModLinkMod(name: string): Promise<ModLinksManifestData | undefined>;
 export declare function getModLinkModSync(name: string): ModLinksManifestData | undefined;
+export declare function getModDate(date: string): Date;
+export declare function getLowestDep(mod: ModLinksManifestData): ModLinksManifestData[] | undefined;

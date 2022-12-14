@@ -185,3 +185,42 @@ export function getModLinkModSync(name: string) {
     return modlinksCache.getMod(name);
 }
 
+export function getModDate(date: string) {
+    const parts = date.split('T');
+    const day = parts[0].split('-');
+    const time = parts[1].replaceAll('Z', '').split(':');
+    const d = new Date(Number.parseInt(day[0]), Number.parseInt(day[1]) - 1, Number.parseInt(day[2]),
+        Number.parseInt(time[0]), Number.parseInt(time[1]), Number.parseInt(time[2])
+    );
+    return d;
+}
+
+export function getLowestDep(mod: ModLinksManifestData) {
+    if (!modlinksCache || !mod.date) return undefined;
+    const moddate = getModDate(mod.date).valueOf();
+    const dep: ModLinksManifestData[] = [];
+    for (const d of mod.dependencies) {
+        const dm = modlinksCache.getModVersions(d);
+        if(!dm) continue;
+        let lowestDate: number = undefined as any;
+        let lowestMod: ModLinksManifestData =  undefined as any;
+        for (const key in dm) {
+            const ver = dm[key];
+            const vd = getModDate(ver.date ?? '');
+            const ss = moddate - vd.valueOf();
+            if(!lowestDate || !lowestMod) {
+                lowestDate = ss;
+                lowestMod = ver;
+                continue;
+            }
+            if(ss < 0) continue;
+            if(lowestDate > ss || lowestDate < 0) {
+                lowestDate = ss;
+                lowestMod = ver;
+            }
+        }
+        dep.push(lowestMod);
+    }
+    return dep;
+}
+

@@ -74,7 +74,7 @@
         "disabled": "未启用",
         "install": "安装",
         "uninstall": "卸载",
-        "requireUpdate": "有更新",
+        "requireUpdate": "需要更新",
         "update": "更新",
         "use": "启用",
         "unuse": "禁用",
@@ -83,6 +83,7 @@
         "depOnThis": "以下Mods依赖于该Mod",
         "isDeleted": "已废弃",
         "noSource": "无下载源",
+        "publishTime": "发布时间",
         "tags": {
             "Gameplay": "Gameplay",
             "Boss": "Boss",

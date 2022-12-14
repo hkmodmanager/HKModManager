@@ -12,7 +12,7 @@ export const downloaders: ICustomDownloader[] = [
 
 export async function getDownloader(mod: ModLinksManifestData) {
     for (const v of downloaders) {
-        if(await v.use(mod)) {
+        if(await v?.use(mod)) {
             return v;
         }
     }

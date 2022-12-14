@@ -1,4 +1,5 @@
 import Store from 'electron-store';
+import { PluginStatus } from './plugins';
 export declare enum ModSavePathMode {
     AppDir = 0,
     UserDir = 1,
@@ -24,6 +25,8 @@ export declare class HKMMSettings {
     current_modgroup: string;
     language?: string;
     options: SettingOptions[];
+    plugins: string[];
+    pluginsStatus: Record<string, PluginStatus>;
 }
 export declare const store: Store<HKMMSettings>;
 export declare function hasOption(name: SettingOptions): boolean;
