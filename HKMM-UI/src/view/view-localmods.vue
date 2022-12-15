@@ -28,7 +28,6 @@ export default defineComponent({
                     result.push(m);
                 }
             }
-            console.log(result);
             return result;
         },
         refresh() {

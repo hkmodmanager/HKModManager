@@ -27,6 +27,7 @@
         "settings": "Settings",
         "modgroups": "Mods Group",
         "api": "MAPI",
+        "plugins": "Plugins",
         "tasks": {
             "title": "Tasks",
             "all": "All",
@@ -68,7 +69,7 @@
         "disabled": "Disabled",
         "install": "Install",
         "uninstall": "Uninstall",
-        "requireUpdate": "Updatable",
+        "requireUpdate": "Require Update",
         "update": "Update",
         "use": "Enable",
         "unuse": "Disable",
@@ -77,6 +78,7 @@
         "depOnThis": "The following mods depend on this mod",
         "isDeleted": "Deprecated",
         "noSource": "No download source",
+        "publishTime": "Publish",
         "tags": {
             "Gameplay": "Gameplay",
             "Boss": "Boss",

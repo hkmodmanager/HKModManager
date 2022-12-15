@@ -7,7 +7,7 @@ import { dirname, join, parse } from "path";
 import { URL } from "url";
 import { copyBackup, getAPIPath, getAPIVersion } from "./apiManager";
 import { apiInfoCache, getModLinkMod, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, LocalModInfo, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 import { store } from "./settings";
 
 export const metadata_name = '[hkmm-metadata].json';
@@ -117,11 +117,7 @@ export class ModGroupController {
         const modset = new Set<string>();
         const mods: LocalModInfo[] = [];
         function addMod(mod: LocalModInstance) {
-            if (modset.has(mod.info.name)) return;
-            modset.add(mod.info.name);
-            mods.push(mod.info);
-            let files: string[] = [];
-            function fedir(p: string, ol: string[], op: string) {
+            function fedir(p: string, ol: string[] = [], op: string = '') {
                 for (const file of readdirSync(p, { encoding: 'utf8' })) {
                     const stats = statSync(join(p, file));
                     if (stats.isFile() && file !== modversionFileName) {
@@ -130,16 +126,29 @@ export class ModGroupController {
                         fedir(join(p, file), ol, join(op, file));
                     }
                 }
+                return ol;
             }
-            if (options?.onlyModFiles) {
-                files = mod.info.files;
-            } else {
-                fedir(mod.info.path, files, '');
-            }
+            if (modset.has(mod.info.name)) return;
+            modset.add(mod.info.name);
+            mods.push(mod.info);
+            let files: string[] = [];
+            files = mod.info.files;
             for (const f of files) {
                 output.addEntry(join(mod.info.path, f), {
                     relativePath: join(moddir, mod.info.name, f)
                 });
+            }
+            if (!options?.onlyModFiles) {
+                const mr = getRealModPath(mod.info.name);
+                console.log(mr);
+                for (const file of fedir(mr)) {
+                    if (file == modversionFileName || mod.info.files.includes(file)) continue;
+                    console.log(join(mr, file));
+                    output.addEntry(join(mr, file), {
+                        relativePath: join(moddir, mod.info.name, file)
+                    });
+                }
+
             }
             for (const dm of mod.info.modinfo.dependencies) {
                 const g = getLocalMod(dm);
@@ -354,13 +363,13 @@ export async function importFromZip(source: string | Buffer) {
         for (const mod of metadata.mods) {
             getOrAddLocalMod(mod.name).installLocalMod(mod, join(od, mod.path));
         }
-        if(metadata.api) {
-            if(getAPIVersion() < metadata.api.version) {
+        if (metadata.api) {
+            if (getAPIVersion() < metadata.api.version) {
                 copyBackup();
                 const managed = dirname(getAPIPath());
                 for (const f of metadata.api.files) {
                     const p = join(od, f);
-                    if(!existsSync(p)) continue;
+                    if (!existsSync(p)) continue;
                     copySync(p, join(managed, parse(f).base));
                 }
             }

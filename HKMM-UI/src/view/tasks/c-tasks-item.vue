@@ -21,7 +21,7 @@
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse" ref="body">
+        <div class="accordion-collapse collapse bg-secondary text-white"  ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div v-if="task?.progress" class="progress">
@@ -35,7 +35,7 @@
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
-                <div class="task-state p-2">
+                <div class="task-state p-2 bg-dark">
                     <div v-for="(val, index) in task?.taskState" :key="index">
                         <span v-if="!task?.isFailed || index !== 0">{{ val }}</span>
                         <span v-else class="text-danger">{{ val }}</span>
@@ -50,7 +50,6 @@
 
 <style>
 .task-item {
-    background-color: var(--bs-gray-200);
     color: var(--bs-black);
 }
 
@@ -62,7 +61,6 @@
 }
 
 .task-state {
-    background-color: var(--bs-gray-300);
     font-size: .75em;
     max-height: 15em;
     overflow: auto;

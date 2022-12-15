@@ -1,7 +1,7 @@
 import { remote } from "electron";
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, stat, statSync, symlinkSync, writeFileSync } from "fs";
 import { dirname, join, parse } from "path";
-import { getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
+import { getLowestDep, getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadFile, downloadRaw } from "./utils/downloadFile";
@@ -30,10 +30,16 @@ export function getModsPath(name: string) {
     return join(root, "$$$" + name + "$$$");
 }
 
+export function getRealModPath(name: string) {
+    const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', name);
+    if (!existsSync(p)) mkdirSync(p);
+    return p;
+}
+
 export function getCacheModsPath() {
     let mods = "";
     const settings = store.store;
-    if(settings.modsavepathMode == undefined) {
+    if (settings.modsavepathMode == undefined) {
         store.set('modsavepathMode', ModSavePathMode.UserDir);
         settings.modsavepathMode = ModSavePathMode.UserDir;
     }
@@ -119,10 +125,17 @@ export class LocalModInstance {
     }
 
     public canInstall() {
-        for (const mod of this.info.modinfo.dependencies) {
-            const mg = getLocalMod(mod);
-            if (!mg) return false;
-            if (!mg.isInstalled()) return false;
+        const depmods = getLowestDep(this.info.modinfo);
+        if (depmods) {
+            for(const mod of depmods) {
+                if(!isInstallMod(mod, false)) return false;
+            }
+        } else {
+            for (const mod of this.info.modinfo.dependencies) {
+                const mg = getLocalMod(mod);
+                if (!mg) return false;
+                if (!mg.isInstalled()) return false;
+            }
         }
         return true;
     }
@@ -195,7 +208,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
-        mod = {...mod};
+        mod = { ...mod };
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
         const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
@@ -237,25 +250,27 @@ export class LocalModsVersionGroup {
             try {
                 const wp = justCheckDep ? undefined : await this.installWithoutNewTask(mod, task);
                 const req: Promise<LocalModInstance>[] = [];
-
-                for (let i = 0; i < mod.dependencies.length; i++) {
-                    const element = mod.dependencies[i];
-                    const dh = LocalModsVersionGroup.downloadingMods.get(element);
-                    if (dh) {
-                        req.push(dh);
-                        continue;
+                const deps = getLowestDep(mod);
+                if (deps) {
+                    for (let i = 0; i < deps.length; i++) {
+                        const element = deps[i];
+                        const dh = LocalModsVersionGroup.downloadingMods.get(element.name);
+                        if (dh) {
+                            req.push(dh);
+                            continue;
+                        }
+                        if (isInstallMod(element, false)) {
+                            task.pushState(`Skip Dependency ${element}`);
+                            continue;
+                        }
+                        const dep = await getModLinkMod(element.name);
+                        if (!dep) {
+                            task.pushState(`Missing Dependency ${element}`);
+                            continue;
+                        }
+                        const group = getOrAddLocalMod(dep.name);
+                        req.push(group.installNew(dep, false));
                     }
-                    if (getLocalMod(element)) {
-                        task.pushState(`Skip Dependency ${element}`);
-                        continue;
-                    }
-                    const dep = await getModLinkMod(element);
-                    if (!dep) {
-                        task.pushState(`Missing Dependency ${element}`);
-                        continue;
-                    }
-                    const group = getOrAddLocalMod(element);
-                    req.push(group.installNew(dep, false));
                 }
                 await Promise.all(req);
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
@@ -369,6 +384,16 @@ export function refreshLocalMods(force: boolean = false) {
 export function getLocalMod(name: string) {
     if (!localMods) refreshLocalMods();
     return (localMods as Record<string, LocalModsVersionGroup>)[name];
+}
+
+export function isInstallMod(mod: ModLinksManifestData, fullMatch = false) {
+    const lmod = getLocalMod(mod.name);
+    if (!mod) return false;
+    if (fullMatch) return lmod.versions[mod.version] != undefined;
+    const lv = lmod.getLatestVersion();
+    if (!lv) return false;
+    if (isLaterVersion(lv, mod.version)) return true;
+    return lv == mod.version;
 }
 
 export function getOrAddLocalMod(name: string) {

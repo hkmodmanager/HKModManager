@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -28,7 +28,7 @@ protocol.registerSchemesAsPrivileged([
 
 initRenderer();
 
-const url_args = [];
+const url_args: string[] = [];
 if (!app.isPackaged) {
   url_args.push("\"" + path.resolve(process.argv[1]) + "\"");
 }
@@ -119,6 +119,7 @@ app.on('ready', async () => {
   ipcMain.on('update-setup-done', (ev, path) => {
     startAfterQuit.add(path);
   });
+   if(app.isPackaged) Menu.setApplicationMenu(null);
   createWindow();
 });
 

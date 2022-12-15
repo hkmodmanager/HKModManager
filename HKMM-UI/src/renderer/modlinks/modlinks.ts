@@ -1,4 +1,7 @@
 
+import { remote } from 'electron';
+import { readFileSync } from 'fs';
+import { readJSONSync } from 'fs-extra';
 import process from 'process';
 import { Parser, ast } from 'tsxml'
 import { isLaterVersion } from '../modManager';
@@ -95,11 +98,16 @@ export async function getModLinksFromRepo() {
         }
     }
     const url = "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json";
-    const content = await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download");
-    modlinksCache = new ModLinksData(content.data);
+    let content: ModCollection = undefined as any;
+    if(navigator.onLine || remote.app.isPackaged) content = (await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download")).data;
+    else {
+        content = readJSONSync("F:\\HKLab\\ModLinksRecord\\modlinks.json", 'utf-8') as ModCollection;
+    }
+    console.log(content);
+    modlinksCache = new ModLinksData(content);
     modlinksCache.lastGet = new Date().valueOf();
-    for (const key in content.data.mods) {
-        const mv = content.data.mods[key];
+    for (const key in content.mods) {
+        const mv = content.mods[key];
         for (const ver in mv) {
             const v = mv[ver];
             if (!v.repository) {

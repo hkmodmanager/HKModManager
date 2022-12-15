@@ -17,22 +17,24 @@
                     <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
                     </span>
+                    
+
+                    <!--Tags-->
+                    <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
+                        {{ $t(`mods.tags.${tag}`) }}
+                    </span>
+                    
                     <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
                         {{ $t("mods.isDeleted") }}
                     </span>
                     <span v-if="(modSize == undefined) && modSizeGet" class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
                     </span>
-
-                    <!--Tags-->
-                    <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
-                        {{ $t(`mods.tags.${tag}`) }}
-                    </span>
                 </div>
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse" ref="body">
+        <div class="accordion-collapse collapse bg-secondary text-white" ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div>
@@ -71,7 +73,12 @@
 
                     <div>
                         <span>{{ $t("mods.version") }}: </span>
-                        <span>{{ mod?.version }}</span>
+                        <span v-if="isRequireUpdate(mod.name)" class="text-success">
+                            {{
+                                isLocal ? `${mod.version} -> ${getLatestVersion(mod.name)}` : `${getLocalLatestModVer(mod.name)} -> ${mod.version}`
+                            }}
+                        </span>
+                        <span v-else>{{ mod?.version }}</span>
                     </div>
                     <div v-if="modSize">
                         <span>{{ $t("mods.size") }}: </span>
@@ -81,9 +88,9 @@
                         <span>{{ $t("mods.repo") }}:</span>
                         <a href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
                     </div>
-                    <div>
+                    <div v-if="mod.date">
                         <span>{{ $t("mods.publishTime") }}:</span>
-                        <span>{{ getModPublishTime(mod).toLocaleString() }}</span>
+                        <span>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
                     </div>
                     <div>
                         <hr />
@@ -112,7 +119,7 @@
                         <template v-if="!isLocal">
                             <h6 v-for="(dep, i) in getLowestDep(mod)" :key="i">
                                 {{ dep.name }} (>= {{ dep.version }})
-                                <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-success">
+                                <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-danger">
                                     ({{ $t("mods.requireUpdate") }})
                                 </span>
                                 <span v-if="isInstallMod2(dep.name, dep.version)" class="text-success">
@@ -170,6 +177,7 @@ class ModSizeCache {
     public size?: number;
 
     public static async getSize(url: string) {
+        if(!navigator.onLine) return undefined;
         const ct = new Date().valueOf();
 
         let c = ModSizeCache.cache[url] ?? new ModSizeCache();
@@ -218,7 +226,17 @@ export default defineComponent({
             if (!lm) return false;
             const lv = lm.getLatestVersion();
             if (!lv) return;
-            return isLaterVersion(this.modlinkCache.getMod(this.mod?.name as string)?.version ?? "0", lv);
+            return isLaterVersion(this.modlinkCache.getMod(name)?.version ?? "0", lv);
+        },
+        getLocalLatestModVer(name: string) {
+            const lm = getLocalMod(name);
+            if (!lm) return undefined;
+            const lv = lm.getLatestVersion();
+            return lv;
+        },
+        getLatestVersion(name: string) {
+            if (this.disableUpdate || !this.modlinkCache) return undefined;
+            return this.modlinkCache.getMod(name)?.version;
         },
         async installMod() {
             if (this.mod === undefined) return;
@@ -258,8 +276,8 @@ export default defineComponent({
             }
             this.$forceUpdate();
         },
-        getModPublishTime(mod?: ModLinksManifestData) {
-            return getModDate(mod?.date ?? '0-0-0-0T0:0:0Z');
+        getModPublishTime(date: string) {
+            return getModDate(date);
         },
         getLowestDep(mod?: ModLinksManifestData) {
             if (!mod) return [];

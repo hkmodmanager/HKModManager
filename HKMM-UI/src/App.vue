@@ -10,6 +10,14 @@
       fill-height
       flex-shrink-0
     ">
+      <h3>
+        HKMM <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
+      </h3>
+      <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
+        <a class="bi bi-github p-2 link-light" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
+        <a class="bi bi-discord p-2 link-light" @click="openLink('https://discord.gg/4Zhdg7QyPS')" href="javascript:;"></a>
+      </div>
+      
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
         <navitem viewpath="/localmods/all" compare-path><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
@@ -57,11 +65,11 @@
       </ul>
     </div>
     <!--Body-->
-    <div class="bg-secondary text-white flex-grow-1 app-body">
+    <div class="text-white flex-grow-1 app-body">
       <router-view></router-view>
     </div>
     <ModalBox ref="modal_language" :title="$t('c_language_title')">
-      <select class="form-select" ref="modssavepathmode" v-model="current_language">
+      <select class="form-select bg-dark text-white" ref="modssavepathmode" v-model="current_language">
         <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n">{{ l_name }}</option>
       </select>
       <template #footer>
@@ -132,8 +140,14 @@ export default defineComponent({
       const col = new Collapse(group);
       col.toggle();
     },
+    openLink(link: string) {
+      remote.shell.openExternal(link);
+    },
     getAllNamedLanguage() {
       return AllNamedLanaguages;
+    },
+    getAppVersion() {
+      return remote.app.getVersion();
     },
     openModalLanguage() {
       this.current_language = this.$i18n.locale;

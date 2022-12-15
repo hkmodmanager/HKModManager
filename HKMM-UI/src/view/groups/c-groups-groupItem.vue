@@ -13,7 +13,7 @@
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse" ref="body">
+        <div class="accordion-collapse collapse bg-secondary" ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div class="w-100 d-flex p-1">
@@ -41,9 +41,9 @@
                 </div>
                 <div>
                     <div class="accordion">
-                        <div class="accordion-item p-1" v-for="(mod) in getMods(groupctrl)" :key="mod[0]">
+                        <div class="accordion-item p-1 bg-dark" v-for="(mod) in getMods(groupctrl)" :key="mod[0]">
                             <div class="input-group">
-                                <input :class="`form-control text-${isInstalled(mod) ? 'success' : 'danger'}`"
+                                <input :class="`form-control bg-dark text-${isInstalled(mod) ? 'success' : 'danger'}`"
                                     :value="mod + ` (${$t(isInstalled(mod) ? 'groups.ready' : 'groups.unready')})`"
                                     readonly disabled />
                                 <a class="btn btn-danger" @click="removeMod(groupctrl as ModGroupController, mod[0])">

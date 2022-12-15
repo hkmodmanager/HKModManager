@@ -7,7 +7,8 @@ import { createI18n } from 'vue-i18n'
 import "bootstrap/dist/js/bootstrap.js"
 import "@/renderer/modManager"
 
-import "bootstrap/dist/css/bootstrap.min.css"
+import "@/css/bootstrap.css"
+//import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
 
 import viewErrorVue from './view/view-error.vue'
