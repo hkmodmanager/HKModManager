@@ -6,7 +6,11 @@
             "zh-tw"
         ],
         "displayName": "中文",
-        "i18nName": "zh"
+        "i18nName": "zh",
+        "mixer": {
+            "mods.nameAlias": "./zh/chinese_modalias.json",
+            "mods._desc": "./zh/chinese_moddesc.json"
+        }
     },
     "c_languages": "语言",
     "c_language_title": "更换语言",

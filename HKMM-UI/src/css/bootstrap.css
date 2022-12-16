@@ -4829,7 +4829,7 @@ textarea.form-control-lg {
   --bs-list-group-color: #fff;
   --bs-list-group-bg: #303030;
   --bs-list-group-border-color: #444;
-  --bs-list-group-border-width: 1px;
+  --bs-list-group-border-width: 0px;
   --bs-list-group-border-radius: 0.375rem;
   --bs-list-group-item-padding-x: 1rem;
   --bs-list-group-item-padding-y: 0.5rem;

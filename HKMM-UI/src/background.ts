@@ -89,7 +89,8 @@ async function createWindow() {
       contextIsolation: false,
       webSecurity: false,
       enableRemoteModule: true,
-      allowRunningInsecureContent: true
+      allowRunningInsecureContent: true,
+      devTools: true
     }
   });
 
@@ -119,7 +120,7 @@ app.on('ready', async () => {
   ipcMain.on('update-setup-done', (ev, path) => {
     startAfterQuit.add(path);
   });
-   if(app.isPackaged) Menu.setApplicationMenu(null);
+  if(app.isPackaged) Menu.setApplicationMenu(null);
   createWindow();
 });
 

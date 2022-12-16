@@ -16,6 +16,7 @@
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
         <a class="bi bi-github p-2 link-light" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
         <a class="bi bi-discord p-2 link-light" @click="openLink('https://discord.gg/4Zhdg7QyPS')" href="javascript:;"></a>
+        <a class="bi bi-wrench-adjustable-circle p-2 link-light" @click="openDevTools()" href="javascript:;"></a>
       </div>
       
       <hr />
@@ -153,6 +154,9 @@ export default defineComponent({
       this.current_language = this.$i18n.locale;
       const modal = this.$refs.modal_language as any;
       modal.getModal().show();
+    },
+    openDevTools() {
+      remote.getCurrentWebContents().openDevTools();
     },
     applyLanguage() {
       console.log(this.current_language);

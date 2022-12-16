@@ -39,13 +39,16 @@ jobs:
         run: |
           cd HKMM-UI
           npm run electron:build
+          npm run build:update
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: "HKMM-UI/dist_electron/*.exe"
+          files: |
+            "HKMM-UI/dist_electron/*.exe"
+            "HKMM-UI/dist_electron/update.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: upload artifact
@@ -55,11 +58,11 @@ jobs:
           path: "HKMM-UI/dist_electron/*.exe"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload unpacked
+      - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: unpacked
-          path: "HKMM-UI/dist_electron/win-unpacked"
+          name: update
+          path: "HKMM-UI/dist_electron/update.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       

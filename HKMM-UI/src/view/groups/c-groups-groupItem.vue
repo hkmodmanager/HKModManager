@@ -44,7 +44,7 @@
                         <div class="accordion-item p-1 bg-dark" v-for="(mod) in getMods(groupctrl)" :key="mod[0]">
                             <div class="input-group">
                                 <input :class="`form-control bg-dark text-${isInstalled(mod) ? 'success' : 'danger'}`"
-                                    :value="mod + ` (${$t(isInstalled(mod) ? 'groups.ready' : 'groups.unready')})`"
+                                    :value="getModName(mod[0]) + ` (${$t(isInstalled(mod) ? 'groups.ready' : 'groups.unready')})`"
                                     readonly disabled />
                                 <a class="btn btn-danger" @click="removeMod(groupctrl as ModGroupController, mod[0])">
                                     <i class="bi bi-x"></i>
@@ -66,6 +66,7 @@ import { Collapse } from 'bootstrap';
 import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/renderer/modManager';
 import { getModLinkMod } from '@/renderer/modlinks/modlinks';
 import { clipboard } from 'electron';
+import { I18nLanguages } from '@/lang/langs';
 
 export default defineComponent({
     props: {
@@ -87,6 +88,13 @@ export default defineComponent({
         },
         getMods(ctrl: ModGroupController) {
             return ctrl.getModNames();
+        },
+        getModName(name: string) {
+            const lang = I18nLanguages[this.$i18n.locale];
+            const alias = lang?.mods?.nameAlias;
+            let an = (alias ?? {})[name?.toLowerCase()?.replaceAll(' ', '')];
+            if(!an) return name;
+            return `${name} (${an})`;
         },
         removeMod(ctrl: ModGroupController, name: string) {
             const mg = getLocalMod(name);

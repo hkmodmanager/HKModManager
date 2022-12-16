@@ -1,11 +1,14 @@
 
 <template>
-    <div class="task-item accordion-item text-black p-1">
+    <div class="task-item accordion-item text-black p-1" :id="`mod-download-${mod.name.replaceAll(' ', '')}`">
         <h2 class="accordion-header">
             <button class="accordion-button collapsed" @click="toggleBody()">
                 <div class="d-flex">
                     <div class="p-1">
                         {{ mod?.name }}
+                        <strong v-if="getModAliasName(mod.name) != undefined">
+                            ({{ getModAliasName(mod.name) }})
+                        </strong>
                     </div>
                     <span v-if="isUsed(mod?.name ?? '')" class="badge bg-success mt-2">
                         {{ $t("mods.enabled") }}
@@ -27,7 +30,7 @@
                     <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
                         {{ $t("mods.isDeleted") }}
                     </span>
-                    <span v-if="(modSize == undefined) && modSizeGet" class="badge bg-danger mt-2">
+                    <span v-if="(modSize == undefined) && modSizeGet && !isLocal && !isInstallMod(mod?.name ?? '')" class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
                     </span>
                 </div>
@@ -98,6 +101,10 @@
                         <div>
                             {{ mod?.desc }}
                         </div>
+                        <div v-if="getModDesc()">
+                            <hr />
+                            {{ getModDesc() }}
+                        </div>
                     </div>
                     <div v-if="(mod?.dependencies?.length ?? 0) > 0">
                         <hr />
@@ -118,7 +125,7 @@
                         </template>
                         <template v-if="!isLocal">
                             <h6 v-for="(dep, i) in getLowestDep(mod)" :key="i">
-                                {{ dep.name }} (>= {{ dep.version }})
+                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep.name)" href="javascript:;">{{ dep.name }} (>= {{ dep.version }})</a>
                                 <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-danger">
                                     ({{ $t("mods.requireUpdate") }})
                                 </span>
@@ -169,6 +176,7 @@ import { Collapse } from 'bootstrap';
 import { remote } from 'electron';
 import { defineComponent } from 'vue';
 import { getFileSize } from '@/renderer/utils/downloadFile';
+import { I18nLanguages } from '@/lang/langs';
 
 class ModSizeCache {
     public time: number = new Date().valueOf();
@@ -234,6 +242,18 @@ export default defineComponent({
             const lv = lm.getLatestVersion();
             return lv;
         },
+        getModAliasName(name: string) {
+            const lang = I18nLanguages[this.$i18n.locale];
+            const alias = lang?.mods?.nameAlias;
+            if(!alias) return undefined;
+            return alias[name?.toLowerCase()?.replaceAll(' ', '')];
+        },
+        getModDesc() {
+            const lang = I18nLanguages[this.$i18n.locale];
+            const desc = lang?.mods?._desc;
+            if(!desc) return undefined;
+            return desc[this.mod?.name?.toLowerCase()?.replaceAll(' ', '')];
+        },
         getLatestVersion(name: string) {
             if (this.disableUpdate || !this.modlinkCache) return undefined;
             return this.modlinkCache.getMod(name)?.version;
@@ -282,6 +302,12 @@ export default defineComponent({
         getLowestDep(mod?: ModLinksManifestData) {
             if (!mod) return [];
             return getLowestDep(mod) ?? [];
+        },
+        anchorMod(name: string) {
+            const rn = `mod-download-${name.replaceAll(' ', '')}`;
+            const dom = document.getElementById(rn);
+            if(!dom) return;
+            dom.scrollIntoView();
         },
         async updateMod() {
 
