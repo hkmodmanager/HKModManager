@@ -8,12 +8,13 @@ import { URL } from "url";
 import { copyBackup, getAPIPath, getAPIVersion } from "./apiManager";
 import { apiInfoCache, getModLinkMod, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { userData } from "./remoteCache";
 import { store } from "./settings";
 
 export const metadata_name = '[hkmm-metadata].json';
 
 export function getGroupPath() {
-    return join(remote.app.getPath('userData'), 'modgroups');
+    return join(userData, 'modgroups');
 }
 
 export function getGroupPath2(guid: string) {

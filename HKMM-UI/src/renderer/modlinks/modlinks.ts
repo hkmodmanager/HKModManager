@@ -5,6 +5,7 @@ import { readJSONSync } from 'fs-extra';
 import process from 'process';
 import { Parser, ast } from 'tsxml'
 import { isLaterVersion } from '../modManager';
+import { isPackaged } from '../remoteCache';
 import { downloadFile, downloadText } from '../utils/downloadFile';
 
 type ContainerNode = ast.ContainerNode<ast.Node>;
@@ -99,7 +100,7 @@ export async function getModLinksFromRepo() {
     }
     const url = "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json";
     let content: ModCollection = undefined as any;
-    if(navigator.onLine || remote.app.isPackaged) content = (await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download")).data;
+    if(navigator.onLine || isPackaged) content = (await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download")).data;
     else {
         content = readJSONSync("F:\\HKLab\\ModLinksRecord\\modlinks.json", 'utf-8') as ModCollection;
     }

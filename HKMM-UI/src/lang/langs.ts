@@ -1,4 +1,5 @@
 
+import { exePath, isPackaged, srcRoot } from '@/renderer/remoteCache';
 import { remote } from 'electron';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { dirname, extname, join, parse } from 'path';
@@ -17,10 +18,10 @@ export interface ILanguageMetadata {
 }
 
 export function getLanguagesDir() {
-    const exename = parse(remote.app.getPath("exe"));
+    const exename = parse(exePath);
 
-    return !remote.app.isPackaged ? (
-        join(dirname(dirname(dirname(exename.dir))), "langs") //Debug
+    return !isPackaged ? (
+        join(srcRoot, "langs") //Debug
     ) : (
         join(exename.dir, "langs")
     );

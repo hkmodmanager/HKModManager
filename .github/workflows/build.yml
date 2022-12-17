@@ -47,8 +47,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            "HKMM-UI/dist_electron/*.exe"
-            "HKMM-UI/dist_electron/update.zip"
+            HKMM-UI/dist_electron/*.exe
+            HKMM-UI/dist_electron/update.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: upload artifact

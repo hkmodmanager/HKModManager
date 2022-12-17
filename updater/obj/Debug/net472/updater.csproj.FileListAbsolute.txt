@@ -1,0 +1,11 @@
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.csproj.AssemblyReference.cache
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.csproj.SuggestedBindingRedirects.cache
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.GeneratedMSBuildEditorConfig.editorconfig
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.AssemblyInfoInputs.cache
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.AssemblyInfo.cs
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.csproj.CoreCompileInputs.cache
+F:\HKLab\HKMM\updater\bin\Debug\net472\updater.exe.config
+F:\HKLab\HKMM\updater\bin\Debug\net472\updater.exe
+F:\HKLab\HKMM\updater\bin\Debug\net472\updater.pdb
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.exe
+F:\HKLab\HKMM\updater\obj\Debug\net472\updater.pdb

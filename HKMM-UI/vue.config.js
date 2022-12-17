@@ -54,6 +54,10 @@ module.exports = defineConfig({
                         filter: [
                             "**/*"
                         ]
+                    },
+                    {
+                        from: "../updater/bin/Debug/updater.exe",
+                        to: "../updater/updater.exe"
                     }
                 ]
                 ,

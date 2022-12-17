@@ -12,6 +12,7 @@ import "./apiManager";
 import { copySync } from "fs-extra";
 import { installGameInject } from "./gameinject";
 import { getDownloader } from "./mods/customDownloader";
+import { appDir, userData } from "./remoteCache";
 
 export const modversionFileName = "modversion.json";
 
@@ -43,8 +44,8 @@ export function getCacheModsPath() {
         store.set('modsavepathMode', ModSavePathMode.UserDir);
         settings.modsavepathMode = ModSavePathMode.UserDir;
     }
-    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(dirname(remote.app.getPath("exe")), "managedMods");
-    else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(remote.app.getPath('userData'), "managedMods");
+    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(appDir, "managedMods");
+    else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(userData, "managedMods");
     else if (settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");
     else mods = settings.modsavepath;
     if (!existsSync(mods)) mkdirSync(mods, { recursive: true });

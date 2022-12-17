@@ -4,13 +4,26 @@ import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu } fr
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
-import { readFile } from 'fs';
+import { existsSync, readFile } from 'fs';
 import { spawn } from 'child_process';
+import { dirname, join } from 'path';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
 if (!singleLock) {
   app.quit();
+}
+
+const appDir = dirname(app.getPath('exe'));
+if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_updater'))) {
+  const updater = join(appDir, 'updater.exe');
+  if (existsSync(updater)) {
+    spawn(updater, ['true', process.pid.toString()], {
+      shell: false,
+      detached: true
+    });
+    app.quit();
+  }
 }
 
 // Scheme must be registered before the app is ready
@@ -120,7 +133,7 @@ app.on('ready', async () => {
   ipcMain.on('update-setup-done', (ev, path) => {
     startAfterQuit.add(path);
   });
-  if(app.isPackaged) Menu.setApplicationMenu(null);
+  if (app.isPackaged) Menu.setApplicationMenu(null);
   createWindow();
 });
 

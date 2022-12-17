@@ -9,6 +9,7 @@ import ts from '@babel/preset-typescript'
 import { remote } from 'electron';
 import { createHash } from 'crypto';
 import { store } from './settings';
+import { userData } from './remoteCache';
 
 const exportLibs: Record<string, () => any> = {
     'vue': () => require('vue'),
@@ -29,7 +30,7 @@ export const webpack_require = w_any.webpack_require = __webpack_require__;
 export const allPlugins: IHKMMPlugin[] = [];
 
 export function getCompileCacheDir() {
-    const result = join(remote.app.getPath('userData'), 'plugins-cache');
+    const result = join(userData, 'plugins-cache');
     if (!existsSync(result)) mkdirSync(result);
     return result;
 }

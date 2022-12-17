@@ -66,6 +66,7 @@ import mirrorlist from "./settings/c-mirror-list.vue"
 import { remote } from "electron";
 import HkpathChange from "@/components/hkpath-change.vue";
 import { join } from "path";
+import { userData } from "@/renderer/remoteCache";
 
 export default defineComponent({
   components: {
@@ -109,7 +110,7 @@ export default defineComponent({
       return store.get('enabled_exp_mode', false);
     },
     getModPath() {
-      return store.get('modsavepath', join(remote.app.getPath('userData'), "managedMods"));
+      return store.get('modsavepath', join(userData, "managedMods"));
     },
     shouldShowAlertRestart(): boolean {
       return sessionStorage.getItem("exp_query_restart") ? true : false;

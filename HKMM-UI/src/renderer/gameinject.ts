@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, rmSync, symlinkSync, readJSONSync, outputJSONSyn
 import { dirname, join, parse } from "path";
 import { getAPIPath } from "./apiManager";
 import { getModsPath, getModsRoot } from "./modManager";
+import { appDir, exePath, isPackaged, srcRoot } from "./remoteCache";
 
 
 export enum RuntimeInitializeLoadType {
@@ -33,22 +34,19 @@ export class ScriptingAssembly {
 }
 
 export function getGameInjectPath() {
-    const exename = parse(remote.app.getPath("exe"));
 
-    return !remote.app.isPackaged ? (
-        join(dirname(dirname(dirname(exename.dir))), "..", "gameinject", "Output", "GameInject.dll") //Debug
+    return !isPackaged ? (
+        join(srcRoot, "..", "gameinject", "Output", "GameInject.dll") //Debug
     ) : (
-        join(exename.dir, "managed", "GameInject.dll")
+        join(appDir, "managed", "GameInject.dll")
     );
 }
 
 export function getManagedPath() {
-    const exename = parse(remote.app.getPath("exe"));
-
-    return !remote.app.isPackaged ? (
-        join(dirname(dirname(dirname(exename.dir))), "managed") //Debug
+    return !isPackaged ? (
+        join(srcRoot, "managed") //Debug
     ) : (
-        join(exename.dir, "managed")
+        join(appDir, "managed")
     );
 }
 

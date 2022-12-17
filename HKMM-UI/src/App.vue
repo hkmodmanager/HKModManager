@@ -122,6 +122,7 @@ import { remote } from "electron";
 
 import "./renderer/plugins"
 import RequireExpmode from "./components/require-expmode.vue";
+import { appVersion } from "./renderer/remoteCache";
 
 export default defineComponent({
   data: function () {
@@ -148,7 +149,7 @@ export default defineComponent({
       return AllNamedLanaguages;
     },
     getAppVersion() {
-      return remote.app.getVersion();
+      return appVersion;
     },
     openModalLanguage() {
       this.current_language = this.$i18n.locale;
@@ -188,7 +189,7 @@ export default defineComponent({
     checkUpdate().then((val) => {
       if (val) {
         const result = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-          message: `${this.$t('hasUpdate')} (v${remote.app.getVersion()} -> v${val[1]})`,
+          message: `${this.$t('hasUpdate')} (v${appVersion} -> v${val[1]})`,
           type: 'question',
           buttons: [this.$t('downloadUpdate'), 'Cancel'],
           cancelId: 1
