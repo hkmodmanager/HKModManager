@@ -27,6 +27,14 @@ const orig_any = w_any.node_require ?? eval('window.require');
 export const node_require = w_any.node_require = orig_any;
 export const webpack_require = w_any.webpack_require = __webpack_require__;
 
+export function node_import<T>(modulename: string, ep?: string) {
+    const module = node_require(modulename);
+    if(ep) {
+        return module[ep] as T;
+    }
+    return module as T;
+}
+
 export const allPlugins: IHKMMPlugin[] = [];
 
 export function getCompileCacheDir() {

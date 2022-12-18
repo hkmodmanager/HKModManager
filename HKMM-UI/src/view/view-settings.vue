@@ -30,7 +30,6 @@
         </div>
         <div class="alert alert-warning" v-if="shouldShowAlertRestart()">
           {{ $t("settings.exp.applyOnRestart") }}
-          <a class="btn btn-success float-end" @click="restart()">{{ $t("settings.exp.restartNow") }}</a>
         </div>
       </div>
     </div>
@@ -114,10 +113,6 @@ export default defineComponent({
     },
     shouldShowAlertRestart(): boolean {
       return sessionStorage.getItem("exp_query_restart") ? true : false;
-    },
-    restart() {
-      remote.app.relaunch();
-      remote.app.exit();
     },
     selectModsSavePath() {
       const result = remote.dialog.showOpenDialogSync({

@@ -67,6 +67,7 @@
     </div>
     <!--Body-->
     <div class="text-white flex-grow-1 app-body">
+      <ModalUpdate />
       <router-view></router-view>
     </div>
     <ModalBox ref="modal_language" :title="$t('c_language_title')">
@@ -77,6 +78,7 @@
         <button class="btn btn-primary w-100" @click="applyLanguage">{{ $t('c_language_apply') }}</button>
       </template>
     </ModalBox>
+    
   </div>
 </template>
 
@@ -86,6 +88,14 @@ body,
 #app {
   min-height: 100vh;
   max-height: 100vh;
+}
+
+[notcopyable] {
+  user-select: none;
+}
+
+[copyable] {
+  user-select: text;
 }
 
 .nav-list {
@@ -117,12 +127,13 @@ import { getModLinks, modlinksCache } from "./renderer/modlinks/modlinks";
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
 import { store } from "./renderer/settings";
-import { checkUpdate, installUpdate } from "./renderer/updater";
+//import { checkUpdate, installUpdate } from "./renderer/updater";
 import { remote } from "electron";
 
 import "./renderer/plugins"
 import RequireExpmode from "./components/require-expmode.vue";
 import { appVersion } from "./renderer/remoteCache";
+import ModalUpdate from "./view/update/modal-update.vue";
 
 export default defineComponent({
   data: function () {
@@ -134,8 +145,9 @@ export default defineComponent({
   components: {
     navitem,
     ModalBox,
-    RequireExpmode
-  },
+    RequireExpmode,
+    ModalUpdate
+},
   methods: {
     toggleNavTasks() {
       const group = this.$refs.tasksNavGroup as Element;
@@ -186,7 +198,7 @@ export default defineComponent({
         this.$forceUpdate();
       });
     }
-    checkUpdate().then((val) => {
+    /*checkUpdate().then((val) => {
       if (val) {
         const result = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
           message: `${this.$t('hasUpdate')} (v${appVersion} -> v${val[1]})`,
@@ -199,7 +211,7 @@ export default defineComponent({
         }
         this.$forceUpdate();
       }
-    });
+    });*/
   }
 });
 </script>

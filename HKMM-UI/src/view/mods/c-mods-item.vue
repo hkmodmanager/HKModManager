@@ -88,20 +88,20 @@
                         <span>{{ getModSize() }}</span>
                     </div>
                     <div>
-                        <span>{{ $t("mods.repo") }}:</span>
-                        <a href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
+                        <span copyable>{{ $t("mods.repo") }}:</span>
+                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
                     </div>
                     <div v-if="mod.date">
                         <span>{{ $t("mods.publishTime") }}:</span>
-                        <span>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
+                        <span copyable>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
                     </div>
                     <div>
                         <hr />
                         <h5>{{ $t("mods.desc") }}</h5>
-                        <div>
+                        <div copyable>
                             {{ mod?.desc }}
                         </div>
-                        <div v-if="getModDesc()">
+                        <div v-if="getModDesc()" copyable>
                             <hr />
                             {{ getModDesc() }}
                         </div>
@@ -110,15 +110,15 @@
                         <hr />
                         <h5>{{ $t("mods.dep") }}</h5>
                         <template v-if="isLocal">
-                            <h6 v-for="(dep, i) in mod?.dependencies" :key="i">
+                            <h6 v-for="(dep, i) in mod?.dependencies" :key="i" copyable>
                                 {{ dep }}
-                                <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success">
+                                <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success" notcopyable>
                                     ({{ $t("mods.depInstall") }})
                                 </span>
-                                <span v-if="!isInstallMod(dep) && isLocal" class="text-danger">
+                                <span v-if="!isInstallMod(dep) && isLocal" class="text-danger" notcopyable>
                                     ({{ $t("mods.missingDep") }})
                                 </span>
-                                <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger">
+                                <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger" notcopyable>
                                     ({{ $t("mods.disabled") }})
                                 </span>
                             </h6>
@@ -136,19 +136,19 @@
                         </template>
                     </div>
 
-                    <div v-if="(mod?.authors?.length ?? 0) > 0">
+                    <div v-if="(mod?.authors?.length ?? 0) > 0" >
                         <hr />
                         <h5>{{ $t("mods.authors") }}</h5>
-                        <h6 v-for="(author, i) in mod?.authors" :key="i">
+                        <h6 v-for="(author, i) in mod?.authors" :key="i" copyable>
                             {{ author }}
                         </h6>
                     </div>
-                    <div v-if="isLocal && (depOnThis.length > 0)">
+                    <div v-if="isLocal && (depOnThis.length > 0)" > 
                         <hr />
                         <h5>{{ $t("mods.depOnThis") }}</h5>
-                        <h6 v-for="(mod, i) in depOnThis" :key="i">
+                        <h6 v-for="(mod, i) in depOnThis" :key="i" copyable>
                             {{ mod.info.name }}
-                            <span v-if="mod.isActived()" class="text-success">
+                            <span v-if="mod.isActived()" class="text-success" notcopyable>
                                 ({{ $t("mods.enabled") }})
                             </span>
                         </h6>
@@ -177,6 +177,7 @@ import { remote } from 'electron';
 import { defineComponent } from 'vue';
 import { getFileSize } from '@/renderer/utils/downloadFile';
 import { I18nLanguages } from '@/lang/langs';
+import { ConvertSize } from '@/renderer/utils/utils';
 
 class ModSizeCache {
     public time: number = new Date().valueOf();
@@ -322,10 +323,7 @@ export default defineComponent({
         },
         getModSize() {
             if (!this.modSize) return "0 KB";
-            if (this.modSize > 1024 * 1024 * 1024) return `${Math.round(this.modSize / 1024 / 1024 / 1024)} G`;
-            if (this.modSize > 1024 * 1024) return `${Math.round(this.modSize / 1024 / 1024)} MB`;
-            if (this.modSize > 1024) return `${Math.round(this.modSize / 1024)} KB`;
-            return `${this.modSize} B`;
+            return ConvertSize(this.modSize);
         }
     },
     props: {

@@ -11,6 +11,10 @@
     "c_language_apply": "Apply",
     "hasUpdate": "A new version is available",
     "downloadUpdate": "Download the update",
+    "updateTitle": "Update",
+    "updateCancel": "Cancel",
+    "updateSize": "Size",
+    "clickHere": "Check it out here",
     "error": {
         "missingView": "Missing page",
         "hkcheck": {

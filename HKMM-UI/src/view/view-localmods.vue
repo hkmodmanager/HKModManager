@@ -1,6 +1,7 @@
 <template>
     <div class="spinner spinner-border text-primary mx-auto d-block" v-if="showSpinner()">
     </div>
+    <CModsSearch  v-if="!showSpinner()" @update="updateSearch"/>
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
@@ -15,20 +16,27 @@ import { refreshLocalMods, LocalModsVersionGroup, getRequireUpdateModsSync, getL
 import { defineComponent } from 'vue';
 import { getModLinks, modlinksCache } from '@/renderer/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
+import { I18nLanguages } from '@/lang/langs';
+import CModsSearch from './mods/c-mods-search.vue';
 
 export default defineComponent({
     methods: {
         getMods() {
-            if (this.filter === 'all' || !this.filter) return refreshLocalMods();
+            const src = (this.filter === 'all' || !this.filter) ? Object.keys(refreshLocalMods()) : getRequireUpdateModsSync();
             const result: LocalModsVersionGroup[] = [];
             if (!modlinksCache) return result;
-            for (const mod of getRequireUpdateModsSync()) {
+            for (const mod of src) {
+                const mname = mod.toLowerCase().replaceAll(' ', '').trim() + (this.getModAliasName(mod) ?? '');
+                if(this.search) {
+                    const fname = this.search.toLowerCase().replaceAll(' ', '').trim();
+                    if(!mname.includes(fname)) continue;
+                }
                 const m = getLocalMod(mod);
                 if(m) {
                     result.push(m);
                 }
             }
-            return result;
+            return result.sort((a, b) => a.name.localeCompare(b.name));
         },
         refresh() {
             if (!modlinksCache) {
@@ -39,6 +47,16 @@ export default defineComponent({
         },
         showSpinner() {
             return this.filter === 'requireUpdate' && !modlinksCache;
+        },
+        updateSearch(f: string) {
+            this.search = f;
+            this.$forceUpdate();
+        },
+        getModAliasName(name: string) {
+            const lang = I18nLanguages[this.$i18n.locale];
+            const alias = lang?.mods?.nameAlias;
+            if(!alias) return undefined;
+            return alias[name?.toLowerCase()?.replaceAll(' ', '')];
         }
     },
     props: {
@@ -47,12 +65,17 @@ export default defineComponent({
             default: "all"
         }
     },
+    data() {
+        return {
+            search: undefined as any as string
+        };
+    },
     beforeUpdate() {
         this.refresh();
     },
     mounted() {
         this.refresh();
     },
-    components: { CModsItem }
+    components: { CModsItem, CModsSearch }
 });
 </script>

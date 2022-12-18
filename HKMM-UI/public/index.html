@@ -7,10 +7,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <script>
     let { ipcRenderer } = require('electron');
-    process.addListener("uncaughtException", (ev) => {
+    function throw_fault(ev) {
       console.error(ev);
       ipcRenderer.send("uncagught-exception", ev.stack ?? ev.message ?? ev?.toString() ?? ev);
-    });
+    }
+    process.addListener("uncaughtException", throw_fault);
   </script>
   <link rel="icon" href="<%= BASE_URL %>favicon.ico">
   <title>
@@ -18,7 +19,7 @@
   </title>
 </head>
 
-<body>
+<body notcopyable>
   <noscript>
     <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
         Please enable it to continue.</strong>

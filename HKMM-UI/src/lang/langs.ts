@@ -1,5 +1,5 @@
 
-import { exePath, isPackaged, srcRoot } from '@/renderer/remoteCache';
+import { appDir, exePath, isPackaged, srcRoot } from '@/renderer/remoteCache';
 import { remote } from 'electron';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { dirname, extname, join, parse } from 'path';
@@ -18,12 +18,10 @@ export interface ILanguageMetadata {
 }
 
 export function getLanguagesDir() {
-    const exename = parse(exePath);
-
     return !isPackaged ? (
         join(srcRoot, "langs") //Debug
     ) : (
-        join(exename.dir, "langs")
+        join(appDir, "langs")
     );
 }
 
@@ -56,7 +54,7 @@ export function searchLanguages() {
                     if(i == keyp.length - 1) {
                         obj[element] = fd;
                     } else {
-                        obj = obj[element];
+                        obj = obj[element] = obj[element] ?? {};
                     }
                 }
                 console.dir(obj);

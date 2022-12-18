@@ -16,7 +16,11 @@
     "c_language_title": "更换语言",
     "c_language_apply": "确定",
     "hasUpdate": "有新版本可用",
+    "updateTitle": "更新",
     "downloadUpdate": "下载更新",
+    "updateCancel": "取消",
+    "updateSize": "更新包大小",
+    "clickHere": "点此查看",
     "error": {
         "missingView": "页面丢失",
         "hkcheck": {
@@ -25,6 +29,9 @@
             "hk_out_of_date": "游戏版本过旧",
             "aff": "无法自动寻找游戏文件"
         }
+    },
+    "welcome": {
+
     },
     "plugins": {
         "byAuthor": "内置"

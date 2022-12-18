@@ -2,10 +2,11 @@ import { app, ipcRenderer, remote } from "electron";
 import { constants, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { isLaterVersion } from "./modManager";
-import { downloadFile, downloadRaw } from "./utils/downloadFile";
-import { exec, spawn, spawnSync } from 'child_process'
+import { downloadFile, downloadRaw, getFileSize } from "./utils/downloadFile";
+import { ChildProcessWithoutNullStreams, exec, spawn, spawnSync } from 'child_process'
 import { zip } from "compressing";
 import { appDir, appVersion, isPackaged, srcRoot, userData } from "./remoteCache";
+import { node_import, node_require } from "./plugins";
 
 export interface ReleaseInfo {
     name: string;
@@ -15,7 +16,13 @@ export interface ReleaseInfo {
     }[];
 }
 
-export async function checkUpdate() {
+export interface UpdateInfo {
+    version: string;
+    url: string;
+    size?: number;
+}
+
+export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined> {
     const releases: ReleaseInfo[] = (await downloadFile<ReleaseInfo[]>('https://api.github.com/repos/HKLab/HKModManager/releases')).data;
     const latest = releases[0];
     if(!latest) return undefined;
@@ -24,18 +31,29 @@ export async function checkUpdate() {
     if(isLaterVersion(sver, cver)) {
         const durl = latest.assets.find(x => x.name == 'update.zip')?.browser_download_url;
         if(!durl) return undefined;
-        return [durl, sver];
+        return {
+            version: sver,
+            url: durl,
+            size: (rsize ? (await getFileSize(durl)) : undefined)
+        };
     }
     return undefined;
 }
 
+export let updaterProc: ChildProcessWithoutNullStreams;
+
 export async function installUpdate() {
     console.log('Update');
+    if(updaterProc) {
+        if(updaterProc.exitCode == null) {
+            updaterProc.kill('SIGKILL');
+        }
+    }
     const result = await checkUpdate();
     if(!result) return;
     let raw: Buffer;
-    if(isPackaged) {
-        raw = await downloadRaw(result[0], undefined, undefined, undefined, 'Download Setup', 'Download');
+    if(!isPackaged) {
+        raw = await downloadRaw(result.url, undefined, undefined, undefined, 'Download Setup', 'Download');
     } else {
         raw = readFileSync(join(srcRoot, 'dist_electron', 'update.zip'));
     }
@@ -46,7 +64,8 @@ export async function installUpdate() {
         updater);
     console.log(updateFile);
     console.log(updater);
-    spawn(updater, [ 'false', remote.process.pid.toString() ], {
+    const n_spawn = node_import<typeof spawn>('child_process', 'spawn');
+    updaterProc = n_spawn(updater, [ 'false', remote.process.pid.toString() ], {
         shell: false,
         detached: true
     });
