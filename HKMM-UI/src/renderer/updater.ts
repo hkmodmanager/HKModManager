@@ -52,7 +52,7 @@ export async function installUpdate() {
     const result = await checkUpdate();
     if(!result) return;
     let raw: Buffer;
-    if(!isPackaged) {
+    if(isPackaged) {
         raw = await downloadRaw(result.url, undefined, undefined, undefined, 'Download Setup', 'Download');
     } else {
         raw = readFileSync(join(srcRoot, 'dist_electron', 'update.zip'));
