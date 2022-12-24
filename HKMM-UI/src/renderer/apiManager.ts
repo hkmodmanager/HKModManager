@@ -1,16 +1,14 @@
 
 import { zip } from 'compressing';
-import { remote } from 'electron';
-import * as edge from 'electron-edge-js';
 import { copyFileSync, existsSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, parse } from 'path';
 import { apiInfoCache, getAPIInfo, ModdingAPIData } from './modlinks/modlinks';
-import { getNetUtilsPath, netfunc } from './nethelper';
+import { netfunc } from './nethelper';
 import { installGameInject } from './gameinject';
 import { store } from './settings';
-import { createTask, startTask } from './taskManager';
-import { downloadFile, downloadRaw } from './utils/downloadFile';
+import { startTask } from './taskManager';
+import { downloadRaw } from './utils/downloadFile';
 import { gl } from './exportGlobal';
 
 export function getAPIPath(root?: string) {

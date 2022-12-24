@@ -21,7 +21,7 @@
                         @click="showExportModal(groupctrl?.info.guid as string)" :title="$t('groups.packShareMsg')">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </button>
-                    <button class="btn btn-primary" @click="copyShareUrl(groupctrl as ModGroupController)"
+                    <button class="btn btn-primary" @click="genShareUrl(groupctrl as ModGroupController)"
                         :title="$t('groups.copyShareMsg')">
                         <i class="bi bi-share"></i>
                     </button>
@@ -38,6 +38,13 @@
                     <button class="btn btn-danger" v-if="!isDefault(groupctrl)"
                         @click="showRemoveGroupModal(groupctrl?.info.guid as string)">
                         <i class="bi bi-trash3"></i></button>
+                </div>
+                <div class="collapse" ref="sharelink">
+                    <div class="input-group">
+                        <input readonly disabled class="form-control bg-dark text-white" style="user-select: all"
+                            :value="sharelink" />
+                        <button class="btn btn-primary" @click="copyShareUrl()">Copy</button>
+                    </div>
                 </div>
                 <div>
                     <div class="accordion">
@@ -93,7 +100,7 @@ export default defineComponent({
             const lang = I18nLanguages[this.$i18n.locale];
             const alias = lang?.mods?.nameAlias;
             let an = (alias ?? {})[name?.toLowerCase()?.replaceAll(' ', '')];
-            if(!an) return name;
+            if (!an) return name;
             return `${name} (${an})`;
         },
         removeMod(ctrl: ModGroupController, name: string) {
@@ -103,6 +110,7 @@ export default defineComponent({
             }
             ctrl.removeMod(name);
             ctrl.save();
+            this.getShareCollapse().hide();
             this.$forceUpdate();
         },
         isDefault(ctrl: ModGroupController) {
@@ -137,10 +145,18 @@ export default defineComponent({
             this.isDownloading = false;
             this.$forceUpdate();
         },
-        copyShareUrl(ctrl: ModGroupController) {
+        genShareUrl(ctrl: ModGroupController) {
             const url = ctrl.getShareUrl();
             console.log(url.toString());
-            clipboard.writeText(url.toString());
+            this.sharelink = url.toString();
+            this.getShareCollapse().toggle();
+            //
+        },
+        copyShareUrl() {
+            if(!this.sharelink) {
+                this.genShareUrl(this.groupctrl as ModGroupController);
+            }
+            clipboard.writeText(this.sharelink);
         },
         showExportModal(guid: string) {
             this.$emit('onshowexport', guid);
@@ -148,6 +164,9 @@ export default defineComponent({
         rename(ctrl: ModGroupController) {
             this.$emit("onshowrename", ctrl.info.guid);
         },
+        getShareCollapse() {
+            return (this.share_collapse ??= new Collapse(this.$refs.sharelink as any)) as Collapse;
+        }
     },
     unmounted() {
         clearInterval(this.checkTimer);
@@ -155,7 +174,9 @@ export default defineComponent({
     data() {
         return {
             checkTimer: setInterval(() => this.$forceUpdate(), 500),
-            isDownloading: false
+            isDownloading: false,
+            sharelink: "",
+            share_collapse: undefined as any
         }
     },
     emits: {

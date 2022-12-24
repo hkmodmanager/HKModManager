@@ -84,6 +84,7 @@
         "noSource": "No download source",
         "publishTime": "Publish",
         "tags": {
+            "None": "None",
             "Gameplay": "Gameplay",
             "Boss": "Boss",
             "Cosmetic": "Cosmetic",

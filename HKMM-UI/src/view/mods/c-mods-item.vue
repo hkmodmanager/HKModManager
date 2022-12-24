@@ -76,19 +76,19 @@
 
                     <div>
                         <span>{{ $t("mods.version") }}: </span>
-                        <span v-if="isRequireUpdate(mod.name)" class="text-success">
+                        <span v-if="isRequireUpdate(mod.name)" class="text-success" copyable>
                             {{
                                 isLocal ? `${mod.version} -> ${getLatestVersion(mod.name)}` : `${getLocalLatestModVer(mod.name)} -> ${mod.version}`
                             }}
                         </span>
-                        <span v-else>{{ mod?.version }}</span>
+                        <span v-else copyable>{{ mod?.version }}</span>
                     </div>
                     <div v-if="modSize">
                         <span>{{ $t("mods.size") }}: </span>
-                        <span>{{ getModSize() }}</span>
+                        <span copyable>{{ getModSize() }}</span>
                     </div>
                     <div>
-                        <span copyable>{{ $t("mods.repo") }}:</span>
+                        <span>{{ $t("mods.repo") }}:</span>
                         <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
                     </div>
                     <div v-if="mod.date">
@@ -101,10 +101,10 @@
                         <div copyable>
                             {{ mod?.desc }}
                         </div>
-                        <div v-if="getModDesc()" copyable>
+                        <!--<div v-if="getModDesc()" copyable>
                             <hr />
                             {{ getModDesc() }}
-                        </div>
+                        </div>-->
                     </div>
                     <div v-if="(mod?.dependencies?.length ?? 0) > 0">
                         <hr />

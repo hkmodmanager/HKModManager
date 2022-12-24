@@ -389,7 +389,7 @@ export function getLocalMod(name: string) {
 
 export function isInstallMod(mod: ModLinksManifestData, fullMatch = false) {
     const lmod = getLocalMod(mod.name);
-    if (!mod) return false;
+    if (!lmod) return false;
     if (fullMatch) return lmod.versions[mod.version] != undefined;
     const lv = lmod.getLatestVersion();
     if (!lv) return false;

@@ -1,9 +1,8 @@
-import { remote } from "electron";
 import { existsSync, mkdirSync, rmSync, symlinkSync, readJSONSync, outputJSONSync } from "fs-extra";
-import { dirname, join, parse } from "path";
+import { dirname, join } from "path";
 import { getAPIPath } from "./apiManager";
-import { getModsPath, getModsRoot } from "./modManager";
-import { appDir, exePath, isPackaged, srcRoot } from "./remoteCache";
+import { getModsRoot } from "./modManager";
+import { appDir, isPackaged, srcRoot } from "./remoteCache";
 
 
 export enum RuntimeInitializeLoadType {

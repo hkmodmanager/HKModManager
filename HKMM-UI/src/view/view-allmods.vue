@@ -1,5 +1,5 @@
 <template>
-    <CModsSearch @update="updateSearch">
+    <CModsSearch @update="updateSearch" @update-tag="updateTag">
         
     </CModsSearch>
     <div class="accordion">
@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks'
+import { getModLinks, modlinksCache, ModLinksManifestData, ModTag } from '@/renderer/modlinks/modlinks'
 import CModsItem from './mods/c-mods-item.vue';
 import { hasOption } from '@/renderer/settings';
 import CModsSearch from './mods/c-mods-search.vue';
@@ -29,6 +29,9 @@ export default defineComponent({
                     const fname = this.filter.toLowerCase().replaceAll(' ', '').trim();
                     if(!mname.includes(fname)) continue;
                 }
+                if (this.tag && this.tag != 'None') {
+                    if (!v.tags.includes(this.tag as ModTag)) continue;
+                }
                 if(!v.isDeleted || hasOption('SHOW_DELETED_MODS')) {
                     arr.push(v);
                 }
@@ -37,6 +40,10 @@ export default defineComponent({
         },
         updateSearch(f: string) {
             this.filter = f;
+            this.$forceUpdate();
+        },
+        updateTag(tag: string) {
+            this.tag = tag;
             this.$forceUpdate();
         },
         getModAliasName(name: string) {
@@ -48,7 +55,8 @@ export default defineComponent({
     },
     data() {
         return {
-            filter: undefined as any as (string | undefined)
+            filter: undefined as any as (string | undefined),
+            tag: 'None'
         };
     },
     mounted() {

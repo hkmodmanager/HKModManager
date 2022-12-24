@@ -2,6 +2,10 @@
 <template>
     <div class="input-group sticky-top">
         <input class="form-control" placeholder="..." v-model="text" @keyup.enter="refresh()"/>
+        <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag">
+            <option  value="None">{{ $t('mods.tags.None') }}</option>
+            <option v-for="(tag) in ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility']" :key="tag" :value="tag">{{ tag }}</option>
+        </select>
     </div>
 </template>
 
@@ -11,7 +15,8 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     data() {
         return {
-            text: ""
+            text: "",
+            ftag: "None"
         };
     },
     methods: {
@@ -25,8 +30,20 @@ export default defineComponent({
             console.log(this.text.trim());
         }
     },
+    computed: {
+        tags() {
+            return [];
+        }
+    },
+    watch: {
+        ftag(n) {
+            this.$emit('updateTag', n);
+            console.log(n);
+        }
+    },
     emits: {
-        update: null
+        update: null,
+        updateTag: null
     }
 });
 </script>

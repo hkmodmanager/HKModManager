@@ -29,14 +29,14 @@
                 </div>
                 <div class="fs-6 p-1 d-flex">
                     <div class="flex-grow-1">
-                        Guid: <i> {{ task?.taskGuid }}</i>
+                        Guid: <i copyable> {{ task?.taskGuid }}</i>
                     </div>
                     <a class="btn" v-if="(task?.isFailed || task?.isSuccess)" @click="hideTask()">
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
                 <div class="task-state p-2 bg-dark">
-                    <div v-for="(val, index) in task?.taskState" :key="index">
+                    <div v-for="(val, index) in task?.taskState" :key="index" copyable>
                         <span v-if="!task?.isFailed || index !== 0">{{ val }}</span>
                         <span v-else class="text-danger">{{ val }}</span>
                     </div>

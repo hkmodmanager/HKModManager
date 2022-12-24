@@ -96,6 +96,7 @@
         "noSource": "无下载源",
         "publishTime": "发布时间",
         "tags": {
+            "None": "无",
             "Gameplay": "Gameplay",
             "Boss": "Boss",
             "Cosmetic": "Cosmetic",
