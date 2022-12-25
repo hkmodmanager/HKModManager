@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, rmSync, symlinkSync, readJSONSync, outputJSONSync } from "fs-extra";
+import { copyFileSync } from "fs";
+import { existsSync, mkdirSync, rmSync, readJSONSync, outputJSONSync } from "fs-extra";
 import { dirname, join } from "path";
 import { getAPIPath } from "./apiManager";
-import { getModsRoot } from "./modManager";
+import { getCacheModsPath } from "./modManager";
 import { appDir, isPackaged, srcRoot } from "./remoteCache";
 
 
@@ -51,22 +52,38 @@ export function getManagedPath() {
 
 export interface GameInjectConfig {
     internalLibPath: string;
-    modsPath: string
+    modsPath: string;
+    /**
+     * e.g. 'HKTool|1.0.0.0|x:/xxx/xxx/xxx/HKTool/1.0.0.0'
+     * */
+    loadedMods: string[];
+}
+
+let configPath: string;
+
+export let config: GameInjectConfig;
+
+export function loadConfig() {
+    if (!configPath) configPath = join(dirname(getAPIPath()), 'hkmm-gameinject.json');
+    if (!config) {
+        config = existsSync(configPath) ? readJSONSync(configPath) : {};
+        if (!config.loadedMods) config.loadedMods = [];
+        config.internalLibPath = getManagedPath();
+        config.modsPath = getCacheModsPath();
+    }
+}
+
+
+
+export function saveConfig() {
+    loadConfig();
+    outputJSONSync(configPath, config);
 }
 
 export function installGameInject() {
     const managed = dirname(getAPIPath());
     const data = dirname(managed);
-    const fmod = join(managed, 'Mods', 'hkmm-inject');
-    if(!existsSync(fmod)) {
-        mkdirSync(fmod, {
-            recursive: true 
-        });
-    }
-    const mp = join(fmod, 'GameInject.dll');
-    if(existsSync(mp)) {
-        rmSync(mp);
-    }
+
     const pd = join(managed, 'GameInject.dll');
     const pdb = join(managed, "GameInject.pdb");
     if (existsSync(pd)) {
@@ -75,25 +92,19 @@ export function installGameInject() {
     if (existsSync(pdb)) {
         rmSync(pdb);
     }
-    symlinkSync(getGameInjectPath(), pd);
-    symlinkSync(join(dirname(getGameInjectPath()), 'GameInject.pdb'), pdb);
-    symlinkSync(getGameInjectPath(), mp);
+    copyFileSync(getGameInjectPath(), pd);
+    copyFileSync(join(dirname(getGameInjectPath()), 'GameInject.pdb'), pdb);
 
-    const config: GameInjectConfig = {
-        internalLibPath: getManagedPath(),
-        modsPath: getModsRoot()
-    };
-
-    outputJSONSync(join(managed, 'hkmm-gameinject.json'), config);
+    saveConfig();
 
     const scripts = readJSONSync(join(data, 'ScriptingAssemblies.json')) as ScriptingAssembly;
     const init = readJSONSync(join(data, 'RuntimeInitializeOnLoads.json')) as { root: RuntimeInitializeOnLoadsItem[] };
-    if(!scripts.names.includes('GameInject.dll')) {
+    if (!scripts.names.includes('GameInject.dll')) {
         scripts.names.push('GameInject.dll');
         scripts.types.push(ScriptingAssemblyType.CustomAssembly);
         outputJSONSync(join(data, 'ScriptingAssemblies.json'), scripts);
     }
-    if(init.root.findIndex(x => x.assemblyName === 'GameInject') == -1) {
+    if (init.root.findIndex(x => x.assemblyName === 'GameInject') == -1) {
         init.root.push({
             assemblyName: 'GameInject',
             nameSpace: 'GameInject',

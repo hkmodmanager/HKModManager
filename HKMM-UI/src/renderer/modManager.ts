@@ -1,35 +1,19 @@
-import { remote } from "electron";
-import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, stat, statSync, symlinkSync, writeFileSync } from "fs";
-import { dirname, join, parse } from "path";
-import { getLowestDep, getModLinkMod, getModLinkModSync, getModLinks, modlinksCache, ModLinksData, ModLinksManifestData } from "./modlinks/modlinks";
+import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
+import { join, parse } from "path";
+import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
-import { downloadFile, downloadRaw } from "./utils/downloadFile";
+import { downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
 
 import "./apiManager";
 import { copySync } from "fs-extra";
-import { installGameInject } from "./gameinject";
+import { config, installGameInject, loadConfig, saveConfig } from "./gameinject";
 import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
 
 export const modversionFileName = "modversion.json";
-
-export function getModsRoot() {
-    const root = join(store.store.gamepath, "hkmm-mods-cache", "enabled", "mods");
-    if (!existsSync(root)) {
-        mkdirSync(root, {
-            recursive: true
-        });
-    }
-    return root;
-}
-
-export function getModsPath(name: string) {
-    const root = getModsRoot();
-    return join(root, "$$$" + name + "$$$");
-}
 
 export function getRealModPath(name: string) {
     const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', name);
@@ -65,7 +49,12 @@ export class LocalModInstance {
     public info: LocalModInfo;
 
     public isActived() {
-        const modPath = getModsPath(this.info.name);
+        loadConfig();
+        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
+        if(id == -1) return false;
+        const parts = config.loadedMods[id].split('|');
+        if(parts[1] !== this.info.version) return false;
+        const modPath = parts[2];
         if (!existsSync(modPath)) return false;
         const inst = LocalModInstance.loadForm(modPath);
         if (inst) {
@@ -95,9 +84,15 @@ export class LocalModInstance {
     }
 
     public install(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
-        const modPath = getModsPath(this.info.name);
-        if (existsSync(modPath)) rmSync(modPath, { recursive: true });
-        symlinkSync(this.info.path, modPath, "dir");
+        loadConfig();
+        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
+        const str = `${this.info.name}|${this.info.version}|${this.info.path}`;
+        if(id == -1) {
+            config.loadedMods.push(str);
+        } else {
+            config.loadedMods[id] = str;
+        }
+        saveConfig();
         if (addToCurrentGroup) {
             getCurrentGroup().addMod(this.info.name, this.info.version);
         }
@@ -118,10 +113,12 @@ export class LocalModInstance {
     }
 
     public uninstall(force: boolean = false) {
-        const modPath = getModsPath(this.info.name);
-        if (existsSync(modPath)) {
+        loadConfig();
+        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
+        if (id != -1) {
             if (!force && !this.isActived()) return;
-            rmSync(modPath, { recursive: true });
+            delete config.loadedMods[id];
+            saveConfig();
         }
     }
 
@@ -261,12 +258,12 @@ export class LocalModsVersionGroup {
                             continue;
                         }
                         if (isInstallMod(element, false)) {
-                            task.pushState(`Skip Dependency ${element}`);
+                            task.pushState(`Skip Dependency ${element.name}`);
                             continue;
                         }
                         const dep = await getModLinkMod(element.name);
                         if (!dep) {
-                            task.pushState(`Missing Dependency ${element}`);
+                            task.pushState(`Missing Dependency ${element.name}`);
                             continue;
                         }
                         const group = getOrAddLocalMod(dep.name);

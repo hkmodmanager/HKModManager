@@ -51,12 +51,7 @@ export async function installUpdate() {
     }
     const result = await checkUpdate();
     if(!result) return;
-    let raw: Buffer;
-    if(isPackaged) {
-        raw = await downloadRaw(result.url, undefined, undefined, undefined, 'Download Setup', 'Download');
-    } else {
-        raw = readFileSync(join(srcRoot, 'dist_electron', 'update.zip'));
-    }
+    const raw = await downloadRaw(result.url, undefined, undefined, undefined, 'Download Setup', 'Download');
     const updateFile = isPackaged ? join(appDir, 'update.zip') : join(srcRoot, 'dist_electron', 'win-unpacked', 'update.zip');
     writeFileSync(updateFile, raw);
     const updater = join(dirname(updateFile), 'updater.exe');

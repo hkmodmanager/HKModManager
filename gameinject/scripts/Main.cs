@@ -58,22 +58,47 @@ public static partial class Main
     }
     public static void ScanMods()
     {
-        foreach (var v in Directory.GetDirectories(config.modsPath))
+        foreach (var vp in config.loadedMods)
         {
+            if (vp is null) continue;
+            var parts = vp.Split('|');
+            if (parts.Length != 3) continue;
+            var v = parts[2];
+            if (!Directory.Exists(v)) continue;
             var mmp = Path.Combine(v, "modversion.json");
-            if(!File.Exists(mmp)) continue;
+            if (!File.Exists(mmp)) continue;
             var md = JsonConvert.DeserializeObject<ModMetadata>(File.ReadAllText(mmp))!;
             var mp = Path.GetFullPath(Path.Combine(ModPath, md.name));
             Debug.Log($"Redirect path: {mp} to {v}");
             Directory.CreateDirectory(mp);
             redirectPath.Add(mp, v);
-            foreach(var f in md.files) {
+            foreach (var f in md.files)
+            {
                 var fn = Path.GetFullPath(Path.Combine(v, f));
                 var mf = Path.GetFullPath(Path.Combine(mp, f));
                 redirectPath.Add(mf, fn);
-                if(Path.GetExtension(f) == ".dll") {
+                if (Path.GetExtension(f) == ".dll")
+                {
                     get_location_redirect.Add(fn, mf);
                 }
+            }
+        }
+    }
+    static void M0()
+    {
+        var mlt = typeof(Mod).Assembly.GetType("Modding.ModLoader");
+        var tam = mlt.GetMethod("TryAddModInstance", BindingFlags.NonPublic | BindingFlags.Static);
+        if (tam != null)
+        {
+            var mit = mlt.GetNestedType("ModInstance", BindingFlags.NonPublic | BindingFlags.Public);
+            if (mit != null)
+            {
+                var mi = Activator.CreateInstance(mit);
+                var mod = new HKMMLoader();
+                mit.GetField("Mod").SetValue(mi, mod);
+                mit.GetField("Name").SetValue(mi, mod.GetName());
+                mit.GetField("Enabled").SetValue(mi, true);
+                tam.Invoke(null, new object[]{ typeof(HKMMLoader), mi});
             }
         }
     }
@@ -83,16 +108,17 @@ public static partial class Main
         if (!ShouldLoad()) return;
         ScanMods();
 
-        var modsp = Path.Combine(Application.dataPath, "Managed", "Mods", "hkmm-inject", "GameInject.dll");
-        if (!File.Exists(modsp))
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(modsp));
-            FileSystemUtils.CreateSymbolicLink(modsp, typeof(Main).Assembly.Location, false);
-            //File.Copy(typeof(Main).Assembly.Location, modsp, true);
-        }
-
         InitHooks();
+
+        try
+        {
+            M0();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
-    
+
 }
