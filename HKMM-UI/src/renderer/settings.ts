@@ -17,7 +17,7 @@ export class MirrorGroup {
     public items: MirrorItem[] = []
 }
 
-export type SettingOptions = 'SHOW_DELETED_MODS';
+export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB';
 
 export class HKMMSettings {
     public mirror_github = new MirrorGroup();
