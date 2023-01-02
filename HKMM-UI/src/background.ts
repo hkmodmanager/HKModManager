@@ -15,7 +15,7 @@ if (!singleLock) {
 }
 
 const appDir = dirname(app.getPath('exe'));
-if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_updater'))) {
+if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_update'))) {
   const updater = join(appDir, 'updater.exe');
   if (existsSync(updater)) {
     spawn(updater, ['true', process.pid.toString()], {
@@ -143,7 +143,7 @@ app.on('window-all-closed', () => {
     });
     console.log(s);
   }
-  app.quit();
+  app.exit();
 })
 
 

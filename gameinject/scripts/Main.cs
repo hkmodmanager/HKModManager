@@ -7,6 +7,7 @@ public static partial class Main
     public static readonly string ModPath = Path.Combine(Application.dataPath, "Managed", "Mods");
     public static readonly Dictionary<string, string> redirectPath = new();
     public static readonly Dictionary<string, string> get_location_redirect = new();
+    public static readonly Dictionary<string, string> redirectDir = new();
     public static Config config = null!;
     public static bool CheckAPI()
     {
@@ -24,7 +25,7 @@ public static partial class Main
     }
     public static bool LoadConfig()
     {
-        var cp = Path.Combine(Path.GetDirectoryName(typeof(Main).Assembly.Location), "hkmm-gameinject.json");
+        var cp = Path.Combine(Path.GetDirectoryName(typeof(HeroController).Assembly.Location), "hkmm-gameinject.json");
         if (!File.Exists(cp))
         {
             Debug.LogError("Not found hkmm-gameinject.json");
@@ -71,17 +72,29 @@ public static partial class Main
             var mp = Path.GetFullPath(Path.Combine(ModPath, md.name));
             Debug.Log($"Redirect path: {mp} to {v}");
             Directory.CreateDirectory(mp);
-            redirectPath.Add(mp, v);
-            foreach (var f in md.files)
+            redirectPath.Add(mp.ToLower(), v);
+            void FED(string realRoot, string modRoot)
             {
-                var fn = Path.GetFullPath(Path.Combine(v, f));
-                var mf = Path.GetFullPath(Path.Combine(mp, f));
-                redirectPath.Add(mf, fn);
-                if (Path.GetExtension(f) == ".dll")
+                redirectDir[modRoot] = realRoot;
+                foreach (var f in Directory.EnumerateFiles(realRoot))
                 {
-                    get_location_redirect.Add(fn, mf);
+                    //Debug.Log(f);
+                    var fn = f;
+                    var mf = Path.GetFullPath(Path.Combine(modRoot, Path.GetFileName(f)));
+                    Debug.Log($"Redirect path: {mf} to {fn}");
+                    redirectPath.Add(mf.ToLower(), fn);
+                    if (Path.GetExtension(f) == ".dll")
+                    {
+                        get_location_redirect.Add(fn, mf);
+                    }
+                }
+                foreach(var d in Directory.EnumerateDirectories(realRoot))
+                {
+                    //Debug.Log(d);
+                    FED(d, Path.GetFullPath(Path.Combine(modRoot, Path.GetFileName(d))));
                 }
             }
+            FED(v, mp);
         }
     }
     static void M0()
@@ -98,7 +111,7 @@ public static partial class Main
                 mit.GetField("Mod").SetValue(mi, mod);
                 mit.GetField("Name").SetValue(mi, mod.GetName());
                 mit.GetField("Enabled").SetValue(mi, true);
-                tam.Invoke(null, new object[]{ typeof(HKMMLoader), mi});
+                tam.Invoke(null, new object[] { typeof(HKMMLoader), mi });
             }
         }
     }
