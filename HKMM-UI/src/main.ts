@@ -3,9 +3,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
 
-
-import "bootstrap/dist/js/bootstrap.js"
-import "@/renderer/modManager"
+import "bootstrap/dist/js/bootstrap.bundle.js"
 
 import "@/css/bootstrap.css"
 //import "bootstrap/dist/css/bootstrap.min.css"

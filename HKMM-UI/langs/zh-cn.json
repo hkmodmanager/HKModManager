@@ -134,6 +134,16 @@
         },
         "options": {
             "show_deleted_mods": "显示已废弃的Mods"
+        },
+        "cdn": {
+            "title": "下载源",
+            "jsdelivr": "Jsdelivr (cdn.jsdelivr.net) (默认)",
+            "githubraw": "Github Raw (raw.githubusercontent.com)",
+            "clazex": "ScarabCN (hk-modlinks.clazex.net)",
+
+            "popover": {
+                "clazex": "来源：https://github.com/Clazex"
+            }
         }
     },
     "api": {

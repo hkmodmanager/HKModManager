@@ -54,6 +54,7 @@ export async function getLatestIsMatch() {
 }
 
 export function getLatestIsMatchSync(apiInfo?: ModdingAPIData) {
+    if(store.get('cdn') == 'SCARABCN') return true;
     apiInfo = apiInfo ?? apiInfoCache;
     if (!apiInfo) return undefined;
 

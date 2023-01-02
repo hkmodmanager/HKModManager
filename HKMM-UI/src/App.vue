@@ -94,7 +94,7 @@ body,
   user-select: none;
 }
 
-[copyable] {
+[copyable], .popover-body {
   user-select: text;
 }
 

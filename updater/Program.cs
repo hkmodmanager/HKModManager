@@ -56,7 +56,7 @@ if(File.Exists(updatePack)) {
 if (waitProcess > 0)
 {
     var proc = Process.GetProcessById(waitProcess);
-    proc.WaitForExit();
+    proc?.WaitForExit();
 }
 
 

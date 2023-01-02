@@ -117,6 +117,16 @@
         },
         "options": {
             "show_deleted_mods": "Displays mods that have been deleted by the author"
+        },
+        "cdn": {
+            "title": "CDN",
+            "jsdelivr": "Jsdelivr (cdn.jsdelivr.net) (Default)",
+            "githubraw": "Github Raw (github.com)",
+            "clazex": "ScarabCN (hk-modlinks.clazex.net)",
+
+            "popover": {
+                "clazex": "From: https://github.com/Clazex"
+            }
         }
     },
     "api": {

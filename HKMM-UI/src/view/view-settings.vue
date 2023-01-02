@@ -14,6 +14,16 @@
         <a class="btn btn-success" @click="selectModsSavePath()"><i class="bi bi-folder2-open"></i></a>
       </div>
     </div>
+    <hr />
+    <div class="p-3">
+      <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
+      <CCdnRadio value="JSDELIVR" :displayname='$t("settings.cdn.jsdelivr")' v-model:cdnProp="cdn"></CCdnRadio>
+      <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
+      <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
+        <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" 
+          :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
+      </CCdnRadio>
+    </div>
     <!--Exp Mode-->
     <hr />
     <div class="p-3">
@@ -36,7 +46,7 @@
     <RequireExpmode>
       <div class="p-3">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS"/>
+          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
           <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
         </div>
       </div>
@@ -46,8 +56,8 @@
       <div class="p-3">
         <div class="form-group">
           <label class="form-label">{{
-              $t("settings.mirror.githubmirror")
-          }}</label>
+    $t("settings.mirror.githubmirror")
+            }}</label>
           <mirrorlist key-name="mirror_github"></mirrorlist>
         </div>
       </div>
@@ -66,13 +76,16 @@ import { remote } from "electron";
 import HkpathChange from "@/components/hkpath-change.vue";
 import { join } from "path";
 import { userData } from "@/renderer/remoteCache";
+import { Popover } from "bootstrap";
+import CCdnRadio from "./settings/c-cdn-radio.vue";
 
 export default defineComponent({
   components: {
     mirrorlist,
     RequireExpmode,
-    HkpathChange
-  },
+    HkpathChange,
+    CCdnRadio
+},
   mounted() {
     let checkbox = this.$refs.expModeSwitch as InputHTMLAttributes;
     checkbox.checked = store.get("enabled_exp_mode", false);
@@ -82,15 +95,24 @@ export default defineComponent({
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.UserDir) select.value = "userdir";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Custom) select.value = "custom";
     else if (store.get("modsavepathMode", ModSavePathMode.UserDir) == ModSavePathMode.Gamepath) select.value = "gamepath";
+
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    popoverTriggerList.map(function (popoverTriggerEl) {
+      return new Popover(popoverTriggerEl)
+    })
   },
   data() {
     return {
-      options: store.get('options', [])
+      options: store.get('options', []),
+      cdn: store.get('cdn', 'JSDELIVR')
     }
   },
   watch: {
     options(n) {
       store.set('options', n);
+    },
+    cdn(n) {
+      store.set('cdn', n);
     }
   },
   methods: {

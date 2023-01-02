@@ -18,6 +18,7 @@ import { getModLinks, modlinksCache, ModTag } from '@/renderer/modlinks/modlinks
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
+import { getShortName } from '@/renderer/utils/utils';
 
 export default defineComponent({
     methods: {
@@ -25,11 +26,14 @@ export default defineComponent({
             const src = (this.filter === 'all' || !this.filter) ? Object.keys(refreshLocalMods()) : getRequireUpdateModsSync();
             const result: LocalModsVersionGroup[] = [];
             //if (!modlinksCache) return result;
+            const filterT = this.search?.trim();
             for (const mod of src) {
-                const mname = mod.toLowerCase().replaceAll(' ', '').trim() + (this.getModAliasName(mod) ?? '');
-                if (this.search) {
+                const mname = mod.toLowerCase().replaceAll(' ', '').trim() 
+                    + (this.getModAliasName(mod) ?? '');
+                
+                if (filterT) {
                     const fname = this.search.toLowerCase().replaceAll(' ', '').trim();
-                    if (!mname.includes(fname)) continue;
+                    if (!mname.includes(fname) && !getShortName(mod).startsWith(filterT.trim())) continue;
                 }
 
                 const m = getLocalMod(mod);
@@ -39,7 +43,10 @@ export default defineComponent({
                 }
                 result.push(m);
             }
-            return result.sort((a, b) => a.name.localeCompare(b.name));
+            return result.sort((a, b) => a.name.localeCompare(b.name) + (filterT ? (
+                (getShortName(a.name).startsWith(filterT) ? -100 : 0) +
+                (getShortName(b.name).startsWith(filterT) ? 100 : 0)
+            ) : 0));
         },
         refresh() {
             if (!modlinksCache) {

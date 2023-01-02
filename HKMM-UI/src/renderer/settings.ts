@@ -18,6 +18,7 @@ export class MirrorGroup {
 }
 
 export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB';
+export type CDN = 'GITHUB_RAW' | 'JSDELIVR' | 'SCARABCN';
 
 export class HKMMSettings {
     public mirror_github = new MirrorGroup();
@@ -33,6 +34,7 @@ export class HKMMSettings {
     public options: SettingOptions[] = [];
     public plugins: string[] = [];
     public pluginsStatus: Record<string, PluginStatus> = {};
+    public cdn: CDN = 'JSDELIVR';
 }
 
 
@@ -79,6 +81,9 @@ function GetSettingsLocal() {
     }
     if(!store.store.pluginsStatus) {
         store.set('pluginsStatus', {});
+    }
+    if(!store.store.cdn) {
+        store.set('cdn', 'JSDELIVR');
     }
 })();
 

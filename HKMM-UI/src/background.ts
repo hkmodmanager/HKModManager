@@ -22,7 +22,7 @@ if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_updater'
       shell: false,
       detached: true
     });
-    app.quit();
+    app.exit();
   }
 }
 
@@ -95,9 +95,6 @@ async function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: true,
       contextIsolation: false,
       webSecurity: false,

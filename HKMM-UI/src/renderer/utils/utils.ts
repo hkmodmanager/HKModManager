@@ -9,7 +9,17 @@ export function ConvertSize(bytes: number) {
 }
 
 export function isVaildModDir(path: string) {
-    if(!existsSync(path)) return false;
-    if(readdirSync(path, 'utf8').findIndex(v => v.endsWith('.dll')) == -1) return false;
+    if (!existsSync(path)) return false;
+    if (readdirSync(path, 'utf8').findIndex(v => v.endsWith('.dll')) == -1) return false;
     return true;
+}
+
+export function getShortName(name: string) {
+    let abbr = '';
+    for (const part of name.split(/(?=[A-Z])/)) {
+        if (part.charAt(0).match(/([A-Z])/)) {
+            abbr = abbr + part.charAt(0);
+        }
+    }
+    return abbr;
 }

@@ -91,7 +91,7 @@
                         <span>{{ $t("mods.repo") }}:</span>
                         <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
                     </div>
-                    <div v-if="mod.date">
+                    <div v-if="mod.date && mod.date != '1970-12-22T04:50:23Z'">
                         <span>{{ $t("mods.publishTime") }}:</span>
                         <span copyable>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
                     </div>
@@ -109,9 +109,9 @@
                     <div v-if="(mod?.dependencies?.length ?? 0) > 0">
                         <hr />
                         <h5>{{ $t("mods.dep") }}</h5>
-                        <template v-if="isLocal">
+                        <template v-if="isLocal || mod.date == '1970-12-22T04:50:23Z'">
                             <h6 v-for="(dep, i) in mod?.dependencies" :key="i" copyable>
-                                {{ dep }}
+                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep)" href="javascript:;">{{ dep }}</a>
                                 <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success" notcopyable>
                                     ({{ $t("mods.depInstall") }})
                                 </span>
@@ -123,7 +123,7 @@
                                 </span>
                             </h6>
                         </template>
-                        <template v-if="!isLocal">
+                        <template v-else>
                             <h6 v-for="(dep, i) in getLowestDep(mod)" :key="i">
                                 <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep.name)" href="javascript:;">{{ dep.name }} (>= {{ dep.version }})</a>
                                 <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-danger">
@@ -147,7 +147,7 @@
                         <hr />
                         <h5>{{ $t("mods.depOnThis") }}</h5>
                         <h6 v-for="(mod, i) in depOnThis" :key="i" copyable>
-                            {{ mod.info.name }}
+                            <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod.info.name)" href="javascript:;">{{ mod.info.name }}</a>
                             <span v-if="mod.isActived()" class="text-success" notcopyable>
                                 ({{ $t("mods.enabled") }})
                             </span>
@@ -178,6 +178,7 @@ import { defineComponent } from 'vue';
 import { getFileSize } from '@/renderer/utils/downloadFile';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize } from '@/renderer/utils/utils';
+import { store } from '@/renderer/settings';
 
 class ModSizeCache {
     public time: number = new Date().valueOf();
@@ -187,6 +188,7 @@ class ModSizeCache {
 
     public static async getSize(url: string) {
         if(!navigator.onLine) return undefined;
+        if(store.store.cdn == 'SCARABCN') return 0;
         const ct = new Date().valueOf();
 
         let c = ModSizeCache.cache[url] ?? new ModSizeCache();

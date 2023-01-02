@@ -14,6 +14,7 @@ import CModsItem from './mods/c-mods-item.vue';
 import { hasOption } from '@/renderer/settings';
 import CModsSearch from './mods/c-mods-search.vue';
 import { I18nLanguages } from '@/lang/langs';
+import { getShortName } from '@/renderer/utils/utils';
 
 export default defineComponent({
     methods: {
@@ -21,13 +22,14 @@ export default defineComponent({
             const names = modlinksCache?.getAllModNames();
             if(!names || !modlinksCache) return [];
             const arr: ModLinksManifestData[] = [];
+            const filterT = this.filter?.trim();
+            const fname = this.filter?.toLowerCase().replaceAll(' ', '').trim();
             for (const name of names) {
                 const v = modlinksCache.getMod(name);
                 if(!v) continue;
                 const mname = name.toLowerCase().replaceAll(' ', '').trim() + (this.getModAliasName(name) ?? '');
-                if(this.filter) {
-                    const fname = this.filter.toLowerCase().replaceAll(' ', '').trim();
-                    if(!mname.includes(fname)) continue;
+                if(filterT && fname) {
+                    if(!mname.includes(fname) && !getShortName(name).startsWith(filterT)) continue;
                 }
                 if (this.tag && this.tag != 'None') {
                     if (!v.tags.includes(this.tag as ModTag)) continue;
@@ -36,7 +38,14 @@ export default defineComponent({
                     arr.push(v);
                 }
             }
-            return arr.sort((a, b) => a.name.localeCompare(b.name) + (a.isDeleted ? 100 : 0) + (b.isDeleted ? -100 : 0));
+            return arr.sort((a, b) => 
+            a.name.localeCompare(b.name) + 
+            (a.isDeleted ? 100 : 0) + 
+            (b.isDeleted ? -100 : 0) + 
+            (filterT ? (
+                (getShortName(a.name).startsWith(filterT) ? -100 : 0) +
+                (getShortName(b.name).startsWith(filterT) ? 100 : 0)
+            ) : 0));
         },
         updateSearch(f: string) {
             this.filter = f;
