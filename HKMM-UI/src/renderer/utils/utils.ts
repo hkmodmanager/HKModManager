@@ -16,10 +16,18 @@ export function isVaildModDir(path: string) {
 
 export function getShortName(name: string) {
     let abbr = '';
-    for (const part of name.split(/(?=[A-Z])/)) {
-        if (part.charAt(0).match(/([A-Z])/)) {
+    for (const part of name.split(/(?=[A-Z0-9])/)) {
+        if (part.charAt(0).match(/([A-Z0-9])/)) {
             abbr = abbr + part.charAt(0);
         }
+    }
+    if (abbr == '') {
+        for (const part of name.split(' ')) {
+            abbr = abbr + part.charAt(0).toUpperCase();
+        }
+    }
+    if(abbr.length == 1) {
+        return name.toUpperCase();
     }
     return abbr;
 }

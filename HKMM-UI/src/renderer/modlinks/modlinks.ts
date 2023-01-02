@@ -26,7 +26,7 @@ export interface ModLinksManifestData {
     name: string;
     desc: string;
     version: string;
-    link: string;
+    link?: string;
     dependencies: string[];
     repository: string | undefined;
     integrations: string[];
@@ -34,6 +34,7 @@ export interface ModLinksManifestData {
     authors: string[];
     date?: string;
     isDeleted?: boolean;
+    alwaysLatest?: boolean;
 }
 
 export type ModVersionCollection = Record<string, ModLinksManifestData>;
@@ -104,15 +105,15 @@ export async function parseModLinks(content: string): Promise<ModCollection> {
             name: "",
             desc: "",
             version: "",
-            link: "",
             dependencies: [],
             repository: "",
             integrations: [],
             tags: [],
             authors: [],
-            date: "1970-12-22T04:50:23Z"
+            date: "1970-12-22T04:50:23Z",
+            alwaysLatest: true
         };
-        
+
         mod.name = getXmlNodeText(manifest, "Name") ?? "";
         mod.desc = getXmlNodeText(manifest, "Description") ?? "";
         mod.version = getXmlNodeText(manifest, "Version") ?? "";
@@ -190,6 +191,26 @@ export async function getModLinksFromRepo() {
     let content: ModCollection = undefined as any;
     if (store.get('cdn') == 'SCARABCN') {
         content = await parseModLinks((await downloadFile<string>(url, undefined, undefined, false, "ModLinks", "Download")).data);
+        try {
+            const mc = (await downloadFile<ModCollection>(cdn_modlinks['JSDELIVR'])).data;
+            const mods = content.mods;
+            for (const key in mods) {
+                const mod = mods[key];
+                const cmod = mc.mods[key];
+                for (const ver in cmod) {
+                    const cver = cmod[ver];
+                    const v = mod[ver];
+                    if(v) {
+                        cver.link = v.link;
+                    } else {
+                        cver.link = undefined;
+                    }
+                    mod[ver] = cver;
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
     else {
         if (navigator.onLine || isPackaged) content = (await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download")).data;
@@ -204,7 +225,7 @@ export async function getModLinksFromRepo() {
         const mv = content.mods[key];
         for (const ver in mv) {
             const v = mv[ver];
-            if (!v.repository) {
+            if (!v.repository && v.link) {
                 const url = new URL(v.link);
                 if (url.hostname == 'github.com') {
                     url.pathname = url.pathname.substring(0, url.pathname.indexOf('/releases/download/'));

@@ -116,7 +116,8 @@
             "custom": "Custom"
         },
         "options": {
-            "show_deleted_mods": "Displays mods that have been deleted by the author"
+            "show_deleted_mods": "Displays mods that have been deleted by the author",
+            "show_mod_short_name": "Display the mod short name"
         },
         "cdn": {
             "title": "CDN",

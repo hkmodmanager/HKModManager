@@ -6,7 +6,10 @@
                 <div class="d-flex">
                     <div class="p-1">
                         {{ mod?.name }}
-                        <strong v-if="getModAliasName(mod.name) != undefined">
+                        <i v-if="getShortName(mod.name) != mod.name.toUpperCase()">
+                            ({{ getShortName(mod.name) }})
+                        </i>
+                        <strong v-if="getModAliasName(mod.name) != undefined && getModAliasName(mod.name) != mod.name">
                             ({{ getModAliasName(mod.name) }})
                         </strong>
                     </div>
@@ -177,7 +180,7 @@ import { remote } from 'electron';
 import { defineComponent } from 'vue';
 import { getFileSize } from '@/renderer/utils/downloadFile';
 import { I18nLanguages } from '@/lang/langs';
-import { ConvertSize } from '@/renderer/utils/utils';
+import { ConvertSize, getShortName } from '@/renderer/utils/utils';
 import { store } from '@/renderer/settings';
 
 class ModSizeCache {
@@ -246,10 +249,15 @@ export default defineComponent({
             return lv;
         },
         getModAliasName(name: string) {
+            if(store.get('options').includes('HIDE_MOD_ALIAS')) return undefined;
             const lang = I18nLanguages[this.$i18n.locale];
             const alias = lang?.mods?.nameAlias;
             if(!alias) return undefined;
             return alias[name?.toLowerCase()?.replaceAll(' ', '')];
+        },
+        getShortName(name: string) {
+            if(!store.get('options').includes('SHOW_MOD_SHORT_NAME')) return name.toUpperCase();
+            return getShortName(name);
         },
         getModDesc() {
             const lang = I18nLanguages[this.$i18n.locale];

@@ -11,7 +11,9 @@
       flex-shrink-0
     ">
       <h3>
-        HKMM <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
+        HKMM 
+        <span v-if="isRelease()" :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
+        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Beta: {{ getShortCommitSHA() }}</span>
       </h3>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
         <a class="bi bi-github p-2 link-light" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
@@ -162,6 +164,15 @@ export default defineComponent({
     },
     getAppVersion() {
       return appVersion;
+    },
+    isRelease() {
+      return true;
+    },
+    getCommitSHA() {
+      return "9d743e7: feat: search for mods by short name";
+    },
+    getShortCommitSHA() {
+      return "9d743e7";
     },
     openModalLanguage() {
       this.current_language = this.$i18n.locale;

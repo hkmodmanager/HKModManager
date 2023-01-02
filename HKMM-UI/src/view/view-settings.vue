@@ -14,14 +14,30 @@
         <a class="btn btn-success" @click="selectModsSavePath()"><i class="bi bi-folder2-open"></i></a>
       </div>
     </div>
+    <!--Options-->
+    <div class="p-3">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
+        <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
+      </div>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_MOD_SHORT_NAME" />
+        <label class="form-check-label">{{ $t("settings.options.show_mod_short_name") }}</label>
+      </div>
+      <div class="form-check form-switch" v-if="$i18n.locale == 'zh'">
+        <input class="form-check-input" type="checkbox" v-model="options" value="HIDE_MOD_ALIAS" />
+        <label class="form-check-label">{{ $t("settings.options.hide_mod_alias") }}</label>
+      </div>
+    </div>
     <hr />
+    <!--CDN-->
     <div class="p-3">
       <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
       <CCdnRadio value="JSDELIVR" :displayname='$t("settings.cdn.jsdelivr")' v-model:cdnProp="cdn"></CCdnRadio>
       <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
-        <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" 
-          :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
+        <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
+          data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
       </CCdnRadio>
     </div>
     <!--Exp Mode-->
@@ -43,14 +59,7 @@
         </div>
       </div>
     </div>
-    <RequireExpmode>
-      <div class="p-3">
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
-          <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
-        </div>
-      </div>
-    </RequireExpmode>
+
     <!--Mirror-->
     <RequireExpmode v-if="false">
       <div class="p-3">
@@ -85,7 +94,7 @@ export default defineComponent({
     RequireExpmode,
     HkpathChange,
     CCdnRadio
-},
+  },
   mounted() {
     let checkbox = this.$refs.expModeSwitch as InputHTMLAttributes;
     checkbox.checked = store.get("enabled_exp_mode", false);

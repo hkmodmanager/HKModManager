@@ -206,8 +206,18 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
+        if(!mod.link) {
+            task.pushState("Unable to download mod, try fallback to the latest version");
+            const lv = await getModLinkMod(mod.name);
+            if(lv?.link == undefined) {
+                task.pushState("Unable to download mod");
+                throw new Error(`Unable to download mod ${mod.name}`);
+            }
+            mod = lv;
+        }
         mod = { ...mod };
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
+        mod.link = mod.link as string;
         const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);

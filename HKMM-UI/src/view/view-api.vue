@@ -6,7 +6,7 @@
         </div>
         <div class="text-center">
             <div v-if="getAPIVersion() > 0">
-                <h3>{{ getGameVersion() }}-{{ getAPIVersion() }}
+                <h3><span copyable>{{ getGameVersion() }}-{{ getAPIVersion() }}</span>
                     <span class="badge bg-success p-1 m-1">{{ $t("api.found") }}</span>
                     <span v-if="apigf">
                         <span class="badge bg-success p-1 m-1" v-if="!hasUpdate()">{{ $t("api.isLatestVer") }}</span>
@@ -15,7 +15,7 @@
                 </h3>
             </div>
             <div v-else>
-                <h3>{{ getGameVersion() }}
+                <h3><span copyable>{{ getGameVersion() }}</span>
                     <span class="badge bg-warning p-1 m-1">{{ $t("api.notfound") }}</span>
                     <span calss="badge bg-danger p-1 m-1" v-if="nofitapi">{{ $t("api.notfit") }}</span>
                 </h3>

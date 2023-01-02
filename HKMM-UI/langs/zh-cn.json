@@ -133,7 +133,9 @@
             "custom": "自定义"
         },
         "options": {
-            "show_deleted_mods": "显示已废弃的Mods"
+            "show_deleted_mods": "显示已废弃的Mods",
+            "show_mod_short_name": "显示Mod短名称",
+            "hide_mod_alias": "隐藏Mod别称"
         },
         "cdn": {
             "title": "下载源",
