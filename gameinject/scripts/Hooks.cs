@@ -3,6 +3,7 @@ namespace GameInject;
 
 public static partial class Main
 {
+    [ThreadStatic]
     public static bool useOrigGetPath = false;
     public static void InitHooks()
     {
@@ -17,7 +18,6 @@ public static partial class Main
         HookEndpointManager.Add(typeof(Assembly).GetProperty("Location").GetMethod, (Func<Assembly, string> orig, Assembly self) =>
         {
             var result = orig(self);
-            if(useOrigGetPath) return result;
             if (get_location_redirect.TryGetValue(result, out var r1)) return r1;
             return result;
         });
@@ -26,6 +26,8 @@ public static partial class Main
             (Func<string, string> orig, string path) =>
             {
                 var result = orig(path);
+                if (useOrigGetPath) return result;
+                if(File.Exists(result)) return result;
                 if (redirectPath.TryGetValue(result.ToLower(), out var rpath))
                 {
                     Debug.Log($"[Redirect] {result} to {rpath}");
@@ -40,53 +42,107 @@ public static partial class Main
                 string path, string originalUserPath, string searchPattern, bool includeFiles, bool includeDirs,
                 SearchOption searchOption, bool checkHost) =>
             {
-                useOrigGetPath = true;
-                var result = orig(path, originalUserPath, searchPattern, includeFiles, includeDirs, searchOption, checkHost);
-                useOrigGetPath = false;
-                if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                try
                 {
-                    return result.Concat(orig(rd, originalUserPath, searchPattern, includeFiles, includeDirs, searchOption, checkHost));
+                    useOrigGetPath = true;
+                    IEnumerable<string>? result = null;
+                    
+                    var op = Path.GetFullPath(path);
+                    if (redirectDir.TryGetValue(op, out var rd))
+                    {
+                        
+                        var frd = Path.GetFullPath(rd);
+                        result = orig(frd, originalUserPath, searchPattern, includeFiles, includeDirs, searchOption, checkHost)
+                            /*.Select(x => {
+                                var r = Path.Combine(op, Path.GetFullPath(x).Remove(0, frd.Length + 1));
+                                Debug.Log($"D2: {x} -> {r}");
+                                return r;
+                            })*/
+                            ;
+                        foreach(var v in result) 
+                        {
+                            Debug.Log($"D3: {v}");
+                            Directory.CreateDirectory(Path.GetDirectoryName(v));
+                        }
+                    }
+                    if(!Directory.Exists(op) && result != null) return result;
+                    
+                    result = result ?? Enumerable.Empty<string>();
+                    return result
+                        .Concat(
+                            orig(op, originalUserPath, searchPattern, includeFiles, includeDirs, searchOption, checkHost)
+                            .Except(result)
+                            );
                 }
-                return result;
+                finally
+                {
+                    useOrigGetPath = false;
+                }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateFileInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
             (Func<string, string, string, SearchOption, IEnumerable<FileInfo>> orig,
                 string path, string originalUserPath, string searchPattern, SearchOption searchOption) =>
             {
-                useOrigGetPath = true;
-                var result = orig(path, originalUserPath, searchPattern, searchOption);
-                useOrigGetPath = false;
-                if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                try
                 {
-                    return result.Concat(orig(rd, originalUserPath, searchPattern, searchOption));
+                    useOrigGetPath = true;
+                    IEnumerable<FileInfo>? result = null;
+                    var op = Path.GetFullPath(path);
+                    if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                    {
+                        var frd = Path.GetFullPath(rd);
+                        result = orig(rd, originalUserPath, searchPattern, searchOption);
+                    }
+                    if(!Directory.Exists(path) && result != null) return result;
+                    result = result ?? Enumerable.Empty<FileInfo>();
+                    return result.Concat(orig(path, originalUserPath, searchPattern, searchOption));
                 }
-                return result;
+                finally
+                {
+                    useOrigGetPath = false;
+                }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateDirectoryInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
             (Func<string, string, string, SearchOption, IEnumerable<DirectoryInfo>> orig,
                 string path, string originalUserPath, string searchPattern, SearchOption searchOption) =>
             {
-                useOrigGetPath = true;
-                var result = orig(path, originalUserPath, searchPattern, searchOption);
-                useOrigGetPath = false;
-                if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                try
                 {
-                    return result.Concat(orig(rd, originalUserPath, searchPattern, searchOption));
+                    useOrigGetPath = true;
+                    IEnumerable<DirectoryInfo>? result = null;
+                    if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                    {
+                        result = orig(rd, originalUserPath, searchPattern, searchOption);
+                    }
+                    if(!Directory.Exists(path) && result != null) return result;
+                    result = result ?? Enumerable.Empty<DirectoryInfo>();
+                    return result.Concat(orig(path, originalUserPath, searchPattern, searchOption));
                 }
-                return result;
+                finally
+                {
+                    useOrigGetPath = false;
+                }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateFileSystemInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
             (Func<string, string, string, SearchOption, IEnumerable<FileSystemInfo>> orig,
                 string path, string originalUserPath, string searchPattern, SearchOption searchOption) =>
             {
-                useOrigGetPath = true;
-                var result = orig(path, originalUserPath, searchPattern, searchOption);
-                useOrigGetPath = false;
-                if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                try
                 {
-                    return result.Concat(orig(rd, originalUserPath, searchPattern, searchOption));
+                    useOrigGetPath = true;
+                    IEnumerable<FileSystemInfo>? result = null;
+                    if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
+                    {
+                        result = orig(rd, originalUserPath, searchPattern, searchOption);
+                    }
+                    if(!Directory.Exists(path) && result != null) return result;
+                    result = result ?? Enumerable.Empty<FileSystemInfo>();
+                    return result.Concat(orig(path, originalUserPath, searchPattern, searchOption));
                 }
-                return result;
+                finally
+                {
+                    useOrigGetPath = false;
+                }
             });
     }
 }

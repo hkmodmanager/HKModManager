@@ -197,9 +197,12 @@ export async function getModLinksFromRepo() {
             for (const key in mods) {
                 const mod = mods[key];
                 const cmod = mc.mods[key];
+                const lv = Object.keys(mod)[0];
                 for (const ver in cmod) {
+                    if(isLaterVersion(ver, lv)) continue;
                     const cver = cmod[ver];
                     const v = mod[ver];
+                    
                     if(v) {
                         cver.link = v.link;
                     } else {

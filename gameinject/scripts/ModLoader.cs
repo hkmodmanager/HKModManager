@@ -8,6 +8,6 @@ public class HKMMLoader : Mod {
     public override int LoadPriority() => -10000;
     public override string GetVersion()
     {
-        return "1.2.1";
+        return "1.2.2";
     }
 }
