@@ -20,24 +20,24 @@
                 @onshowexport="onShowExportModal" :ref="`group-${group.info.guid}`"></CGroupsGroupItem>
         </div>
     </div>
-    <ModalBox :title="$t('groups.newtitle')" ref="modal_cngb_show">
+    <ModalBox :title="$t('groups.newtitle')" ref="modal_cngb_show" :keyboard="false" :backdrop="false">
         <form>
             <div class="form-group">
                 <label class="form-label">{{ $t("groups.name") }}</label>
-                <input v-model="group_name_t" class="form-control" />
+                <input v-model="group_name_t" class="form-control"/>
             </div>
         </form>
         <template #footer>
             <button class="btn btn-primary" @click="createNewGroup()">{{ $t("groups.create") }}</button>
         </template>
     </ModalBox>
-    <ModalBox :title="$t('groups.remove')" ref="modal_delete_group">
+    <ModalBox :title="$t('groups.remove')" ref="modal_delete_group" :keyboard="false">
         <strong>{{ $t("groups.deleteMsg") }}</strong>
         <template #footer>
             <button class="btn btn-danger w-100" @click="removeGroup()">{{ $t('groups.remove') }}</button>
         </template>
     </ModalBox>
-    <ModalBox :title="$t('groups.rename')" ref="modal_rename_group">
+    <ModalBox :title="$t('groups.rename')" ref="modal_rename_group" :keyboard="false">
         <form>
             <input class="form-control" v-model="group_name_t" />
         </form>

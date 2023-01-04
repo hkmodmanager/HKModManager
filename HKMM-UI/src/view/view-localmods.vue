@@ -8,7 +8,9 @@
                 :is-local="true"></CModsItem>
         </div>
     </div>
-
+    <button class="btn btn-primary w-100" @click="showScarabModal()">{{ $t('mods.importScarab.btn') }}</button>
+    <ModalScarab ref="modal_import_scarab">
+    </ModalScarab>
 </template>
 
 <script lang="ts">
@@ -19,6 +21,7 @@ import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
 import { getShortName } from '@/renderer/utils/utils';
+import ModalScarab from './relocation/modal-scarab.vue';
 
 export default defineComponent({
     methods: {
@@ -54,6 +57,10 @@ export default defineComponent({
                     this.$forceUpdate();
                 });
             }
+        },
+        showScarabModal() {
+            const modal = this.$refs.modal_import_scarab as any;
+            modal.showModal();
         },
         showSpinner() {
             return this.filter === 'requireUpdate' && !modlinksCache;
@@ -91,6 +98,6 @@ export default defineComponent({
     mounted() {
         this.refresh();
     },
-    components: { CModsItem, CModsSearch }
+    components: { CModsItem, CModsSearch, ModalScarab }
 });
 </script>

@@ -95,6 +95,15 @@
         "isDeleted": "已废弃",
         "noSource": "无下载源",
         "publishTime": "发布时间",
+        "importScarab": {
+            "title": "从Scarab导入Mods",
+            "alertMsg": "注意：导入后的Mods将被Scarab视为未安装",
+            "confirmTitle": "确认操作",
+            "confirmBtn": "确认",
+            "cancelBtn": "取消",
+            "import": "导入",
+            "btn": "从Scarab导入"
+        },
         "tags": {
             "None": "无",
             "Gameplay": "Gameplay",

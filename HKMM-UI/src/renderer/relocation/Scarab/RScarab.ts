@@ -1,28 +1,62 @@
-import { getLocalMod, getRealModPath, isLaterVersion } from "@/renderer/modManager";
+import { getModLinkModSync } from "@/renderer/modlinks/modlinks";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
 import { remote } from "electron";
-import { existsSync } from "fs";
-import { readJSONSync } from "fs-extra";
+import { existsSync, readdirSync, rmSync } from "fs";
+import { readJSONSync, writeJSONSync } from "fs-extra";
 import { dirname, join } from "path";
 import { Component, ComputedOptions, MethodOptions } from "vue";
-import { IModRelocation } from "../IModRelocation";
 
-interface ModState {
+export interface ModState {
     Version: string;
     Enabled: boolean;
 }
 
-interface ModInfo {
+export interface ModInfo {
     mod: ModState;
+    name: string;
     path: string;
 }
 
-interface ModConfig {
+export interface ModConfig {
     Mods: Record<string, ModState>;
 }
 
 export function getScarabModConfig() {
     return join(remote.app.getPath('appData'), 'HKModInstaller', 'InstalledMods.json');
+}
+
+export function importMods(mods: ModInfo[]) {
+    const mcp = getScarabModConfig();
+    if (!existsSync(mcp)) return;
+    const mc: ModConfig = readJSONSync(mcp);
+    if (!mc.Mods) return;
+    for (const mod of mods) {
+        const lm = getOrAddLocalMod(mod.name);
+        let mlm = getModLinkModSync(mod.name);
+        if (!mlm) continue;
+        mlm = { ...mlm };
+        mlm.version = mod.mod.Version;
+        lm.installLocalMod({
+            modinfo: mlm,
+            path: mod.path,
+            name: mod.name,
+            version: mod.mod.Version,
+            install: Date.now(),
+            files: readdirSync(mod.path, 'utf8')
+        }, mod.path);
+        delete mc.Mods[mod.name];
+        try {
+            rmSync(mod.path, {
+                recursive: true
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    writeJSONSync(mcp, mc, {
+        spaces: 4
+    });
 }
 
 export function scanScarabMods() {
@@ -53,18 +87,9 @@ export function scanScarabMods() {
         }
         result.push({
             mod: mod,
+            name: name,
             path: mp
         });
     }
     return result;
-}
-
-export class RL_Scarab implements IModRelocation {
-    getModal() {
-        return require('@/view/relocation/modal-scarab.vue');
-    }
-    isRequired(): boolean {
-        return scanScarabMods().length > 0;
-    }
-    
 }

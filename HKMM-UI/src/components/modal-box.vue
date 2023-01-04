@@ -30,7 +30,11 @@ export default defineComponent({
     getModal() {
       if(this.modal) return this.modal as Modal;
       const el = this.$refs.modal as HTMLDivElement;
-      return this.modal = new Modal(el);
+      return this.modal = new Modal(el, {
+        backdrop: (this.backdrop ?? true) ? true : 'static',
+        keyboard: this.keyboard,
+        focus: this.focus
+      });
     },
     close() {
       this.getModal().hide();
@@ -48,7 +52,10 @@ export default defineComponent({
     }
   },
   props: {
-    title: String
+    title: String,
+    backdrop: Boolean,
+    keyboard: Boolean,
+    focus: Boolean
   }
 })
 </script>

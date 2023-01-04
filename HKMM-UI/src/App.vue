@@ -72,6 +72,7 @@
       <ModalUpdate />
       <router-view></router-view>
     </div>
+    <!--Modals-->
     <ModalBox ref="modal_language" :title="$t('c_language_title')">
       <select class="form-select bg-dark text-white" ref="modssavepathmode" v-model="current_language">
         <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n">{{ l_name }}</option>
@@ -209,20 +210,6 @@ export default defineComponent({
         this.$forceUpdate();
       });
     }
-    /*checkUpdate().then((val) => {
-      if (val) {
-        const result = remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-          message: `${this.$t('hasUpdate')} (v${appVersion} -> v${val[1]})`,
-          type: 'question',
-          buttons: [this.$t('downloadUpdate'), 'Cancel'],
-          cancelId: 1
-        });
-        if (result == 0) {
-          installUpdate();
-        }
-        this.$forceUpdate();
-      }
-    });*/
   }
 });
 </script>
