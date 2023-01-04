@@ -8,9 +8,11 @@
                 :is-local="true"></CModsItem>
         </div>
     </div>
-    <button class="btn btn-primary w-100" @click="showScarabModal()">{{ $t('mods.importScarab.btn') }}</button>
-    <ModalScarab ref="modal_import_scarab">
-    </ModalScarab>
+    <RequireExpmode>
+        <button class="btn btn-primary w-100" @click="showScarabModal()">{{ $t('mods.importScarab.btn') }}</button>
+        <ModalScarab ref="modal_import_scarab">
+        </ModalScarab>
+    </RequireExpmode>
 </template>
 
 <script lang="ts">
@@ -22,6 +24,7 @@ import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
 import { getShortName } from '@/renderer/utils/utils';
 import ModalScarab from './relocation/modal-scarab.vue';
+import RequireExpmode from '@/components/require-expmode.vue';
 
 export default defineComponent({
     methods: {
@@ -31,9 +34,9 @@ export default defineComponent({
             //if (!modlinksCache) return result;
             const filterT = this.search?.trim();
             for (const mod of src) {
-                const mname = mod.toLowerCase().replaceAll(' ', '').trim() 
+                const mname = mod.toLowerCase().replaceAll(' ', '').trim()
                     + (this.getModAliasName(mod) ?? '');
-                
+
                 if (filterT) {
                     const fname = this.search.toLowerCase().replaceAll(' ', '').trim();
                     if (!mname.includes(fname) && !getShortName(mod).startsWith(filterT.trim())) continue;
@@ -98,6 +101,6 @@ export default defineComponent({
     mounted() {
         this.refresh();
     },
-    components: { CModsItem, CModsSearch, ModalScarab }
+    components: { CModsItem, CModsSearch, ModalScarab, RequireExpmode }
 });
 </script>
