@@ -98,6 +98,10 @@
                         <span>{{ $t("mods.publishTime") }}:</span>
                         <span copyable>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
                     </div>
+                    <div v-if="localmod">
+                        <span>{{ $t("mods.installTime") }}:</span>
+                        <span copyable>{{ new Date(localmod.info.install).toLocaleString() }}</span>
+                    </div>
                     <div>
                         <hr />
                         <h5>{{ $t("mods.desc") }}</h5>
@@ -173,41 +177,14 @@
 
 <script lang="ts">
 import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod } from '@/renderer/modManager';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod, LocalModInstance } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import { remote } from 'electron';
 import { defineComponent } from 'vue';
-import { getFileSize } from '@/renderer/utils/downloadFile';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
 import { store } from '@/renderer/settings';
-
-class ModSizeCache {
-    public time: number = new Date().valueOf();
-    public static cache: Record<string, ModSizeCache> = {};
-    public promise?: Promise<number>;
-    public size?: number;
-
-    public static async getSize(url: string) {
-        if(!navigator.onLine) return undefined;
-        if(store.store.cdn == 'SCARABCN') return 0;
-        const ct = new Date().valueOf();
-
-        let c = ModSizeCache.cache[url] ?? new ModSizeCache();
-        if (ct - c.time > 1000 * 60 * 60 /* 1 Hour */) c = new ModSizeCache();
-        ModSizeCache.cache[url] = c;
-        if (c.size) return c.size;
-        if (c.promise) return await c.promise;
-        c.promise = (async function () {
-            const result = await getFileSize(url);
-            c.size = result;
-            c.promise = undefined;
-            return result;
-        })();
-        return await c.promise;
-    }
-}
 
 export default defineComponent({
     methods: {
@@ -338,6 +315,7 @@ export default defineComponent({
     },
     props: {
         inmod: Object,
+        localmod: LocalModInstance,
         isLocal: Boolean,
         disableUpdate: Boolean
     },
@@ -361,14 +339,8 @@ export default defineComponent({
             this.modlinkCache = val;
             this.$forceUpdate();
 
-            ModSizeCache.getSize(val.getMod(this.mod?.name as string)?.link as string).then((val) => {
-                this.modSize = val;
-                this.modSizeGet = true;
-                this.$forceUpdate();
-            }).catch(() => {
-                this.modSizeGet = true;
-                this.$forceUpdate();
-            });
+            this.modSizeGet = true;
+            this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         });
 
     },

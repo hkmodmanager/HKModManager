@@ -88,7 +88,7 @@
 import ModalBox from '@/components/modal-box.vue';
 import {
     saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup,
-    getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG, importFromZip
+    getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG
 } from '@/renderer/modgroup';
 import { defineComponent } from 'vue';
 import { remote } from 'electron'
@@ -182,7 +182,7 @@ export default defineComponent({
             this.show_drag_hkmg = false;
             for (const file of transfer.files) {
                 if (extname(file.path) === '.hkmg') importFromHKMG(file.path);
-                if (extname(file.path) === '.zip') importFromZip(file.path);
+                //if (extname(file.path) === '.zip') importFromZip(file.path);
             }
             ev.preventDefault();
             refreshLocalMods(true);

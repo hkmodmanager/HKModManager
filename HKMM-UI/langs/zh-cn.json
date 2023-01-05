@@ -95,6 +95,7 @@
         "isDeleted": "已废弃",
         "noSource": "无下载源",
         "publishTime": "发布时间",
+        "installTime": "安装时间",
         "importScarab": {
             "title": "从Scarab导入Mods",
             "alertMsg": "注意：导入后的Mods将被Scarab视为未安装",

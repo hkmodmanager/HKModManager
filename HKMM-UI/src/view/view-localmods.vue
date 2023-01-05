@@ -4,12 +4,14 @@
     <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag" />
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
-            <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
+            <CModsItem v-if="mod.isInstalled()" 
+                :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
+                :localmod="mod.versions[mod.getLatestVersion() ?? '']"
                 :is-local="true"></CModsItem>
         </div>
     </div>
     <RequireExpmode>
-        <button class="btn btn-primary w-100" @click="showScarabModal()">{{ $t('mods.importScarab.btn') }}</button>
+        <button class="btn btn-primary w-100" @click="showScarabModal()" :disabled="getModLinks() == undefined">{{ $t('mods.importScarab.btn') }}</button>
         <ModalScarab ref="modal_import_scarab">
         </ModalScarab>
     </RequireExpmode>
@@ -81,6 +83,9 @@ export default defineComponent({
             const alias = lang?.mods?.nameAlias;
             if (!alias) return undefined;
             return alias[name?.toLowerCase()?.replaceAll(' ', '')];
+        },
+        getModLinks() {
+            return modlinksCache;
         }
     },
     props: {

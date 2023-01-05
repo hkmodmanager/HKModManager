@@ -16,9 +16,9 @@
         <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Beta: {{ getShortCommitSHA() }}</span>
       </h3>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
-        <a class="bi bi-github p-2 link-light" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
-        <a class="bi bi-discord p-2 link-light" @click="openLink('https://discord.gg/4Zhdg7QyPS')" href="javascript:;"></a>
-        <a class="bi bi-wrench-adjustable-circle p-2 link-light" @click="openDevTools()" href="javascript:;"></a>
+        <a class="bi bi-github p-2 link-light" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
+        <a class="bi bi-discord p-2 link-light" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')" href="javascript:;"></a>
+        <a class="bi bi-wrench-adjustable-circle p-2 link-light" title="Dev Tools" @click="openDevTools()" href="javascript:;"></a>
       </div>
       
       <hr />

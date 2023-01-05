@@ -1,9 +1,9 @@
 import { getModLinkModSync } from "@/renderer/modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion } from "@/renderer/modManager";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
 import { remote } from "electron";
-import { existsSync, readdirSync, rmSync } from "fs";
-import { readJSONSync, writeJSONSync } from "fs-extra";
+import { copyFileSync, existsSync, readdirSync, rmSync } from "fs";
+import { copySync, readJSONSync, writeJSONSync } from "fs-extra";
 import { dirname, join } from "path";
 import { Component, ComputedOptions, MethodOptions } from "vue";
 
@@ -26,6 +26,31 @@ export function getScarabModConfig() {
     return join(remote.app.getPath('appData'), 'HKModInstaller', 'InstalledMods.json');
 }
 
+export function exportMods(mods: LocalModInstance[]) {
+    const mcp = getScarabModConfig();
+    if (!existsSync(mcp)) return;
+    const mc: ModConfig = readJSONSync(mcp);
+    if (!mc.Mods) return;
+    for (const mod of mods) {
+        //const files = mod.info.modinfo.ei_files?.files;
+        //if(!files) continue;
+        const realroot = getRealModPath(mod.info.name);
+        const root = mod.info.path;
+        copySync(realroot, root, {
+            overwrite: true,
+            recursive: true
+        });
+        const ms: ModState = {
+            Version: mod.info.version,
+            Enabled: true
+        };
+        mc.Mods[mod.info.name] = ms;
+    }
+    writeJSONSync(mcp, mc, {
+        spaces: 4
+    });
+}
+
 export function importMods(mods: ModInfo[]) {
     const mcp = getScarabModConfig();
     if (!existsSync(mcp)) return;
@@ -42,17 +67,16 @@ export function importMods(mods: ModInfo[]) {
             path: mod.path,
             name: mod.name,
             version: mod.mod.Version,
-            install: Date.now(),
-            files: readdirSync(mod.path, 'utf8')
-        }, mod.path);
+            install: Date.now()
+        }, mod.path, undefined, false);
         delete mc.Mods[mod.name];
-        try {
+        /*try {
             rmSync(mod.path, {
                 recursive: true
             });
         } catch (e) {
             console.error(e);
-        }
+        }*/
     }
     writeJSONSync(mcp, mc, {
         spaces: 4

@@ -56,6 +56,8 @@ export default defineComponent({
             if(this.selectedMods.length == 0) return;
             console.log(this.selectedMods);
             importMods(this.selectedMods);
+
+            this.$parent?.$forceUpdate();
         },
         getMods() {
             return scanScarabMods();

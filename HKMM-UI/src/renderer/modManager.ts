@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
-import { join, parse } from "path";
+import { dirname, join, parse } from "path";
 import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
@@ -12,6 +12,7 @@ import { copySync } from "fs-extra";
 import { config, installGameInject, loadConfig, saveConfig } from "./gameinject";
 import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
+import { createHash } from "crypto";
 
 export const modversionFileName = "modversion.json";
 
@@ -41,7 +42,6 @@ export class LocalModInfo {
     public version: string = "";
     public install: number = 0;
     public path: string = "";
-    public files: string[] = [];
     public modinfo: ModLinksManifestData = undefined as any;
 }
 
@@ -51,9 +51,9 @@ export class LocalModInstance {
     public isActived() {
         loadConfig();
         const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
-        if(id == -1) return false;
+        if (id == -1) return false;
         const parts = config.loadedMods[id].split('|');
-        if(parts[1] !== this.info.version) return false;
+        if (parts[1] !== this.info.version) return false;
         const modPath = parts[2];
         if (!existsSync(modPath)) return false;
         const inst = LocalModInstance.loadForm(modPath);
@@ -67,27 +67,15 @@ export class LocalModInstance {
     private fixOld() {
         const zipp = join(this.info.path, "mod.zip");
         if (existsSync(zipp)) rmSync(zipp, { force: true });
-        if (!this.info.files) {
-            this.fillFileNames();
-        }
         this.save();
     }
 
-    public fillFileNames() {
-        this.info.files = [];
-        for (const file of readdirSync(this.info.path, {
-            encoding: 'utf-8'
-        })) {
-            if (file == modversionFileName || !statSync(join(this.info.path, file)).isFile()) continue;
-            this.info.files.push(file);
-        }
-    }
 
     public install(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
         loadConfig();
         const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
         const str = `${this.info.name}|${this.info.version}|${this.info.path}`;
-        if(id == -1) {
+        if (id == -1) {
             config.loadedMods.push(str);
         } else {
             config.loadedMods[id] = str;
@@ -125,8 +113,8 @@ export class LocalModInstance {
     public canInstall() {
         const depmods = getLowestDep(this.info.modinfo);
         if (depmods) {
-            for(const mod of depmods) {
-                if(!isInstallMod(mod, false)) return false;
+            for (const mod of depmods) {
+                if (!isInstallMod(mod, false)) return false;
             }
         } else {
             for (const mod of this.info.modinfo.dependencies) {
@@ -206,10 +194,10 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
-        if(!mod.link) {
+        if (!mod.link) {
             task.pushState("Unable to download mod, try fallback to the latest version");
             const lv = await getModLinkMod(mod.name);
-            if(lv?.link == undefined) {
+            if (lv?.link == undefined) {
                 task.pushState("Unable to download mod");
                 throw new Error(`Unable to download mod ${mod.name}`);
             }
@@ -245,7 +233,6 @@ export class LocalModsVersionGroup {
         }
         task.pushState(`Download ${mod.name} complete`);
         const inst = this.versions[mod.version] = new LocalModInstance(info);
-        inst.fillFileNames();
         this.versionsArray.push(inst);
         inst.save();
         inst.install(false);
@@ -346,15 +333,36 @@ export class LocalModsVersionGroup {
         return this.versionsArray.length > 0;
     }
 
-    public installLocalMod(mod: LocalModInfo, root: string) {
-        if (this.versions[mod.version]) return false;
+    public installLocalMod(mod: LocalModInfo, root: string,
+        files?: Record<string, string | undefined>,
+        deleteFile: boolean = false) {
+        files ??= mod.modinfo.ei_files?.files;
+        if (this.versions[mod.version] || !files) return false;
         const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
         info.path = mp;
-        copySync(root, mp, {
+        /*copySync(root, mp, {
             overwrite: true,
             recursive: true
-        })
+        })*/
+        for (const fn in files) {
+            const sha256 = files[fn];
+            const srcpath = join(root, fn);
+            const dest = join(mp, fn);
+            if (!existsSync(srcpath)) continue;
+            if (sha256) {
+                const srcSHA = createHash('sha256').update(readFileSync(srcpath)).digest('hex');
+                if (sha256 != srcSHA) continue;
+            }
+            const ddir = dirname(dest);
+            if (!existsSync(ddir)) mkdirSync(ddir);
+            copySync(srcpath, dest, {
+                overwrite: true
+            });
+            if (deleteFile) {
+                rmSync(srcpath);
+            }
+        }
         const inst = new LocalModInstance(info);
         inst.save();
         this.versionsArray.push(inst);

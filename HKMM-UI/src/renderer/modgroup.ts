@@ -133,7 +133,7 @@ export class ModGroupController {
             modset.add(mod.info.name);
             mods.push(mod.info);
             let files: string[] = [];
-            files = mod.info.files;
+            files = Object.keys(mod.info.modinfo.ei_files?.files ?? {'.': ''});
             for (const f of files) {
                 output.addEntry(join(mod.info.path, f), {
                     relativePath: join(moddir, mod.info.name, f)
@@ -143,7 +143,7 @@ export class ModGroupController {
                 const mr = getRealModPath(mod.info.name);
                 console.log(mr);
                 for (const file of fedir(mr)) {
-                    if (file == modversionFileName || mod.info.files.includes(file)) continue;
+                    if (file == modversionFileName || files.includes(file)) continue;
                     console.log(join(mr, file));
                     output.addEntry(join(mr, file), {
                         relativePath: join(moddir, mod.info.name, file)

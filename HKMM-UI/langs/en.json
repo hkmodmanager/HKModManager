@@ -83,6 +83,16 @@
         "isDeleted": "Deprecated",
         "noSource": "No download source",
         "publishTime": "Publish",
+        "installTime": "Install",
+        "importScarab": {
+            "title": "Import mods from Scarab",
+            "alertMsg": "Note: Imported mods will be considered uninstalled by Scarab",
+            "confirmTitle": "Confirm",
+            "confirmBtn": "Confirm",
+            "cancelBtn": "Cancel",
+            "import": "Import",
+            "btn": "Import from Scarab"
+        },
         "tags": {
             "None": "None",
             "Gameplay": "Gameplay",

@@ -5,7 +5,7 @@ import { readJSONSync } from 'fs-extra';
 import process from 'process';
 import { Parser, ast } from 'tsxml'
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
-import { isLaterVersion } from '../modManager';
+import { isLaterVersion, refreshLocalMods } from '../modManager';
 import { isPackaged } from '../remoteCache';
 import { CDN, store } from '../settings';
 import { downloadFile, downloadText } from '../utils/downloadFile';
@@ -14,13 +14,28 @@ type ContainerNode = ast.ContainerNode<ast.Node>;
 type TextNode = ast.TextNode;
 type CDataNode = ast.CDataSectionNode;
 
-export type ModTag = "Boss" | "Cosmetic" | "Expansion" | "Gameplay" | "Library" | "Utility";
-
 export let currentPlatform: string = "";
 const cp = process.platform;
 if (cp == "win32") currentPlatform = "Windows";
 else if (cp == "darwin") currentPlatform = "Mac";
 else if (cp == "linux") currentPlatform = "Linux";
+
+export interface ModFileRecord {
+    files?: Record<string, string>;
+    link: string;
+    size?: number;
+    noSource?: boolean;
+    sha256?: string;
+}
+
+export type ModTag = "Boss" | "Cosmetic" | "Expansion" | "Gameplay" | "Library" | "Utility";
+
+export interface ModCollection {
+    mods: Record<string, ModVersionCollection>;
+    latestCommit?: string;
+}
+
+export type ModVersionCollection = Record<string, ModLinksManifestData>;
 
 export interface ModLinksManifestData {
     name: string;
@@ -34,15 +49,8 @@ export interface ModLinksManifestData {
     authors: string[];
     date?: string;
     isDeleted?: boolean;
-    alwaysLatest?: boolean;
-}
 
-export type ModVersionCollection = Record<string, ModLinksManifestData>;
-
-
-export interface ModCollection {
-    mods: Record<string, ModVersionCollection>;
-    latestCommit?: string;
+    ei_files?: ModFileRecord;
 }
 
 
@@ -110,8 +118,7 @@ export async function parseModLinks(content: string): Promise<ModCollection> {
             integrations: [],
             tags: [],
             authors: [],
-            date: "1970-12-22T04:50:23Z",
-            alwaysLatest: true
+            date: "1970-12-22T04:50:23Z"
         };
 
         mod.name = getXmlNodeText(manifest, "Name") ?? "";
@@ -199,11 +206,11 @@ export async function getModLinksFromRepo() {
                 const cmod = mc.mods[key];
                 const lv = Object.keys(mod)[0];
                 for (const ver in cmod) {
-                    if(isLaterVersion(ver, lv)) continue;
+                    if (isLaterVersion(ver, lv)) continue;
                     const cver = cmod[ver];
                     const v = mod[ver];
-                    
-                    if(v) {
+
+                    if (v) {
                         cver.link = v.link;
                     } else {
                         cver.link = undefined;
@@ -238,6 +245,11 @@ export async function getModLinksFromRepo() {
         }
     }
     promise_get_modlinks = undefined;
+    try {
+        tryRefreshOldLocalMods();
+    } catch (e) {
+        console.error(e);
+    }
     return modlinksCache;
 }
 
@@ -352,3 +364,22 @@ export function getLowestDep(mod: ModLinksManifestData) {
     return dep;
 }
 
+export function tryRefreshOldLocalMods() {
+    if (!modlinksCache) return;
+    const mods = refreshLocalMods();
+    for (const modname in mods) {
+        const lmod = mods[modname];
+        const mlmod = modlinksCache.mods.mods[modname];
+        if (!mlmod) continue;
+        for (const ver in lmod.versions) {
+            const lver = lmod.versions[ver];
+            const mlver = mlmod[ver];
+            if (!mlver) continue;
+            const linfo = lver.info.modinfo;
+            if (!linfo.ei_files) {
+                linfo.ei_files = mlver.ei_files;
+                lver.save();
+            }
+        }
+    }
+}
