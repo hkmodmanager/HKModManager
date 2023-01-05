@@ -94,7 +94,10 @@
             "confirmBtn": "Confirm",
             "cancelBtn": "Cancel",
             "import": "Import",
-            "btn": "Import from Scarab"
+            "btn": "Import from Scarab",
+
+            "exclusive": "Exclusive import",
+            "nonexclusive": "Non-exclusive import"
         },
         "exportScarab": {
             "title": "Export to Scarab",
