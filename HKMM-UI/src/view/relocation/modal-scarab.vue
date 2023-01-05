@@ -1,10 +1,15 @@
 <template>
     <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.importScarab.title')" ref="modal">
-        <div class="alert alert-danger">{{ $t('mods.importScarab.alertMsg') }}</div>
+        <select class="form-select bg-dark text-white" v-model="importMode">
+            <option value="nonexclusive">{{ $t('mods.importScarab.nonexclusive') }}</option>
+            <option value="exclusive">{{ $t('mods.importScarab.exclusive') }}</option>
+        </select>
+        <div v-if="importMode == 'exclusive'" class="alert alert-danger" copyable>{{ $t('mods.importScarab.alertMsg_exclusive') }}</div>
+        <div v-else class="alert alert-danger" copyable>{{ $t('mods.importScarab.alertMsg_nonexclusive') }}</div>
         <div v-for="(mod) in getMods()" :key="mod.name">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" v-model="selectedMods" :value="mod"/>
-                <label class="form-check-label">{{ mod.name }}(v{{mod.mod.Version}})</label>
+                <label class="form-check-label" copyable>{{ mod.name }}(v{{mod.mod.Version}})</label>
             </div>
         </div>
         <template #footer>
@@ -12,7 +17,8 @@
         </template>
     </ModalBox>
     <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.importScarab.confirmTitle')" ref="confirm">
-        <div class="alert alert-danger">{{ $t('mods.importScarab.alertMsg') }}</div>
+        <div v-if="importMode == 'exclusive'" class="alert alert-danger" copyable>{{ $t('mods.importScarab.alertMsg_exclusive') }}</div>
+        <div v-else class="alert alert-danger" copyable>{{ $t('mods.importScarab.alertMsg_nonexclusive') }}</div>
         <template #footer>
             <button class="btn btn-outline-danger" @click="beginImport()">{{ $t('mods.importScarab.confirmBtn') }}</button>
             <button class="btn btn-primary" @click="hideConfirm()">{{ $t('mods.importScarab.cancelBtn') }}</button>
@@ -29,7 +35,8 @@ export default defineComponent({
     components: { ModalBox },
     data() {
         return {
-            selectedMods: [] as ModInfo[]
+            selectedMods: [] as ModInfo[],
+            importMode: 'exclusive'
         };
     },
     methods: {
@@ -55,7 +62,7 @@ export default defineComponent({
             this.hideConfirm();
             if(this.selectedMods.length == 0) return;
             console.log(this.selectedMods);
-            importMods(this.selectedMods);
+            importMods(this.selectedMods, this.importMode == 'exclusive');
 
             this.$parent?.$forceUpdate();
         },

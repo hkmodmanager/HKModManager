@@ -96,14 +96,28 @@
         "noSource": "无下载源",
         "publishTime": "发布时间",
         "installTime": "安装时间",
+        "badge_importFromScarab": "从Scarab导入",
+        "exportToScarab": "导出到Scarab",
         "importScarab": {
             "title": "从Scarab导入Mods",
-            "alertMsg": "注意：导入后的Mods将被Scarab视为未安装",
+            "alertMsg_exclusive": "注意：导入后的Mods将被Scarab视为未安装",
+            "alertMsg_nonexclusive": "注意：导入后的Mods在日后可能会和Scarab所管理的Mods出现版本冲突或其他问题",
             "confirmTitle": "确认操作",
             "confirmBtn": "确认",
             "cancelBtn": "取消",
             "import": "导入",
-            "btn": "从Scarab导入"
+            "btn": "从Scarab导入",
+
+            "exclusive": "独占式导入",
+            "nonexclusive": "非独占式导入"
+        },
+        "exportScarab": {
+            "title": "导出到Scarab",
+            "alertMsg": "注意：导出后的Mod在日后可能会和HKMM所管理的Mod出现版本冲突或其他问题",
+            "dontAsk": "不再提示",
+            "confirmTitle": "确认操作",
+            "confirmBtn": "确认",
+            "cancelBtn": "取消"
         },
         "tags": {
             "None": "无",

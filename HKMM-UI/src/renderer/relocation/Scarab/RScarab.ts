@@ -31,18 +31,20 @@ export function exportMods(mods: LocalModInstance[]) {
     if (!existsSync(mcp)) return;
     const mc: ModConfig = readJSONSync(mcp);
     if (!mc.Mods) return;
+    console.log(mods);
     for (const mod of mods) {
         //const files = mod.info.modinfo.ei_files?.files;
         //if(!files) continue;
-        const realroot = getRealModPath(mod.info.name);
+        const realroot = getRealModPath(mod.info.name, !mod.isActived());
         const root = mod.info.path;
-        copySync(realroot, root, {
+        console.log(realroot);
+        copySync(root, realroot, {
             overwrite: true,
             recursive: true
         });
         const ms: ModState = {
             Version: mod.info.version,
-            Enabled: true
+            Enabled: mod.isActived()
         };
         mc.Mods[mod.info.name] = ms;
     }
@@ -51,7 +53,7 @@ export function exportMods(mods: LocalModInstance[]) {
     });
 }
 
-export function importMods(mods: ModInfo[]) {
+export function importMods(mods: ModInfo[], exclusive = true) {
     const mcp = getScarabModConfig();
     if (!existsSync(mcp)) return;
     const mc: ModConfig = readJSONSync(mcp);
@@ -67,9 +69,10 @@ export function importMods(mods: ModInfo[]) {
             path: mod.path,
             name: mod.name,
             version: mod.mod.Version,
-            install: Date.now()
-        }, mod.path, undefined, false);
-        delete mc.Mods[mod.name];
+            install: Date.now(),
+            importFromScarab: true
+        }, mod.path, undefined, exclusive);
+        if(exclusive) delete mc.Mods[mod.name];
         /*try {
             rmSync(mod.path, {
                 recursive: true

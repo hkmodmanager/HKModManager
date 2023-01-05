@@ -20,10 +20,12 @@
                         class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
+                    <span v-if="isLocal && localmod && localmod.info.importFromScarab" class="badge bg-success mt-2">
+                        {{ $t("mods.badge_importFromScarab") }}
+                    </span>
                     <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
                     </span>
-                    
 
                     <!--Tags-->
                     <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
@@ -51,6 +53,10 @@
                         <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
                             <div class="flex-grow-1 d-flex">
+                                <a class="btn btn-primary bi bi-box-arrow-up-right" 
+                                    v-if="isUseScarab()"
+                                    :title="$t('mods.exportToScarab')"
+                                    @click="exportToScarab()"></a>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
                                         v-if="!isUsed(mod?.name as string) && canEnable(mod?.name as string)"
@@ -185,6 +191,8 @@ import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
 import { store } from '@/renderer/settings';
+import { getScarabModConfig } from '@/renderer/relocation/Scarab/RScarab';
+import { existsSync } from 'fs';
 
 export default defineComponent({
     methods: {
@@ -246,6 +254,13 @@ export default defineComponent({
             if (this.disableUpdate || !this.modlinkCache) return undefined;
             return this.modlinkCache.getMod(name)?.version;
         },
+        exportToScarab() {
+            if(!this.localmod) return;
+            this.$emit('showExportToScarabConfirm', this.localmod);
+        },
+        isUseScarab() {
+            return existsSync(getScarabModConfig());
+        },
         async installMod() {
             if (this.mod === undefined) return;
             const group = getOrAddLocalMod(this.mod.name);
@@ -303,10 +318,12 @@ export default defineComponent({
             const ml = await getModLinkMod(this.mod.name);
             if (!ml) return;
             const group = getOrAddLocalMod(this.mod.name);
+            const oa = group.isActived();
             group.disableAll();
             await group.installNew(ml);
-            group.getLatest()?.install();
+            if(!oa) group.getLatest()?.uninstall();
             this.$forceUpdate();
+            this.$parent?.$forceUpdate();
         },
         getModSize() {
             if (!this.modSize) return "0 KB";
@@ -346,6 +363,9 @@ export default defineComponent({
     },
     unmounted() {
         clearInterval(this.checkTimer);
+    },
+    emits: {
+        showExportToScarabConfirm: null
     }
 });
 </script>

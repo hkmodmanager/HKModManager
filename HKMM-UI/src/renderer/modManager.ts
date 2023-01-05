@@ -16,8 +16,8 @@ import { createHash } from "crypto";
 
 export const modversionFileName = "modversion.json";
 
-export function getRealModPath(name: string) {
-    const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', name);
+export function getRealModPath(name: string, disabled = false) {
+    const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
     if (!existsSync(p)) mkdirSync(p);
     return p;
 }
@@ -42,6 +42,7 @@ export class LocalModInfo {
     public version: string = "";
     public install: number = 0;
     public path: string = "";
+    public importFromScarab?: boolean = false;
     public modinfo: ModLinksManifestData = undefined as any;
 }
 
@@ -340,6 +341,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version] || !files) return false;
         const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
+        if(!existsSync(mp)) mkdirSync(mp);
         info.path = mp;
         /*copySync(root, mp, {
             overwrite: true,

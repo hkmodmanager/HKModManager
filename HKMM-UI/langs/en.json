@@ -84,14 +84,25 @@
         "noSource": "No download source",
         "publishTime": "Publish",
         "installTime": "Install",
+        "badge_importFromScarab": "Import from Scarab",
+        "exportToScarab": "Export mod to Scarab",
         "importScarab": {
             "title": "Import mods from Scarab",
-            "alertMsg": "Note: Imported mods will be considered uninstalled by Scarab",
+            "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",
+            "alertMsg_nonexclusive": "Warning: Imported mods may have version conflicts or other issues with mods managed by Scarab in the future",
             "confirmTitle": "Confirm",
             "confirmBtn": "Confirm",
             "cancelBtn": "Cancel",
             "import": "Import",
             "btn": "Import from Scarab"
+        },
+        "exportScarab": {
+            "title": "Export to Scarab",
+            "alertMsg": "Warning: Exported mods may have version conflicts or other issues with mods managed by HKMM in the future",
+            "dontAsk": "Ask no more",
+            "confirmTitle": "Confirm",
+            "confirmBtn": "Confirm",
+            "cancelBtn": "Cancel"
         },
         "tags": {
             "None": "None",
