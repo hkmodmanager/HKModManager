@@ -145,8 +145,7 @@
         },
         "cdn": {
             "title": "CDN",
-            "jsdelivr": "Jsdelivr (cdn.jsdelivr.net) (Default)",
-            "githubraw": "Github Raw (github.com)",
+            "githubraw": "Github Raw (github.com) (Default)",
             "clazex": "ScarabCN (hk-modlinks.clazex.net)",
 
             "popover": {

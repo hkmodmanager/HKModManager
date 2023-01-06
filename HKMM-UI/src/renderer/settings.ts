@@ -34,7 +34,7 @@ export class HKMMSettings {
     public options: SettingOptions[] = [];
     public plugins: string[] = [];
     public pluginsStatus: Record<string, PluginStatus> = {};
-    public cdn: CDN = 'JSDELIVR';
+    public cdn: CDN = 'GITHUB_RAW';
 }
 
 
@@ -82,8 +82,8 @@ function GetSettingsLocal() {
     if(!store.store.pluginsStatus) {
         store.set('pluginsStatus', {});
     }
-    if(!store.store.cdn) {
-        store.set('cdn', 'JSDELIVR');
+    if(!store.store.cdn || store.store.cdn == 'JSDELIVR') {
+        store.set('cdn', 'GITHUB_RAW');
     }
 })();
 

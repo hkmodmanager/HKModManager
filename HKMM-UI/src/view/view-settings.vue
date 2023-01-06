@@ -33,7 +33,6 @@
     <!--CDN-->
     <div class="p-3">
       <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
-      <CCdnRadio value="JSDELIVR" :displayname='$t("settings.cdn.jsdelivr")' v-model:cdnProp="cdn"></CCdnRadio>
       <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"

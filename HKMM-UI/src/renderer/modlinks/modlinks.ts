@@ -66,6 +66,7 @@ export class ModLinksData {
     public getMod(name: string, version?: string) {
         const ver = this.getModVersions(name);
         if (!ver) return undefined;
+        if(version) return ver[version];
         let latest = "0.0.0.0";
         for (const v in ver) {
             if (isLaterVersion(v, latest)) {
@@ -199,7 +200,8 @@ export async function getModLinksFromRepo() {
     if (store.get('cdn') == 'SCARABCN') {
         content = await parseModLinks((await downloadFile<string>(url, undefined, undefined, false, "ModLinks", "Download")).data);
         try {
-            const mc = (await downloadFile<ModCollection>(cdn_modlinks['JSDELIVR'])).data;
+            const mc = (await downloadFile<ModCollection>(cdn_modlinks['GITHUB_RAW'], undefined, undefined, 
+            undefined, undefined, undefined)).data;
             const mods = content.mods;
             for (const key in mods) {
                 const mod = mods[key];
@@ -382,4 +384,9 @@ export function tryRefreshOldLocalMods() {
             }
         }
     }
+}
+
+export function hasModLink_ei_files() {
+    if(!modlinksCache) return false;
+    return (getModLinkModSync("HKTool")?.ei_files || getModLinkModSync("Satchel")?.ei_files || getModLinkModSync("Vasi")?.ei_files) != undefined;
 }

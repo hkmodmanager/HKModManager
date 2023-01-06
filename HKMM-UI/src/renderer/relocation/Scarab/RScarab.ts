@@ -1,4 +1,4 @@
-import { getModLinkModSync } from "@/renderer/modlinks/modlinks";
+import { getModLinkModSync, modlinksCache } from "@/renderer/modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
 import { remote } from "electron";
@@ -60,7 +60,7 @@ export function importMods(mods: ModInfo[], exclusive = true) {
     if (!mc.Mods) return;
     for (const mod of mods) {
         const lm = getOrAddLocalMod(mod.name);
-        let mlm = getModLinkModSync(mod.name);
+        let mlm = modlinksCache?.getMod(mod.name, mod.mod.Version);
         if (!mlm) continue;
         mlm = { ...mlm };
         mlm.version = mod.mod.Version;
@@ -112,6 +112,9 @@ export function scanScarabMods() {
                 if (isLaterVersion(lv, mod.Version) || lv == mod.Version) continue;
             }
         }
+        const mm = modlinksCache?.getMod(name, mod.Version);
+        if(!mm) continue;
+        if(!mm.ei_files) continue;
         result.push({
             mod: mod,
             name: name,

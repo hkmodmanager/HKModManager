@@ -163,8 +163,7 @@
         },
         "cdn": {
             "title": "下载源",
-            "jsdelivr": "Jsdelivr (cdn.jsdelivr.net) (默认)",
-            "githubraw": "Github Raw (raw.githubusercontent.com)",
+            "githubraw": "Github Raw (raw.githubusercontent.com) (默认)",
             "clazex": "ScarabCN (hk-modlinks.clazex.net)",
 
             "popover": {

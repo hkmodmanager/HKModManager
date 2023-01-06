@@ -54,7 +54,7 @@
 
                             <div class="flex-grow-1 d-flex">
                                 <a class="btn btn-primary bi bi-box-arrow-up-right" 
-                                    v-if="isUseScarab()"
+                                    v-if="canExportToScarab() && localmod"
                                     :title="$t('mods.exportToScarab')"
                                     @click="exportToScarab()"></a>
                                 <div class="flex-grow-1 d-flex">
@@ -257,6 +257,9 @@ export default defineComponent({
         exportToScarab() {
             if(!this.localmod) return;
             this.$emit('showExportToScarabConfirm', this.localmod);
+        },
+        canExportToScarab() {
+            return this.isUseScarab() && this.localmod;
         },
         isUseScarab() {
             return existsSync(getScarabModConfig());

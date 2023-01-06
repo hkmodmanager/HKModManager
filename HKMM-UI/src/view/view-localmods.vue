@@ -9,7 +9,7 @@
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'">
-        <button class="btn btn-primary w-100" @click="showScarabModal()" :disabled="getModLinks() == undefined">{{
+        <button class="btn btn-primary w-100" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
             $t('mods.importScarab.btn')
         }}</button>
     </div>
@@ -31,7 +31,7 @@
 <script lang="ts">
 import { refreshLocalMods, LocalModsVersionGroup, getRequireUpdateModsSync, getLocalMod, LocalModInstance } from '@/renderer/modManager';
 import { defineComponent } from 'vue';
-import { getModLinks, modlinksCache, ModTag } from '@/renderer/modlinks/modlinks';
+import { getModLinks, hasModLink_ei_files, modlinksCache, ModTag } from '@/renderer/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
@@ -92,6 +92,9 @@ export default defineComponent({
         hideISConfirm() {
             const modal = this.$refs.modal_export_scarab as any;
             modal.getModal().hide();
+        },
+        canImportFromScarab() {
+            return hasModLink_ei_files();
         },
         beginES() {
             this.hideISConfirm();
