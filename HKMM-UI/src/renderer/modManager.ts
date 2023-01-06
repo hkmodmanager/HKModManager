@@ -338,7 +338,7 @@ export class LocalModsVersionGroup {
         files?: Record<string, string | undefined>,
         deleteFile: boolean = false) {
         files ??= mod.modinfo.ei_files?.files;
-        if (this.versions[mod.version] || !files) return false;
+        if (this.versions[mod.version] || !files) return undefined;
         const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
         if(!existsSync(mp)) mkdirSync(mp);
@@ -369,7 +369,7 @@ export class LocalModsVersionGroup {
         inst.save();
         this.versionsArray.push(inst);
         this.versions[mod.name] = inst;
-        return true;
+        return inst;
     }
 
 }

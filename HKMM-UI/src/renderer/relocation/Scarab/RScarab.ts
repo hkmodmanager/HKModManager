@@ -64,7 +64,7 @@ export function importMods(mods: ModInfo[], exclusive = true) {
         if (!mlm) continue;
         mlm = { ...mlm };
         mlm.version = mod.mod.Version;
-        lm.installLocalMod({
+        const result = lm.installLocalMod({
             modinfo: mlm,
             path: mod.path,
             name: mod.name,
@@ -72,6 +72,8 @@ export function importMods(mods: ModInfo[], exclusive = true) {
             install: Date.now(),
             importFromScarab: true
         }, mod.path, undefined, exclusive);
+        if(!result) continue;
+        copySync(join(result.info.path, 'modversion.json'), join(mod.path, 'modversion.json'));
         if(exclusive) delete mc.Mods[mod.name];
         /*try {
             rmSync(mod.path, {
