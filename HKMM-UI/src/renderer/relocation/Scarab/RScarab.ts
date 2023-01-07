@@ -2,7 +2,7 @@ import { getModLinkModSync, modlinksCache } from "@/renderer/modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
 import { remote } from "electron";
-import { copyFileSync, existsSync, readdirSync, rmSync } from "fs";
+import { copyFileSync, existsSync, readdirSync, rmSync, writeFileSync } from "fs";
 import { copySync, readJSONSync, writeJSONSync } from "fs-extra";
 import { dirname, join } from "path";
 import { Component, ComputedOptions, MethodOptions } from "vue";
@@ -74,6 +74,7 @@ export function importMods(mods: ModInfo[], exclusive = true) {
         }, mod.path, undefined, exclusive);
         if(!result) continue;
         copySync(join(result.info.path, 'modversion.json'), join(mod.path, 'modversion.json'));
+        result.writeMetadataPath();
         if(exclusive) delete mc.Mods[mod.name];
         /*try {
             rmSync(mod.path, {

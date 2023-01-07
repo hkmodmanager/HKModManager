@@ -15,6 +15,7 @@ import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
 
 export const modversionFileName = "modversion.json";
+export const hkmmmMetaDataFileName = "HKMM-Metadata";
 
 export function getRealModPath(name: string, disabled = false) {
     const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
@@ -81,6 +82,7 @@ export class LocalModInstance {
         } else {
             config.loadedMods[id] = str;
         }
+        this.writeMetadataPath();
         saveConfig();
         if (addToCurrentGroup) {
             getCurrentGroup().addMod(this.info.name, this.info.version);
@@ -147,6 +149,14 @@ export class LocalModInstance {
         const inst = new LocalModInstance(info);
         inst.fixOld();
         return inst;
+    }
+
+    public writeMetadataPath() {
+        try {
+            writeFileSync(join(getRealModPath(this.info.name), hkmmmMetaDataFileName), join(this.info.path, modversionFileName));
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     public constructor(info: LocalModInfo) {
@@ -333,6 +343,7 @@ export class LocalModsVersionGroup {
     public isInstalled() {
         return this.versionsArray.length > 0;
     }
+
 
     public installLocalMod(mod: LocalModInfo, root: string,
         files?: Record<string, string | undefined>,
