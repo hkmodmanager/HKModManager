@@ -44,15 +44,19 @@ export function searchLanguages() {
             for (const key in md.mixer) {
                 const fp = join(root, md.mixer[key]);
                 console.log(`[I18n] Mixer: ${key} -> ${fp}`);
-                if(!existsSync(fp)) continue;
+                if (!existsSync(fp)) continue;
                 const fd = JSON.parse(readFileSync(fp, 'utf-8'));
                 const keyp = key.split('.');
-                
+
                 let obj = data;
                 for (let i = 0; i < keyp.length; i++) {
                     const element = keyp[i];
-                    if(i == keyp.length - 1) {
-                        obj[element] = fd;
+                    if (i == keyp.length - 1) {
+                        if (obj[element]) {
+                            obj[element] = { ...obj[element], ...fd };
+                        } else {
+                            obj[element] = fd;
+                        }
                     } else {
                         obj = obj[element] = obj[element] ?? {};
                     }

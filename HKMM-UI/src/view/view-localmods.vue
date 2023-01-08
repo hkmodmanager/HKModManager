@@ -1,11 +1,13 @@
 <template>
     <div class="spinner spinner-border text-primary mx-auto d-block" v-if="showSpinner()">
     </div>
-    <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag" />
+    <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag"
+        :custom-tags="filter !== 'requireUpdate' ? ['ScarabImported'] : []" />
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
-                :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true" @show-export-to-scarab-confirm="showISConfirm"></CModsItem>
+                :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true"
+                @show-export-to-scarab-confirm="showISConfirm"></CModsItem>
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'">
@@ -15,11 +17,12 @@
     </div>
     <ModalScarab ref="modal_import_scarab">
     </ModalScarab>
-    <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.exportScarab.confirmTitle')" ref="modal_export_scarab">
+    <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.exportScarab.confirmTitle')"
+        ref="modal_export_scarab">
         <div class="alert alert-danger" copyable>{{ $t('mods.exportScarab.alertMsg') }}</div>
         <template #footer>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" v-model="options" value="HIDE_ALERT_EXPORT_TO_SCARAB"/>
+            <div class="form-check" style="display: none">
+                <input class="form-check-input" type="checkbox" v-model="options" value="HIDE_ALERT_EXPORT_TO_SCARAB" />
                 <label class="form-check-label">{{ $t('mods.exportScarab.dontAsk') }}</label>
             </div>
             <button class="btn btn-outline-danger" @click="beginES()">{{ $t('mods.exportScarab.confirmBtn') }}</button>
@@ -39,7 +42,7 @@ import { getShortName } from '@/renderer/utils/utils';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalBox from '@/components/modal-box.vue';
 import { exportMods } from '@/renderer/relocation/Scarab/RScarab';
-import { hasOption, store } from '@/renderer/settings';
+import { store } from '@/renderer/settings';
 
 export default defineComponent({
     methods: {
@@ -60,7 +63,11 @@ export default defineComponent({
                 const m = getLocalMod(mod);
                 if (!m) continue;
                 if (this.tag && this.tag != 'None') {
-                    if (!m.getLatest()?.info.modinfo.tags.includes(this.tag as ModTag)) continue;
+                    if (this.tag == 'ScarabImported') {
+                        if(!m.getLatest()?.info.importFromScarab) continue;
+                    } else {
+                        if (!m.getLatest()?.info.modinfo.tags.includes(this.tag as ModTag)) continue;
+                    }
                 }
                 result.push(m);
             }
@@ -82,10 +89,10 @@ export default defineComponent({
         },
         showISConfirm(mod: LocalModInstance) {
             this.ets_mod = mod;
-            if(hasOption('HIDE_ALERT_EXPORT_TO_SCARAB')) {
-                this.beginES();
-                return;
-            }
+            //if (hasOption('HIDE_ALERT_EXPORT_TO_SCARAB')) {
+            //    this.beginES();
+            //    return;
+            //}
             const modal = this.$refs.modal_export_scarab as any;
             modal.getModal().show();
         },
@@ -98,8 +105,8 @@ export default defineComponent({
         },
         beginES() {
             this.hideISConfirm();
-            if(!this.ets_mod) return;
-            exportMods([ this.ets_mod as any ]);
+            if (!this.ets_mod) return;
+            exportMods([this.ets_mod as any]);
             this.ets_mod = undefined as any;
         },
         showSpinner() {

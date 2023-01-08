@@ -49,7 +49,7 @@ export class LocalModInfo {
 
 export class LocalModInstance {
     public info: LocalModInfo;
-
+    public name: string;
     public isActived() {
         loadConfig();
         const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
@@ -154,13 +154,14 @@ export class LocalModInstance {
     public writeMetadataPath() {
         try {
             writeFileSync(join(getRealModPath(this.info.name), hkmmmMetaDataFileName), join(this.info.path, modversionFileName));
-        } catch(e) {
+        } catch (e) {
             console.error(e);
         }
     }
 
     public constructor(info: LocalModInfo) {
         this.info = info;
+        this.name = info.name;
     }
 }
 
@@ -352,7 +353,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version] || !files) return undefined;
         const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
-        if(!existsSync(mp)) mkdirSync(mp);
+        if (!existsSync(mp)) mkdirSync(mp);
         info.path = mp;
         /*copySync(root, mp, {
             overwrite: true,
@@ -464,6 +465,29 @@ export function getSubMods(name: string, onlyLatest: boolean = true) {
     }
     for (const iterator of inst) {
         if (iterator.info.modinfo.dependencies.includes(name)) result.push(iterator);
+    }
+    return result;
+}
+
+export function getIntegrationsMods(name: string, onlyLatest: boolean = true) {
+    const result: LocalModInstance[] = [];
+    const inst: LocalModInstance[] = [];
+
+    for (const key in localMods) {
+        const mod = localMods[key];
+        if (onlyLatest) {
+            const l = mod.getLatest();
+            if (l) inst.push(l);
+        } else {
+            for (let i = 0; i < mod.versionsArray.length; i++) {
+                inst.push(mod.versionsArray[i]);
+            }
+        }
+    }
+    const self = getLocalMod(name)?.getLatest();
+    for (const iterator of inst) {
+        if (iterator.info.modinfo.integrations.includes(name) || 
+            (self?.info.modinfo?.integrations.includes(iterator.name))) result.push(iterator);
     }
     return result;
 }

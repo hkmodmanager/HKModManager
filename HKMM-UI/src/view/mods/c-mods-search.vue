@@ -4,7 +4,8 @@
         <input class="form-control" placeholder="..." v-model="text" @keyup.enter="refresh()"/>
         <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag">
             <option  value="None">{{ $t('mods.tags.None') }}</option>
-            <option v-for="(tag) in ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility']" :key="tag" :value="tag">{{ tag }}</option>
+            <option v-for="(tag) in ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility', ...(customTags as string[] ?? [])]" 
+            :key="tag" :value="tag">{{ $t('mods.tags.' + tag) }}</option>
         </select>
     </div>
 </template>
@@ -40,6 +41,9 @@ export default defineComponent({
             this.$emit('updateTag', n);
             console.log(n);
         }
+    },
+    props: {
+        customTags: Array
     },
     emits: {
         update: null,

@@ -390,3 +390,31 @@ export function hasModLink_ei_files() {
     if(!modlinksCache) return false;
     return (getModLinkModSync("HKTool")?.ei_files || getModLinkModSync("Satchel")?.ei_files || getModLinkModSync("Vasi")?.ei_files) != undefined;
 }
+
+export function getSubMods_ModLinks(name: string) {
+    if(!modlinksCache) return [];
+    const result: ModLinksManifestData[] = [];
+    for (const key in modlinksCache.mods.mods) {
+        const mod = getModLinkModSync(key);
+        if(!mod || mod.isDeleted) continue;
+        if(mod.dependencies.includes(name)) result.push(mod);
+    }
+    return result;
+}
+
+export function getIntegrationsMods_ModLinks(name: string) {
+    if(!modlinksCache) return [];
+    
+    const self = getModLinkModSync(name);
+    if(!self) return [];
+    const result: ModLinksManifestData[] = [];
+    const names: string[] = [];
+    for (const key in modlinksCache.mods.mods) {
+        const mod = getModLinkModSync(key);
+        if(!mod || names.includes(key) || mod.isDeleted) continue;
+        names.push(key);
+        if(mod.integrations.includes(name) || self.integrations.includes(key)) result.push(mod);
+    }
+    
+    return result;
+}

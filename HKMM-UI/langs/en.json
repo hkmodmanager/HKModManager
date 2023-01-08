@@ -9,6 +9,8 @@
     "c_languages": "Language",
     "c_language_title": "Language",
     "c_language_apply": "Apply",
+    "collapse": "Collapse",
+    "expand": "Expand",
     "hasUpdate": "A new version is available",
     "downloadUpdate": "Download the update",
     "updateTitle": "Update",
@@ -78,14 +80,17 @@
         "use": "Enable",
         "unuse": "Disable",
         "desc": "Description",
+        "badge_scarabInstalled": "Installed in Scarab",
         "missingDep": "Not installed",
         "depOnThis": "The following mods depend on this mod",
+        "integrateWithThis": "The following mods are integrated with this mod",
         "isDeleted": "Deprecated",
         "noSource": "No download source",
         "publishTime": "Publish",
         "installTime": "Install",
         "badge_importFromScarab": "Import from Scarab",
         "exportToScarab": "Export mod to Scarab",
+        "releasePath": "Release",
         "importScarab": {
             "title": "Import mods from Scarab",
             "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",
@@ -114,7 +119,9 @@
             "Cosmetic": "Cosmetic",
             "Expansion": "Expansion",
             "Library": "Library",
-            "Utility": "Utility"
+            "Utility": "Utility",
+            "ScarabInstalled": "Installed in Scarab",
+            "ScarabImported": "Imported from Scarab"
         }
     },
     "settings": {

@@ -2,7 +2,7 @@
 <template>
     <div class="task-item accordion-item text-black p-1" :id="`mod-download-${mod.name.replaceAll(' ', '')}`">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed" @click="toggleBody()">
+            <button class="accordion-button collapsed" @click="toggleCollapse('body')">
                 <div class="d-flex">
                     <div class="p-1">
                         {{ mod?.name }}
@@ -20,8 +20,11 @@
                         class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
-                    <span v-if="isLocal && localmod && localmod.info.importFromScarab" class="badge bg-success mt-2">
+                    <span v-if="localmod && localmod.info.importFromScarab" class="badge bg-success mt-2">
                         {{ $t("mods.badge_importFromScarab") }}
+                    </span>
+                    <span v-if="!isLocal && scarab" class="badge bg-success mt-2">
+                        {{ $t("mods.badge_scarabInstalled") }}
                     </span>
                     <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
@@ -31,11 +34,12 @@
                     <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
                         {{ $t(`mods.tags.${tag}`) }}
                     </span>
-                    
+
                     <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
                         {{ $t("mods.isDeleted") }}
                     </span>
-                    <span v-if="(modSize == undefined) && modSizeGet && !isLocal && !isInstallMod(mod?.name ?? '')" class="badge bg-danger mt-2">
+                    <span v-if="(modSize == undefined) && modSizeGet && !isLocal && !isInstallMod(mod?.name ?? '')"
+                        class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
                     </span>
                 </div>
@@ -47,15 +51,18 @@
                 <!--accordion body-->
                 <div>
                     <div class="d-flex w-100">
-                        <button class="btn btn-primary flex-grow-1" @click="installMod"
-                            :disabled="isDownload || (modSize == undefined)"
-                            v-if="!isInstallMod(mod?.name as string)">{{ $t("mods.install") }}</button>
+                        <template v-if="!isInstallMod(mod?.name as string)">
+                            <button class="btn btn-primary" @click="$emit('importFromScarab', scarab)"
+                                :disabled="isDownload || (modSize == undefined)"
+                                v-if="scarab">{{ $t("mods.importScarab.title") }}</button>
+                            <button class="btn btn-primary flex-grow-1" @click="installMod"
+                                :disabled="isDownload || (modSize == undefined)">{{ $t("mods.install") }}</button>
+                        </template>
                         <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
                             <div class="flex-grow-1 d-flex">
-                                <a class="btn btn-primary bi bi-box-arrow-up-right" 
-                                    v-if="canExportToScarab() && localmod"
-                                    :title="$t('mods.exportToScarab')"
+                                <a class="btn btn-primary bi bi-box-arrow-up-right"
+                                    v-if="canExportToScarab() && localmod" :title="$t('mods.exportToScarab')"
                                     @click="exportToScarab()"></a>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
@@ -69,7 +76,7 @@
                                     </button>
                                     <button class="btn btn-primary flex-grow-1" @click="installMod"
                                         v-if="!canEnable(mod?.name as string)" :disabled="isDownload">{{
-                                                $t("mods.installDep")
+                                        $t("mods.installDep")
                                         }}</button>
                                 </div>
                                 <button class="btn btn-danger flex-grow-1" @click="uninstallMod" :disabled="isDownload">
@@ -87,7 +94,8 @@
                         <span>{{ $t("mods.version") }}: </span>
                         <span v-if="isRequireUpdate(mod.name)" class="text-success" copyable>
                             {{
-                                isLocal ? `${mod.version} -> ${getLatestVersion(mod.name)}` : `${getLocalLatestModVer(mod.name)} -> ${mod.version}`
+                            isLocal ? `${ mod.version } -> ${ getLatestVersion(mod.name) } ` :
+                            `${ getLocalLatestModVer(mod.name) } -> ${ mod.version }`
                             }}
                         </span>
                         <span v-else copyable>{{ mod?.version }}</span>
@@ -98,7 +106,12 @@
                     </div>
                     <div>
                         <span>{{ $t("mods.repo") }}:</span>
-                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository }}</a>
+                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository
+                        }}</a>
+                    </div>
+                    <div v-if="releasePath">
+                        <span>{{ $t("mods.releasePath") }}:</span>
+                        <a copyable href="javascript:;" @click="openLink(releasePath ?? '')">{{ releasePath }}</a>
                     </div>
                     <div v-if="mod.date && mod.date != '1970-12-22T04:50:23Z'">
                         <span>{{ $t("mods.publishTime") }}:</span>
@@ -121,25 +134,30 @@
                     </div>
                     <div v-if="(mod?.dependencies?.length ?? 0) > 0">
                         <hr />
-                        <h5>{{ $t("mods.dep") }}</h5>
+                        <h5>{{ $t("mods.dep") }} ({{ mod.dependencies.length }})</h5>
                         <template v-if="isLocal || mod.date == '1970-12-22T04:50:23Z'">
                             <h6 v-for="(dep, i) in mod?.dependencies" :key="i" copyable>
-                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep)" href="javascript:;">{{ dep }}</a>
-                                <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success" notcopyable>
+                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep)" href="javascript:;">{{
+                                dep }}</a>
+                                <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success"
+                                    notcopyable>
                                     ({{ $t("mods.depInstall") }})
                                 </span>
                                 <span v-if="!isInstallMod(dep) && isLocal" class="text-danger" notcopyable>
                                     ({{ $t("mods.missingDep") }})
                                 </span>
-                                <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger" notcopyable>
+                                <span v-if="isInstallMod(dep) && !isUsed(dep) && isLocal" class="text-danger"
+                                    notcopyable>
                                     ({{ $t("mods.disabled") }})
                                 </span>
                             </h6>
                         </template>
                         <template v-else>
                             <h6 v-for="(dep, i) in getLowestDep(mod)" :key="i">
-                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep.name)" href="javascript:;">{{ dep.name }} (>= {{ dep.version }})</a>
-                                <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)" class="text-danger">
+                                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep.name)"
+                                    href="javascript:;">{{ dep.name }} (>= {{ dep.version }})</a>
+                                <span v-if="!isInstallMod2(dep.name, dep.version) && isInstallMod(dep.name)"
+                                    class="text-danger">
                                     ({{ $t("mods.requireUpdate") }})
                                 </span>
                                 <span v-if="isInstallMod2(dep.name, dep.version)" class="text-success">
@@ -149,22 +167,22 @@
                         </template>
                     </div>
 
-                    <div v-if="(mod?.authors?.length ?? 0) > 0" >
+                    <div v-if="(mod?.authors?.length ?? 0) > 0">
                         <hr />
-                        <h5>{{ $t("mods.authors") }}</h5>
+                        <h5>{{ $t("mods.authors") }} ({{ mod.authors.length }})</h5>
                         <h6 v-for="(author, i) in mod?.authors" :key="i" copyable>
                             {{ author }}
                         </h6>
                     </div>
-                    <div v-if="isLocal && (depOnThis.length > 0)" > 
+                    <div v-if="depOnThis.length > 0">
                         <hr />
-                        <h5>{{ $t("mods.depOnThis") }}</h5>
-                        <h6 v-for="(mod, i) in depOnThis" :key="i" copyable>
-                            <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod.info.name)" href="javascript:;">{{ mod.info.name }}</a>
-                            <span v-if="mod.isActived()" class="text-success" notcopyable>
-                                ({{ $t("mods.enabled") }})
-                            </span>
-                        </h6>
+                        <h5>{{ $t("mods.depOnThis") }} ({{ depOnThis.length }})</h5>
+                        <CModsDiList :mods="depOnThis" :is-local="isLocal"></CModsDiList>
+                    </div>
+                    <div v-if="integrateWithThis.length > 0">
+                        <hr />
+                        <h5>{{ $t("mods.integrateWithThis") }} ({{ integrateWithThis.length }})</h5>
+                        <CModsDiList :mods="integrateWithThis" :is-local="isLocal"></CModsDiList>
                     </div>
                 </div>
                 <!--accordion body end-->
@@ -182,8 +200,8 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, getSubMods, isDownloadingMod, LocalModInstance } from '@/renderer/modManager';
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks } from '@/renderer/modlinks/modlinks';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import { remote } from 'electron';
@@ -191,14 +209,24 @@ import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
 import { store } from '@/renderer/settings';
-import { getScarabModConfig } from '@/renderer/relocation/Scarab/RScarab';
+import { getScarabModConfig, ModInfo } from '@/renderer/relocation/Scarab/RScarab';
 import { existsSync } from 'fs';
+import CModsDiList from './c-mods-di-list.vue';
+import { dirname, join, parse } from 'path';
 
 export default defineComponent({
     methods: {
-        toggleBody() {
-            const tgb = new Collapse(this.$refs.body as Element);
-            tgb.toggle();
+        toggleCollapse(name: string) {
+            this.getCollapse(name).toggle();
+        },
+        getCollapse(name: string) {
+            return this.collapses[name] ??= new Collapse(this.$refs[name] as Element);
+        },
+        isCollapseHide(name: string) {
+            const el = this.$refs[name] as Element;
+            if (!el)
+                return false;
+            return el.classList.contains("collapse") && !el.classList.contains("collapsing") && !el.classList.contains("show");
         },
         openLink(link: string) {
             remote.shell.openExternal(link);
@@ -208,55 +236,71 @@ export default defineComponent({
         },
         isInstallMod2(name: string, minver: string) {
             const mod = getLocalMod(name);
-            if(!mod) return false;
+            if (!mod)
+                return false;
             const lv = mod.getLatestVersion();
-            if(!lv) return false;
-            if(isLaterVersion(lv, minver)) return true;
+            if (!lv)
+                return false;
+            if (isLaterVersion(lv, minver))
+                return true;
             return lv == minver;
         },
         canEnable(name: string) {
             const mg = getLocalMod(name);
-            if (!mg) return false;
+            if (!mg)
+                return false;
             return mg.canEnable();
         },
         isRequireUpdate(name: string) {
-            if (this.disableUpdate || !this.modlinkCache) return false;
+            if (this.disableUpdate || !this.modlinkCache)
+                return false;
             const lm = getLocalMod(name);
-            if (!lm) return false;
+            if (!lm)
+                return false;
             const lv = lm.getLatestVersion();
-            if (!lv) return;
+            if(name == "Benchwrap") console.log(lm);
+            if (!lv)
+                return;
             return isLaterVersion(this.modlinkCache.getMod(name)?.version ?? "0", lv);
         },
         getLocalLatestModVer(name: string) {
             const lm = getLocalMod(name);
-            if (!lm) return undefined;
+            if (!lm)
+                return undefined;
             const lv = lm.getLatestVersion();
+
             return lv;
         },
         getModAliasName(name: string) {
-            if(store.get('options').includes('HIDE_MOD_ALIAS')) return undefined;
+            if (store.get("options").includes("HIDE_MOD_ALIAS"))
+                return undefined;
             const lang = I18nLanguages[this.$i18n.locale];
             const alias = lang?.mods?.nameAlias;
-            if(!alias) return undefined;
-            return alias[name?.toLowerCase()?.replaceAll(' ', '')];
+            if (!alias)
+                return undefined;
+            return alias[name?.toLowerCase()?.replaceAll(" ", "")];
         },
         getShortName(name: string) {
-            if(!store.get('options').includes('SHOW_MOD_SHORT_NAME')) return name.toUpperCase();
+            if (!store.get("options").includes("SHOW_MOD_SHORT_NAME"))
+                return name.toUpperCase();
             return getShortName(name);
         },
         getModDesc() {
             const lang = I18nLanguages[this.$i18n.locale];
             const desc = lang?.mods?._desc;
-            if(!desc) return undefined;
-            return desc[this.mod?.name?.toLowerCase()?.replaceAll(' ', '')];
+            if (!desc)
+                return undefined;
+            return desc[this.mod?.name?.toLowerCase()?.replaceAll(" ", "")];
         },
         getLatestVersion(name: string) {
-            if (this.disableUpdate || !this.modlinkCache) return undefined;
+            if (this.disableUpdate || !this.modlinkCache)
+                return undefined;
             return this.modlinkCache.getMod(name)?.version;
         },
         exportToScarab() {
-            if(!this.localmod) return;
-            this.$emit('showExportToScarabConfirm', this.localmod);
+            if (!this.localmod)
+                return;
+            this.$emit("showExportToScarabConfirm", this.localmod);
         },
         canExportToScarab() {
             return this.isUseScarab() && this.localmod;
@@ -265,38 +309,46 @@ export default defineComponent({
             return existsSync(getScarabModConfig());
         },
         async installMod() {
-            if (this.mod === undefined) return;
+            if (this.mod === undefined)
+                return;
             const group = getOrAddLocalMod(this.mod.name);
             (await group.installNew(this.mod)).install(true);
             this.$forceUpdate();
         },
         async installModDep() {
-            if (this.mod === undefined) return;
+            if (this.mod === undefined)
+                return;
             const group = getOrAddLocalMod(this.mod.name);
             await group.getLatest()?.checkDependencies();
             this.$forceUpdate();
         },
         uninstallMod() {
-            if (this.mod === undefined) return;
+            if (this.mod === undefined)
+                return;
             const group = getOrAddLocalMod(this.mod.name);
             group.uninstall(undefined);
             this.$forceUpdate();
         },
         isUsed(name: string) {
-            if (this.mod === undefined) return false;
+            if (this.mod === undefined)
+                return false;
             const lm = getLocalMod(name);
-            if (!lm) return false;
+            if (!lm)
+                return false;
             return lm.isActived();
         },
         toggleMod(actived: boolean) {
-            if (this.mod === undefined) return;
+            if (this.mod === undefined)
+                return;
             const lm = getLocalMod(this.mod.name);
-            if (!lm || !lm.isInstalled()) return;
+            if (!lm || !lm.isInstalled())
+                return;
             const group = getCurrentGroup();
             if (!actived) {
                 lm.disableAll();
-                group.removeMod(this.mod.name)
-            } else {
+                group.removeMod(this.mod.name);
+            }
+            else {
                 lm.getLatest()?.install();
                 group.addMod(this.mod.name, this.mod.version);
             }
@@ -306,30 +358,35 @@ export default defineComponent({
             return getModDate(date);
         },
         getLowestDep(mod?: ModLinksManifestData) {
-            if (!mod) return [];
+            if (!mod)
+                return [];
             return getLowestDep(mod) ?? [];
         },
         anchorMod(name: string) {
-            const rn = `mod-download-${name.replaceAll(' ', '')}`;
+            const rn = `mod-download-${name.replaceAll(" ", "")}`;
             const dom = document.getElementById(rn);
-            if(!dom) return;
+            if (!dom)
+                return;
             dom.scrollIntoView();
         },
         async updateMod() {
-
-            if (this.mod === undefined || this.disableUpdate) return;
+            if (this.mod === undefined || this.disableUpdate)
+                return;
             const ml = await getModLinkMod(this.mod.name);
-            if (!ml) return;
+            if (!ml)
+                return;
             const group = getOrAddLocalMod(this.mod.name);
             const oa = group.isActived();
             group.disableAll();
             await group.installNew(ml);
-            if(!oa) group.getLatest()?.uninstall();
+            if (!oa)
+                group.getLatest()?.uninstall();
             this.$forceUpdate();
             this.$parent?.$forceUpdate();
         },
         getModSize() {
-            if (!this.modSize) return "0 KB";
+            if (!this.modSize)
+                return "0 KB";
             return ConvertSize(this.modSize);
         }
     },
@@ -337,38 +394,56 @@ export default defineComponent({
         inmod: Object,
         localmod: LocalModInstance,
         isLocal: Boolean,
-        disableUpdate: Boolean
+        disableUpdate: Boolean,
+        scarabInstalled: Object
+    },
+    computed: {
+        scarab(): ModInfo {
+            return this.scarabInstalled as ModInfo;
+        },
+        releasePath(): string | undefined {
+            if(!this.mod?.link) return undefined;
+            const url = new URL(this.mod.link);
+            if(url.hostname !== 'github.com') return undefined;
+            const tag = parse(dirname(url.pathname));
+            const repo = dirname(dirname(dirname(dirname(url.pathname))));
+            url.pathname = join(repo, "releases", "tag", tag.base);
+            return url.toString();
+        }
     },
     data() {
         return {
             mod: this.inmod as ModLinksManifestData,
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
-            depOnThis: getSubMods(this.mod?.name ?? ""),
+            depOnThis: this.isLocal ? getSubMods(this.mod?.name ?? "") : getSubMods_ModLinks(this.mod?.name ?? ""),
+            integrateWithThis: this.isLocal ? getIntegrationsMods(this.mod?.name ?? "") : getIntegrationsMods_ModLinks(this.mod?.name ?? ""),
             isDownload: false,
             modlinkCache: modlinksCache,
             modSize: undefined as (undefined | number),
-            modSizeGet: false
-        }
+            modSizeGet: false,
+            collapses: {} as Record<string, Collapse>
+        };
     },
     beforeUpdate() {
-        this.depOnThis = getSubMods(this.mod?.name ?? "");
+        this.depOnThis = this.isLocal ? getSubMods(this.mod?.name ?? "") : getSubMods_ModLinks(this.mod?.name ?? "");
+        this.integrateWithThis = this.isLocal ? getIntegrationsMods(this.mod?.name ?? "") : getIntegrationsMods_ModLinks(this.mod?.name ?? "")
         this.isDownload = isDownloadingMod(this.mod?.name as string);
     },
     mounted() {
         getModLinks().then((val) => {
             this.modlinkCache = val;
             this.$forceUpdate();
-
             this.modSizeGet = true;
             this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         });
-
     },
     unmounted() {
         clearInterval(this.checkTimer);
     },
     emits: {
-        showExportToScarabConfirm: null
-    }
+        showExportToScarabConfirm: null,
+        importFromScarab: null
+    },
+    components: { CModsDiList }
 });
 </script>
