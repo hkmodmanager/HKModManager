@@ -11,16 +11,21 @@
       flex-shrink-0
     ">
       <h3>
-        HKMM 
+        HKMM
         <span v-if="isRelease()" :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
-        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Beta: {{ getShortCommitSHA() }}</span>
+        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Beta: {{
+          getShortCommitSHA()
+        }}</span>
       </h3>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
-        <a class="bi bi-github p-2 link-light" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')" href="javascript:;"></a>
-        <a class="bi bi-discord p-2 link-light" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')" href="javascript:;"></a>
-        <a class="bi bi-wrench-adjustable-circle p-2 link-light" title="Dev Tools" @click="openDevTools()" href="javascript:;"></a>
+        <a class="bi bi-github p-2 link-light" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')"
+          href="javascript:;"></a>
+        <a class="bi bi-discord p-2 link-light" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')"
+          href="javascript:;"></a>
+        <a class="bi bi-wrench-adjustable-circle p-2 link-light" title="Dev Tools" @click="openDevTools()"
+          href="javascript:;"></a>
       </div>
-      
+
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
         <navitem viewpath="/localmods/all" compare-path><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
@@ -86,7 +91,7 @@
         <button class="btn btn-primary w-100" @click="applyLanguage">{{ $t('c_language_apply') }}</button>
       </template>
     </ModalBox>
-    
+
   </div>
 </template>
 
@@ -102,7 +107,8 @@ body,
   user-select: none;
 }
 
-[copyable], .popover-body {
+[copyable],
+.popover-body {
   user-select: text;
 }
 
@@ -157,7 +163,7 @@ export default defineComponent({
     ModalBox,
     RequireExpmode,
     ModalUpdate
-},
+  },
   methods: {
     toggleNavTasks() {
       const group = this.$refs.tasksNavGroup as Element;
@@ -204,11 +210,13 @@ export default defineComponent({
       return getRequireUpdateModsSync().length > 0;
     },
     exportDebugPackage() {
-      br_build_zip();
-      remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-        message: this.$t('debugpack_done'),
-        title: this.$t('debugpack_done_title')
+      br_build_zip().then(() => {
+        remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+          message: this.$t('debugpack_done'),
+          title: this.$t('debugpack_done_title')
+        });
       });
+
     }
   },
   updated() {

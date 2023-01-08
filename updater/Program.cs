@@ -22,7 +22,7 @@ void CopyDirectory(string sourceDir, string destinationDir)
     foreach (FileInfo file in dir.GetFiles())
     {
         string targetFilePath = Path.Combine(destinationDir, file.Name);
-        if(File.Exists(targetFilePath)) File.Delete(targetFilePath);
+        if (File.Exists(targetFilePath)) File.Delete(targetFilePath);
         file.MoveTo(targetFilePath);
     }
 
@@ -44,20 +44,29 @@ var binr = Path.Combine(appRoot, "_update");
 var updatePack = Path.Combine(appRoot, "update.zip");
 var nupdater = Path.Combine(binr, "updater");
 
-if(File.Exists(updatePack)) {
-    if(Directory.Exists(binr)) Directory.Delete(binr);
-    using(var zip = ZipFile.OpenRead(updatePack)) {
+if (File.Exists(updatePack))
+{
+    if (Directory.Exists(binr)) Directory.Delete(binr);
+    using (var zip = ZipFile.OpenRead(updatePack))
+    {
         Directory.CreateDirectory(binr);
         zip.ExtractToDirectory(binr);
     }
     File.Delete(updatePack);
 }
 
-if (waitProcess > 0)
+try
 {
-    var proc = Process.GetProcessById(waitProcess);
-    proc?.WaitForExit();
+    if (waitProcess > 0)
+    {
+        var proc = Process.GetProcessById(waitProcess);
+        proc?.WaitForExit();
+    }
 }
+catch (System.Exception)
+{
+}
+
 
 
 if (Directory.Exists(binr))
