@@ -63,6 +63,11 @@
         <RequireExpmode>
           <navitem viewpath="/plugins"><i class="bi bi-puzzle"></i> {{ $t("tabs.plugins") }}</navitem>
         </RequireExpmode>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="javascript:;" @click="exportDebugPackage" :title="$t('debugpack_desc')">
+            <i class="bi bi-box-arrow-up-right"></i> {{ $t("c_exportLog") }}
+          </a>
+        </li>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
 
       </ul>
@@ -137,6 +142,8 @@ import "./renderer/plugins"
 import RequireExpmode from "./components/require-expmode.vue";
 import { appVersion } from "./renderer/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
+import "./renderer/bugReport"
+import { br_build_zip } from "./renderer/bugReport";
 
 export default defineComponent({
   data: function () {
@@ -195,6 +202,13 @@ export default defineComponent({
     },
     isRequireUpdateMods() {
       return getRequireUpdateModsSync().length > 0;
+    },
+    exportDebugPackage() {
+      br_build_zip();
+      remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+        message: this.$t('debugpack_done'),
+        title: this.$t('debugpack_done_title')
+      });
     }
   },
   updated() {

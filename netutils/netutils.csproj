@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="PresentationCore"></Reference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Mono.cecil" Version="0.11.4">
       <Private>true</Private>

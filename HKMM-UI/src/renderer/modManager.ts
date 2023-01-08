@@ -355,6 +355,7 @@ export class LocalModsVersionGroup {
         const mp = join(getCacheModsPath(), mod.name, mod.version);
         if (!existsSync(mp)) mkdirSync(mp);
         info.path = mp;
+        console.log("Instance Local Mod");
         /*copySync(root, mp, {
             overwrite: true,
             recursive: true

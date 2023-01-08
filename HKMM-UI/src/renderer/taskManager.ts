@@ -1,4 +1,5 @@
 
+import { LogSkipStackFrame } from '@/common';
 import { Guid } from 'guid-typescript'
 
 export type TaskCategory = "Download" | "Build" | "Auto";
@@ -40,6 +41,7 @@ export class TaskInfo {
     }
     public pushState(state: string) {
         this.exitState();
+        console.log(`[Task (${this.name})-{${this.taskGuid}}]:${state}`, new LogSkipStackFrame(1));
         this.setState(state);
         this.exitState();
     }
@@ -50,6 +52,9 @@ export class TaskInfo {
             this.isSuccess = true;
         }
         this.stopTime = new Date().valueOf();
+        console.log(
+            `[Task finish (${this.name})-{${this.taskGuid}}] (${failed ? 'Failed' : 'Complate'}) - ${new Date(this.startTime).toLocaleString()} to ${new Date().toLocaleString()} = ${this.stopTime - this.startTime}ms`
+            , new LogSkipStackFrame(1));
     }
 }
 

@@ -19,3 +19,11 @@ export function netfunc(method: string, type: string = "HKMM.NetUtils") {
     })
 }
 
+const net_clipboard_putfile = netfunc("ClipboardCopyFile");
+
+export function Clipboard_PutFile(path: string) {
+    net_clipboard_putfile({
+        file: path
+    }, true);
+}
+

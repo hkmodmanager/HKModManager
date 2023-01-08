@@ -230,7 +230,7 @@ export async function getModLinksFromRepo() {
             content = readJSONSync("F:\\HKLab\\ModLinksRecord\\modlinks.json", 'utf-8') as ModCollection;
         }
     }
-    console.log(content);
+
     modlinksCache = new ModLinksData(content);
     modlinksCache.lastGet = new Date().valueOf();
     for (const key in content.mods) {

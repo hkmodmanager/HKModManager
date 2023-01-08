@@ -4,7 +4,8 @@ import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu } fr
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
-import { existsSync, readFile } from 'fs';
+import { existsSync } from 'fs';
+import { readdir, readFile } from 'fs/promises';
 import { spawn } from 'child_process';
 import { dirname, join } from 'path';
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -53,20 +54,15 @@ app.setAsDefaultProtocolClient("hkmm", undefined, url_args);
 export let mainWindow: BrowserWindow | undefined;
 
 function registerAppScheme() {
-  protocol.registerBufferProtocol("app", (request, callback) => {
-    let pathName = request.url.substring(6);
-    const hash = pathName.lastIndexOf('#');
-    if (hash > 0) {
-      pathName = pathName.substring(0, hash);
-    }
-    pathName = decodeURI(pathName);
-    readFile(path.join(__dirname, pathName), (error, data) => {
-      if (error) {
-        dialog.showErrorBox(
-          `Failed to read ${pathName} on app protocol`,
-          error.message
-        );
+  protocol.registerBufferProtocol("app", async (request, callback) => {
+    try {
+      let pathName = (decodeURI(request.url)).substring(6);
+
+      const hash = pathName.lastIndexOf('#');
+      if (hash > 0) {
+        pathName = pathName.substring(0, hash);
       }
+      const data = await readFile(path.join(__dirname, pathName));
       const extension = path.extname(pathName).toLowerCase()
       let mimeType = ''
 
@@ -85,7 +81,10 @@ function registerAppScheme() {
       }
 
       callback({ mimeType, data })
-    })
+    } catch (e) {
+      console.error(e);
+      dialog.showErrorBox("Error!", e.toString());
+    }
   });
 }
 
