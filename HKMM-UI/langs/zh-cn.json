@@ -130,12 +130,12 @@
         },
         "tags": {
             "None": "无",
-            "Gameplay": "Gameplay",
+            "Gameplay": "游戏性",
             "Boss": "Boss",
-            "Cosmetic": "Cosmetic",
-            "Expansion": "Expansion",
-            "Library": "Library",
-            "Utility": "Utility",
+            "Cosmetic": "装饰性",
+            "Expansion": "拓展",
+            "Library": "前置",
+            "Utility": "工具",
             "ScarabInstalled": "Scarab已安装",
             "ScarabImported": "从Scarab导入"
         }
