@@ -2,7 +2,7 @@ import { app, ipcRenderer, remote } from "electron";
 import { constants, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { isLaterVersion } from "./modManager";
-import { downloadFile, downloadRaw, getFileSize } from "./utils/downloadFile";
+import { downloadFile, downloadRaw, downloadText, getFileSize } from "./utils/downloadFile";
 import { ChildProcessWithoutNullStreams, exec, spawn, spawnSync } from 'child_process'
 import { zip } from "compressing";
 import { appDir, appVersion, isPackaged, srcRoot, userData } from "./remoteCache";
@@ -23,7 +23,7 @@ export interface UpdateInfo {
 }
 
 export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined> {
-    const releases: ReleaseInfo[] = (await downloadFile<ReleaseInfo[]>('https://api.github.com/repos/HKLab/HKModManager/releases')).data;
+    const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/releases'));
     const latest = releases[0];
     if(!latest) return undefined;
     const cver = appVersion;

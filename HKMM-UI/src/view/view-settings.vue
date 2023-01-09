@@ -57,6 +57,14 @@
           {{ $t("settings.exp.applyOnRestart") }}
         </div>
       </div>
+      <RequireExpmode>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
+          <label class="form-check-label" :title="$t('settings.options.fastdownload_od')">{{
+            $t("settings.options.fastdownload")
+          }}</label>
+        </div>
+      </RequireExpmode>
     </div>
 
     <!--Mirror-->
@@ -64,8 +72,8 @@
       <div class="p-3">
         <div class="form-group">
           <label class="form-label">{{
-    $t("settings.mirror.githubmirror")
-            }}</label>
+            $t("settings.mirror.githubmirror")
+          }}</label>
           <mirrorlist key-name="mirror_github"></mirrorlist>
         </div>
       </div>

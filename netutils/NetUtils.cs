@@ -54,4 +54,8 @@ public class NetUtils
         thread.Join();
         return null;
     }
+    public async Task<object> DownloadFileSeg(dynamic input)
+    {
+        return await FileDownload.DownloadFileSegment(input.url, ((int)input.from, (int)input.to), null);
+    }
 }

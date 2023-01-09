@@ -170,7 +170,9 @@
         "options": {
             "show_deleted_mods": "显示已废弃的Mods",
             "show_mod_short_name": "显示Mod短名称",
-            "hide_mod_alias": "隐藏Mod别称"
+            "hide_mod_alias": "隐藏Mod别称",
+            "fastdownload": "多线程下载",
+            "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。"
         },
         "cdn": {
             "title": "下载源",

@@ -198,10 +198,10 @@ export async function getModLinksFromRepo() {
     const url = cdn_modlinks[store.get('cdn', 'JSDELIVR')];
     let content: ModCollection = undefined as any;
     if (store.get('cdn') == 'SCARABCN') {
-        content = await parseModLinks((await downloadFile<string>(url, undefined, undefined, false, "ModLinks", "Download")).data);
+        content = await parseModLinks((await downloadText(url, undefined, undefined, false, "ModLinks", "Download")));
         try {
-            const mc = (await downloadFile<ModCollection>(cdn_modlinks['GITHUB_RAW'], undefined, undefined, 
-            undefined, undefined, undefined)).data;
+            const mc = JSON.parse(await downloadText(cdn_modlinks['GITHUB_RAW'], undefined, undefined, 
+            undefined, undefined, undefined)) as ModCollection;
             const mods = content.mods;
             for (const key in mods) {
                 const mod = mods[key];
@@ -225,7 +225,7 @@ export async function getModLinksFromRepo() {
         }
     }
     else {
-        if (navigator.onLine || isPackaged) content = (await downloadFile<ModCollection>(url, undefined, undefined, false, "ModLinks", "Download")).data;
+        if (navigator.onLine || isPackaged) content = JSON.parse(await downloadText(url, undefined, undefined, false, "ModLinks", "Download"));
         else {
             content = readJSONSync("F:\\HKLab\\ModLinksRecord\\modlinks.json", 'utf-8') as ModCollection;
         }

@@ -1,13 +1,13 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu } from 'electron'
+import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu, net } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
 import { existsSync } from 'fs';
 import { readdir, readFile } from 'fs/promises';
 import { spawn } from 'child_process';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();

@@ -17,7 +17,8 @@ export class MirrorGroup {
     public items: MirrorItem[] = []
 }
 
-export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB' | 'SHOW_MOD_SHORT_NAME' | 'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB';
+export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB' | 'SHOW_MOD_SHORT_NAME' | 
+    'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB' | 'FAST_DOWNLOAD';
 export type CDN = 'GITHUB_RAW' | 'JSDELIVR' | 'SCARABCN';
 
 export class HKMMSettings {
