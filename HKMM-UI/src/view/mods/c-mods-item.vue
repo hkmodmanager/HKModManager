@@ -53,17 +53,23 @@
                     <div class="d-flex w-100">
                         <template v-if="!isInstallMod(mod?.name as string)">
                             <button class="btn btn-primary" @click="$emit('importFromScarab', scarab)"
-                                :disabled="isDownload || (modSize == undefined)"
-                                v-if="scarab">{{ $t("mods.importScarab.title") }}</button>
+                                :disabled="isDownload || (modSize == undefined)" v-if="scarab">{{
+                                $t("mods.importScarab.title") }}</button>
                             <button class="btn btn-primary flex-grow-1" @click="installMod"
                                 :disabled="isDownload || (modSize == undefined)">{{ $t("mods.install") }}</button>
                         </template>
                         <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
 
                             <div class="flex-grow-1 d-flex">
-                                <a class="btn btn-primary bi bi-box-arrow-up-right"
-                                    v-if="canExportToScarab() && localmod" :title="$t('mods.exportToScarab')"
-                                    @click="exportToScarab()"></a>
+                                <template v-if="localmod">
+                                    <a class="btn btn-primary bi bi-box-arrow-up-right"
+                                        v-if="canExportToScarab()" :title="$t('mods.exportToScarab')"
+                                        @click="exportToScarab()"></a>
+                                    <a class="btn btn-primary bi bi-folder2-open"
+                                        :title="$t('mods.openDataFolder')" @click="openModFolder(localmod.name)"></a>
+                                    <a class="btn btn-primary bi bi-file-earmark"
+                                        :title="$t('mods.openDllFolder')" @click="openFolder(localmod.info.path)"></a>
+                                </template>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
                                         v-if="!isUsed(mod?.name as string) && canEnable(mod?.name as string)"
@@ -201,10 +207,10 @@
 
 <script lang="ts">
 import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods } from '@/renderer/modManager';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
-import { remote } from 'electron';
+import { remote, shell } from 'electron';
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
@@ -258,7 +264,7 @@ export default defineComponent({
             if (!lm)
                 return false;
             const lv = lm.getLatestVersion();
-            if(name == "Benchwrap") console.log(lm);
+            if (name == "Benchwrap") console.log(lm);
             if (!lv)
                 return;
             return isLaterVersion(this.modlinkCache.getMod(name)?.version ?? "0", lv);
@@ -388,6 +394,12 @@ export default defineComponent({
             if (!this.modSize)
                 return "0 KB";
             return ConvertSize(this.modSize);
+        },
+        openFolder(folder: string) {
+            shell.openPath(folder);
+        },
+        openModFolder(name: string) {
+            this.openFolder(getRealModPath(name));
         }
     },
     props: {
@@ -402,9 +414,9 @@ export default defineComponent({
             return this.scarabInstalled as ModInfo;
         },
         releasePath(): string | undefined {
-            if(!this.mod?.link) return undefined;
+            if (!this.mod?.link) return undefined;
             const url = new URL(this.mod.link);
-            if(url.hostname !== 'github.com') return undefined;
+            if (url.hostname !== 'github.com') return undefined;
             const tag = parse(dirname(url.pathname));
             const repo = dirname(dirname(dirname(dirname(url.pathname))));
             url.pathname = join(repo, "releases", "tag", tag.base);

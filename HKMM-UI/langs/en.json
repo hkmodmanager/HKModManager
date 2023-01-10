@@ -95,6 +95,8 @@
         "badge_importFromScarab": "Import from Scarab",
         "exportToScarab": "Export mod to Scarab",
         "releasePath": "Release",
+        "openDataFolder": "Open the Mod folder",
+        "openDllFolder": "Open the Dll folder",
         "importScarab": {
             "title": "Import mods from Scarab",
             "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",

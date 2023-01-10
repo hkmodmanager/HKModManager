@@ -107,6 +107,8 @@
         "badge_importFromScarab": "从Scarab导入",
         "exportToScarab": "导出到Scarab",
         "releasePath": "发布页面",
+        "openDataFolder": "打开Mod文件夹",
+        "openDllFolder": "打开Dll文件夹",
         "importScarab": {
             "title": "从Scarab导入Mods",
             "alertMsg_exclusive": "注意：导入后的Mods将被Scarab视为未安装",
