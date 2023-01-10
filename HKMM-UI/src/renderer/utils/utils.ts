@@ -14,6 +14,12 @@ export function isVaildModDir(path: string) {
     return true;
 }
 
+export function PromiseTimeout<T>(ms: number, result: T) {
+    return new Promise<T>((resolve) => {
+        setTimeout(() => resolve(result), ms);
+    });
+}
+
 export function getShortName(name: string) {
     let abbr = '';
     for (const part of name.split(/(?=[A-Z0-9])/)) {

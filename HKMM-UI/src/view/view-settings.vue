@@ -64,7 +64,10 @@
         </div>
       </div>
       <RequireExpmode>
-        
+        <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
+        <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
+      </div>
       </RequireExpmode>
     </div>
 

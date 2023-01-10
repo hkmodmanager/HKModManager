@@ -9,16 +9,13 @@ import { isLaterVersion, refreshLocalMods } from '../modManager';
 import { isPackaged } from '../remoteCache';
 import { CDN, store } from '../settings';
 import { downloadFile, downloadText } from '../utils/downloadFile';
+import { PromiseTimeout } from '../utils/utils';
 
 type ContainerNode = ast.ContainerNode<ast.Node>;
 type TextNode = ast.TextNode;
 type CDataNode = ast.CDataSectionNode;
 
-export let currentPlatform: string = "";
-const cp = process.platform;
-if (cp == "win32") currentPlatform = "Windows";
-else if (cp == "darwin") currentPlatform = "Mac";
-else if (cp == "linux") currentPlatform = "Linux";
+export const currentPlatform: string = "Windows";
 
 export interface ModFileRecord {
     files?: Record<string, string>;
@@ -66,7 +63,7 @@ export class ModLinksData {
     public getMod(name: string, version?: string) {
         const ver = this.getModVersions(name);
         if (!ver) return undefined;
-        if(version) return ver[version];
+        if (version) return ver[version];
         let latest = "0.0.0.0";
         for (const v in ver) {
             if (isLaterVersion(v, latest)) {
@@ -200,35 +197,45 @@ export async function getModLinksFromRepo() {
     if (store.get('cdn') == 'SCARABCN') {
         content = await parseModLinks((await downloadText(url, undefined, undefined, false, "ModLinks", "Download")));
         try {
-            const mc = JSON.parse(await downloadText(cdn_modlinks['GITHUB_RAW'], undefined, undefined, 
-            undefined, undefined, undefined)) as ModCollection;
-            const mods = content.mods;
-            for (const key in mods) {
-                const mod = mods[key];
-                const cmod = mc.mods[key];
-                const lv = Object.keys(mod)[0];
-                for (const ver in cmod) {
-                    if (isLaterVersion(ver, lv)) continue;
-                    const cver = cmod[ver];
-                    const v = mod[ver];
+            let mcontent = await Promise.race([
+                downloadText(cdn_modlinks['GITHUB_RAW']),
+                PromiseTimeout<false>(4000, false)
+            ]);
+            if(mcontent == false) {
+                mcontent = await Promise.race([
+                    downloadText(cdn_modlinks['JSDELIVR']),
+                    PromiseTimeout<false>(4000, false)
+                ]);
+            }
+            if (mcontent != false) {
+                const mc = JSON.parse(mcontent) as ModCollection;
+                const mods = content.mods;
+                for (const key in mods) {
+                    const mod = mods[key];
+                    const cmod = mc.mods[key];
+                    const lv = Object.keys(mod)[0];
+                    for (const ver in cmod) {
+                        if (isLaterVersion(ver, lv)) continue;
+                        const cver = cmod[ver];
+                        const v = mod[ver];
 
-                    if (v) {
-                        cver.link = v.link;
-                    } else {
-                        cver.link = undefined;
+                        if (v) {
+                            cver.link = v.link;
+                        } else {
+                            cver.link = undefined;
+                        }
+                        mod[ver] = cver;
                     }
-                    mod[ver] = cver;
                 }
+            } else {
+                console.log("[ModLink] GITHUB_RAW Timeout");
             }
         } catch (e) {
             console.error(e);
         }
     }
     else {
-        if (navigator.onLine || isPackaged) content = JSON.parse(await downloadText(url, undefined, undefined, false, "ModLinks", "Download"));
-        else {
-            content = readJSONSync("F:\\HKLab\\ModLinksRecord\\modlinks.json", 'utf-8') as ModCollection;
-        }
+        content = JSON.parse(await downloadText(url, undefined, undefined, false, "ModLinks", "Download"));
     }
 
     modlinksCache = new ModLinksData(content);
@@ -387,34 +394,41 @@ export function tryRefreshOldLocalMods() {
 }
 
 export function hasModLink_ei_files() {
-    if(!modlinksCache) return false;
+    if (!modlinksCache) return false;
     return (getModLinkModSync("HKTool")?.ei_files || getModLinkModSync("Satchel")?.ei_files || getModLinkModSync("Vasi")?.ei_files) != undefined;
 }
 
 export function getSubMods_ModLinks(name: string) {
-    if(!modlinksCache) return [];
+    if (!modlinksCache) return [];
     const result: ModLinksManifestData[] = [];
     for (const key in modlinksCache.mods.mods) {
         const mod = getModLinkModSync(key);
-        if(!mod || mod.isDeleted) continue;
-        if(mod.dependencies.includes(name)) result.push(mod);
+        if (!mod || mod.isDeleted) continue;
+        if (mod.dependencies.includes(name)) result.push(mod);
     }
     return result;
 }
 
 export function getIntegrationsMods_ModLinks(name: string) {
-    if(!modlinksCache) return [];
-    
+    if (!modlinksCache) return [];
+
     const self = getModLinkModSync(name);
-    if(!self) return [];
+    if (!self) return [];
     const result: ModLinksManifestData[] = [];
     const names: string[] = [];
     for (const key in modlinksCache.mods.mods) {
         const mod = getModLinkModSync(key);
-        if(!mod || names.includes(key) || mod.isDeleted) continue;
+        if (!mod || names.includes(key) || mod.isDeleted) continue;
         names.push(key);
-        if(mod.integrations.includes(name) || self.integrations.includes(key)) result.push(mod);
+        if (mod.integrations.includes(name) || self.integrations.includes(key)) result.push(mod);
     }
-    
+
     return result;
+}
+
+export function getModRepo(repo: string): [string, string] | undefined {
+    const url = new URL(repo);
+    if(url.hostname != "github.com") return undefined;
+    const parts = url.pathname.split('/');
+    return [parts[1], parts[2]];
 }

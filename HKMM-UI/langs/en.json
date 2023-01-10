@@ -96,7 +96,8 @@
         "exportToScarab": "Export mod to Scarab",
         "releasePath": "Release",
         "openDataFolder": "Open the Mod folder",
-        "openDllFolder": "Open the Dll folder",
+        "openDllFolder": "Open the Dll folder\nThis is for developers, please do not easily change any of the files inside",
+        "license": "License",
         "importScarab": {
             "title": "Import mods from Scarab",
             "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",
@@ -156,7 +157,8 @@
             "show_deleted_mods": "Displays mods that have been deleted by the author",
             "show_mod_short_name": "Display the mod short name",
             "fastdownload": "Multi-threaded download",
-            "fastdownload_od": "Use multithreading whenever possible to download oversized mods, which in some cases may result in slow download speeds."
+            "fastdownload_od": "Use multithreading whenever possible to download oversized mods, which in some cases may result in slow download speeds.",
+            "show_licence": "Displays the license for the mods"
         },
         "cdn": {
             "title": "CDN",

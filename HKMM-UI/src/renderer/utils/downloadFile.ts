@@ -11,20 +11,20 @@ import { ConvertSize } from './utils';
 export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
     taskinfo?.pushState(`Download file ${url} using segments`);
     config ??= {};
-    config = {...config};
+    config = { ...config };
     config.responseType = 'arraybuffer';
     let segments = 16;
-    if(size < 1024 * 1024 * 5) segments = 16;
-    else if(size < 1024 * 1024 * 20) segments = 32;
-    else if(size < 1024 * 1024 * 50) segments = 64;
+    if (size < 1024 * 1024 * 5) segments = 16;
+    else if (size < 1024 * 1024 * 20) segments = 32;
+    else if (size < 1024 * 1024 * 50) segments = 64;
     else segments = 128;
     const persegments = Math.round(size / segments);
     taskinfo?.pushState(`Total segments: ${segments}(${ConvertSize(persegments)})`);
     const ranges: [number, number][] = [];
     let offset = 0;
-    for(let i = 0; i < segments ; i++) {
+    for (let i = 0; i < segments; i++) {
         const from = offset;
-        const to = Math.min(offset + persegments, size -1);
+        const to = Math.min(offset + persegments, size - 1);
         ranges.push([from, to]);
         offset += persegments + 1;
     }
@@ -33,13 +33,23 @@ export async function downloadFileFast(url: string, size: number, allowChangePro
     let totalComplate = 1;
     for await (const c of asyncPool(store.get('maxConnection', 16), ranges, async (range) => {
         const sid = id++;
-        taskinfo?.pushState(`Begin download segment: ${sid}(${range[0]}-${range[1]}) Size: ${ConvertSize(range[1] - range[0])}`);
-        const r = await DownloadFileSeg(url, range[0], range[1]);
-        taskinfo?.pushState(`Finish download segment(${totalComplate++}/${segments}): ${sid}`);
-        if(allowChangeProgress) {
-            taskinfo?.reportProgress(totalComplate / segments * 100);
+        for (let retry = 0; retry <= store.get('downloadRetry'); retry++) {
+            try {
+                taskinfo?.pushState(`Begin download segment: ${sid}(${range[0]}-${range[1]}) Size: ${ConvertSize(range[1] - range[0])}`);
+                const r = await DownloadFileSeg(url, range[0], range[1]);
+                taskinfo?.pushState(`Finish download segment(${totalComplate++}/${segments}): ${sid}`);
+                if (allowChangeProgress) {
+                    taskinfo?.reportProgress(totalComplate / segments * 100);
+                }
+                return [sid, r] as [number, Buffer];
+            } catch (e: any) {
+                console.error(e);
+                taskinfo?.pushState(e?.toString());
+                if (retry == store.get('downloadRetry')) throw e;
+                taskinfo?.pushState(`Retry download segment: ${sid}`);
+            }
         }
-        return [sid, r] as [number, Buffer];
+        throw new Error('Failed Retry');
     })) {
         buf[c[0]] = c[1];
     }
@@ -47,9 +57,9 @@ export async function downloadFileFast(url: string, size: number, allowChangePro
 }
 
 export async function downloadFile<T = any>(url: string
-    , config?: AxiosRequestConfig<any>, 
+    , config?: AxiosRequestConfig<any>,
     canUseFast?: Boolean,
-    taskinfo?: TaskInfo, 
+    taskinfo?: TaskInfo,
     allowChangeProgress: boolean = false,
     taskName?: string,
     taskCategory?: TaskCategory, fallback?: string): Promise<AxiosResponse<T, any> | Buffer> {
@@ -63,7 +73,7 @@ export async function downloadFile<T = any>(url: string
     else config = {};
 
     try {
-        
+
         let acceptRanges = false;
         let size: number | undefined = undefined;
         try {
@@ -75,7 +85,7 @@ export async function downloadFile<T = any>(url: string
             console.error(e);
         }
         if (acceptRanges && size && size > 1024 * 1024 * 5 && canUseFast && hasOption('FAST_DOWNLOAD')) {
-            return await downloadFileFast(url, size, allowChangeProgress,config, taskinfo);
+            return await downloadFileFast(url, size, allowChangeProgress, config, taskinfo);
         }
         if (taskinfo) {
             config.onDownloadProgress = ev => {
@@ -97,7 +107,7 @@ export async function downloadFile<T = any>(url: string
         return r;
     } catch (e) {
         if (!fallback) throw e;
-        return await downloadFile<T>(fallback, config, canUseFast,taskinfo, allowChangeProgress, taskName, taskCategory);
+        return await downloadFile<T>(fallback, config, canUseFast, taskinfo, allowChangeProgress, taskName, taskCategory);
     }
 }
 

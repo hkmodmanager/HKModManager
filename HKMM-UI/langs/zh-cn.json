@@ -108,7 +108,8 @@
         "exportToScarab": "导出到Scarab",
         "releasePath": "发布页面",
         "openDataFolder": "打开Mod文件夹",
-        "openDllFolder": "打开Dll文件夹",
+        "openDllFolder": "打开Dll文件夹\n这是为开发者准备的，请不要轻易更改里面的任何一个文件",
+        "license": "许可证",
         "importScarab": {
             "title": "从Scarab导入Mods",
             "alertMsg_exclusive": "注意：导入后的Mods将被Scarab视为未安装",
@@ -174,7 +175,8 @@
             "show_mod_short_name": "显示Mod短名称",
             "hide_mod_alias": "隐藏Mod别称",
             "fastdownload": "多线程下载",
-            "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。"
+            "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。",
+            "show_licence": "显示Mods的许可证"
         },
         "cdn": {
             "title": "下载源",

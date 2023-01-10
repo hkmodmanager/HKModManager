@@ -18,7 +18,7 @@ export class MirrorGroup {
 }
 
 export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB' | 'SHOW_MOD_SHORT_NAME' | 
-    'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB' | 'FAST_DOWNLOAD';
+    'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB' | 'FAST_DOWNLOAD' | 'SHOW_LICENCE';
 export type CDN = 'GITHUB_RAW' | 'JSDELIVR' | 'SCARABCN';
 
 export class HKMMSettings {
@@ -37,6 +37,7 @@ export class HKMMSettings {
     public pluginsStatus: Record<string, PluginStatus> = {};
     public cdn: CDN = 'GITHUB_RAW';
     public maxConnection: number = 16;
+    public downloadRetry: number = 3;
 }
 
 
@@ -89,6 +90,9 @@ function GetSettingsLocal() {
     }
     if(!store.store.maxConnection) {
         store.set('maxConnection', 16);
+    }
+    if(!store.store.downloadRetry) {
+        store.set('downloadRetry', 3);
     }
 })();
 

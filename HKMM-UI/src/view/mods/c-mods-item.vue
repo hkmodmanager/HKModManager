@@ -62,13 +62,12 @@
 
                             <div class="flex-grow-1 d-flex">
                                 <template v-if="localmod">
-                                    <a class="btn btn-primary bi bi-box-arrow-up-right"
-                                        v-if="canExportToScarab()" :title="$t('mods.exportToScarab')"
-                                        @click="exportToScarab()"></a>
-                                    <a class="btn btn-primary bi bi-folder2-open"
-                                        :title="$t('mods.openDataFolder')" @click="openModFolder(localmod.name)"></a>
-                                    <a class="btn btn-primary bi bi-file-earmark"
-                                        :title="$t('mods.openDllFolder')" @click="openFolder(localmod.info.path)"></a>
+                                    <a class="btn btn-primary bi bi-box-arrow-up-right" v-if="canExportToScarab()"
+                                        :title="$t('mods.exportToScarab')" @click="exportToScarab()"></a>
+                                    <a class="btn btn-primary bi bi-folder2-open" :title="$t('mods.openDataFolder')"
+                                        @click="openModFolder(localmod?.name ?? '')"></a>
+                                    <a class="btn btn-primary bi bi-file-earmark" :title="$t('mods.openDllFolder')"
+                                        @click="openFolder(localmod?.info.path ?? '')"></a>
                                 </template>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
@@ -105,6 +104,10 @@
                             }}
                         </span>
                         <span v-else copyable>{{ mod?.version }}</span>
+                    </div>
+                    <div v-if="licenseName != null">
+                        <span>{{  $t('mods.license')  }}: </span>
+                        <span copyable>{{ licenseName }}</span>
                     </div>
                     <div v-if="modSize">
                         <span>{{ $t("mods.size") }}: </span>
@@ -206,7 +209,7 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks } from '@/renderer/modlinks/modlinks';
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/renderer/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
@@ -214,11 +217,13 @@ import { remote, shell } from 'electron';
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
-import { store } from '@/renderer/settings';
+import { hasOption, store } from '@/renderer/settings';
 import { getScarabModConfig, ModInfo } from '@/renderer/relocation/Scarab/RScarab';
 import { existsSync } from 'fs';
 import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
+
+const licenseCache: Record<string, string | null> = {};
 
 export default defineComponent({
     methods: {
@@ -400,6 +405,14 @@ export default defineComponent({
         },
         openModFolder(name: string) {
             this.openFolder(getRealModPath(name));
+        },
+        getModRepo(repo: string) {
+            return getModRepo(repo);
+        },
+        buildSvgUrl(repo: string) {
+            const r = getModRepo(repo);
+            if (!r) return undefined;
+            return `https://img.shields.io/github/license/${r[0]}/${r[1]}?style=for-the-badge`;
         }
     },
     props: {
@@ -433,7 +446,8 @@ export default defineComponent({
             modlinkCache: modlinksCache,
             modSize: undefined as (undefined | number),
             modSizeGet: false,
-            collapses: {} as Record<string, Collapse>
+            collapses: {} as Record<string, Collapse>,
+            licenseName: null as (string | null)
         };
     },
     beforeUpdate() {
@@ -448,6 +462,25 @@ export default defineComponent({
             this.modSizeGet = true;
             this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         });
+        if (this.mod.repository && hasOption('SHOW_LICENCE')) {
+            const repo = this.mod.repository;
+            if (licenseCache[repo] != undefined) {
+                this.licenseName = licenseCache[repo];
+            } else {
+                const url = this.buildSvgUrl(repo);
+                if (url) {
+                    fetch(url).then(async val => {
+                        const text = await val.text();
+                        const le = text.lastIndexOf('</text>');
+                        const ls = text.lastIndexOf('>', le);
+                        let l: string | null = text.substring(ls + 1, le);
+                        if (l == 'NOT SPECIFIED' || l == 'NOT IDENTIFIABLE BY GITHUB') l = null;
+                        this.licenseName = licenseCache[repo] = l;
+                    }).catch();
+                }
+            }
+        }
+
     },
     unmounted() {
         clearInterval(this.checkTimer);
