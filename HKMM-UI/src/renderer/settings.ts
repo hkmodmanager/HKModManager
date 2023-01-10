@@ -36,6 +36,7 @@ export class HKMMSettings {
     public plugins: string[] = [];
     public pluginsStatus: Record<string, PluginStatus> = {};
     public cdn: CDN = 'GITHUB_RAW';
+    public maxConnection: number = 16;
 }
 
 
@@ -85,6 +86,9 @@ function GetSettingsLocal() {
     }
     if(!store.store.cdn || store.store.cdn == 'JSDELIVR') {
         store.set('cdn', 'GITHUB_RAW');
+    }
+    if(!store.store.maxConnection) {
+        store.set('maxConnection', 16);
     }
 })();
 

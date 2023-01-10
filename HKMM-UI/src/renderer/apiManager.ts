@@ -54,7 +54,7 @@ export async function getLatestIsMatch() {
 }
 
 export function getLatestIsMatchSync(apiInfo?: ModdingAPIData) {
-    if(store.get('cdn') == 'SCARABCN') return true;
+    if (store.get('cdn') == 'SCARABCN') return true;
     apiInfo = apiInfo ?? apiInfoCache;
     if (!apiInfo) return undefined;
 
@@ -67,7 +67,7 @@ export function getLatestIsMatchSync(apiInfo?: ModdingAPIData) {
 
 export function checkGameFile(root: string): boolean | string {
     try {
-        if(!existsSync(root)) {
+        if (!existsSync(root)) {
             return "invaild_path";
         }
         if (!existsSync(join(root, "hollow_knight.exe"))) {
@@ -100,7 +100,7 @@ export function copyBackup() {
 
 export function resotreBackup() {
     const bp = getBackupPath();
-    if(!existsSync(bp)) return;
+    if (!existsSync(bp)) return;
     copyFileSync(getBackupPath(), join(dirname(bp), "Assembly-CSharp.dll"));
 }
 
@@ -112,25 +112,33 @@ export function getBackupPath() {
 
 export function isVaildBackup() {
     const bp = getBackupPath();
-    if(!existsSync(bp)) return false;
+    if (!existsSync(bp)) return false;
     try {
         return getAPIVersion(bp) <= 0;
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         return false;
     }
 }
 
+export let isDownloadingAPI = false;
+
 export async function downloadAPI() {
+    if(isDownloadingAPI) return;
     startTask("Download API", undefined, async (task) => {
-        copyBackup();
-        task.pushState("Get latest api info");
-        const link = (await getAPIInfo()).link;
-        const raw = await downloadRaw(link, undefined, task);
-        task.pushState("Uncompress api");
-        const tf = join(tmpdir(), "api.zip");
-        writeFileSync(tf, raw);
-        await zip.uncompress(tf, parse(getAPIPath()).dir);
-        installGameInject();
+        isDownloadingAPI = true;
+        try {
+            copyBackup();
+            task.pushState("Get latest api info");
+            const link = (await getAPIInfo()).link;
+            const raw = await downloadRaw(link, undefined, task);
+            task.pushState("Uncompress api");
+            const tf = join(tmpdir(), "api.zip");
+            writeFileSync(tf, raw);
+            await zip.uncompress(tf, parse(getAPIPath()).dir);
+            installGameInject();
+        } finally {
+            isDownloadingAPI = false;
+        }
     });
 }

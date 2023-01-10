@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup } from '@/renderer/apiManager'
+import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/renderer/apiManager'
 import { apiInfoCache, getAPIInfo } from '@/renderer/modlinks/modlinks';
 import ModalBox from '@/components/modal-box.vue';
 
@@ -88,6 +88,7 @@ export default defineComponent({
         },
         async updateAPI() {
             this.apiDownloading = true;
+            this.$forceUpdate();
             await downloadAPI();
             this.apiDownloading = false;
             this.$forceUpdate();
@@ -97,7 +98,7 @@ export default defineComponent({
         return {
             nofitapi: false,
             apigf: false,
-            apiDownloading: false
+            apiDownloading: isDownloadingAPI
         };
     },
     mounted() {

@@ -5,34 +5,45 @@ import { ipcRenderer } from 'electron';
 import { Guid } from 'guid-typescript';
 import { DownloadFileSeg } from '../nethelper';
 import { hasOption, store } from '../settings';
+import asyncPool from 'tiny-async-pool'
+import { ConvertSize } from './utils';
 
-export async function downloadFileFast<T = any>(url: string, size: number, allowChangeProgress: Boolean, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
+export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
     taskinfo?.pushState(`Download file ${url} using segments`);
     config ??= {};
     config = {...config};
     config.responseType = 'arraybuffer';
-    const segments = 16;
+    let segments = 16;
+    if(size < 1024 * 1024 * 5) segments = 16;
+    else if(size < 1024 * 1024 * 20) segments = 32;
+    else if(size < 1024 * 1024 * 50) segments = 64;
+    else segments = 128;
     const persegments = Math.round(size / segments);
-    const tasks: Promise<Buffer>[] = [];
+    taskinfo?.pushState(`Total segments: ${segments}(${ConvertSize(persegments)})`);
+    const ranges: [number, number][] = [];
     let offset = 0;
     for(let i = 0; i < segments ; i++) {
         const from = offset;
         const to = Math.min(offset + persegments, size -1);
-        const range = `${from}-${to}`;
+        ranges.push([from, to]);
         offset += persegments + 1;
-        tasks.push((async function(): Promise<Buffer>{
-            taskinfo?.pushState(`Start download segment: ${i}(${range})`);
-            /*const c = {...config};
-            c.headers = new AxiosHeaders(config.headers as AxiosHeaders);
-            c.headers.set('Range', `bytes=${range}`);
-            const r = Buffer.from((await axios.get<ArrayBuffer>(url + "?_=" + Guid.create().toString(), c)).data);*/
-            const r = await DownloadFileSeg(url, from, to);
-            taskinfo?.pushState(`Download segment finished: ${i}(${range})`);
-            return r;
-        })());
     }
-    const r = await Promise.all(tasks);
-    return Buffer.concat(r);
+    const buf: Buffer[] = [];
+    let id = 0;
+    let totalComplate = 1;
+    for await (const c of asyncPool(store.get('maxConnection', 16), ranges, async (range) => {
+        const sid = id++;
+        taskinfo?.pushState(`Begin download segment: ${sid}(${range[0]}-${range[1]}) Size: ${ConvertSize(range[1] - range[0])}`);
+        const r = await DownloadFileSeg(url, range[0], range[1]);
+        taskinfo?.pushState(`Finish download segment(${totalComplate++}/${segments}): ${sid}`);
+        if(allowChangeProgress) {
+            taskinfo?.reportProgress(totalComplate / segments * 100);
+        }
+        return [sid, r] as [number, Buffer];
+    })) {
+        buf[c[0]] = c[1];
+    }
+    return Buffer.concat(buf);
 }
 
 export async function downloadFile<T = any>(url: string
@@ -63,14 +74,14 @@ export async function downloadFile<T = any>(url: string
         } catch (e) {
             console.error(e);
         }
-        if (acceptRanges && size && size > 1024 * 1024 * 5 && canUseFast && store.get('enabled_exp_mode') && hasOption('FAST_DOWNLOAD')) {
-            return await downloadFileFast<T>(url, size, allowChangeProgress,config, taskinfo);
+        if (acceptRanges && size && size > 1024 * 1024 * 5 && canUseFast && hasOption('FAST_DOWNLOAD')) {
+            return await downloadFileFast(url, size, allowChangeProgress,config, taskinfo);
         }
         if (taskinfo) {
             config.onDownloadProgress = ev => {
                 if (!ev.total || !ev.progress) return;
                 const progress = ev.progress * 100;
-                taskinfo.setState(`Progress (${ev.total * ev.progress}/${ev.total}): ${progress}%`);
+                taskinfo.setState(`Progress (${ConvertSize(ev.total * ev.progress)}/${ConvertSize(ev.total)}): ${progress}%`);
                 if (allowChangeProgress) {
                     taskinfo.reportProgress(progress);
                 }
@@ -108,7 +119,7 @@ export async function downloadRaw(url: string, config?: AxiosRequestConfig<any>,
     if (config) config = { ...config };
     else config = {};
     config.responseType = "arraybuffer";
-    const r = await downloadFile<ArrayBuffer>(url, config, false, taskinfo, allowChangeProgress, taskName, taskCategory, fallback);
+    const r = await downloadFile<ArrayBuffer>(url, config, true, taskinfo, allowChangeProgress, taskName, taskCategory, fallback);
     return r instanceof Buffer ? r : Buffer.from(r.data);
 }
 

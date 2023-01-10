@@ -24,7 +24,7 @@
         <div class="accordion-collapse collapse bg-secondary text-white"  ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
-                <div v-if="task?.progress" class="progress">
+                <div v-if="task?.progress != undefined" class="progress">
                     <div class="progress-bar" :style="'width: ' + task.progress + '%;'"></div>
                 </div>
                 <div class="fs-6 p-1 d-flex">
