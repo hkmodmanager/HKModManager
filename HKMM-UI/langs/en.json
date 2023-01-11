@@ -93,6 +93,7 @@
         "publishTime": "Publish",
         "installTime": "Install",
         "badge_importFromScarab": "Import from Scarab",
+        "badge_importFromLocal": "Import from Local",
         "exportToScarab": "Export mod to Scarab",
         "releasePath": "Release",
         "openDataFolder": "Open the Mod folder",
@@ -110,6 +111,24 @@
 
             "exclusive": "Exclusive import",
             "nonexclusive": "Non-exclusive import"
+        },
+        "importLocal": {
+            "title": "Import manually installed mods",
+            "alertMsg_exclusive": "Warning: The imported mods will be fully transferred to HKMM for management",
+            "alertMsg_nonexclusive": "Warning: Imported mods may have version conflicts or other issues with the original mods in the future",
+            "confirmTitle": "Confirm",
+            "confirmBtn": "Confirm",
+            "cancelBtn": "Cancel",
+            "import": "Import",
+            "btn": "Import from Local",
+
+            "exclusive": "Exclusive import",
+            "nonexclusive": "Non-exclusive import",
+
+            "alert_dllnotfull": "Missing critical mod files that may not be available at all",
+            "alert_dllfull": "Some resource files are missing, which may affect normal use",
+            "alert_resourcefull": "Some non-essential files are missing, which generally do not affect the use",
+            "alert_full": "Mod file is not missing"
         },
         "exportScarab": {
             "title": "Export to Scarab",

@@ -23,6 +23,9 @@
                     <span v-if="localmod && localmod.info.importFromScarab" class="badge bg-success mt-2">
                         {{ $t("mods.badge_importFromScarab") }}
                     </span>
+                    <span v-if="localmod && localmod.info.imported?.localmod" class="badge bg-success mt-2">
+                        {{ $t("mods.badge_importFromLocal") }}
+                    </span>
                     <span v-if="!isLocal && scarab" class="badge bg-success mt-2">
                         {{ $t("mods.badge_scarabInstalled") }}
                     </span>

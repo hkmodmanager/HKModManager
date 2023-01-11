@@ -202,9 +202,10 @@ export async function getModLinksFromRepo() {
                 PromiseTimeout<false>(4000, false)
             ]);
             if(mcontent == false) {
+                console.log(`Try load cdn`);
                 mcontent = await Promise.race([
-                    downloadText(cdn_modlinks['JSDELIVR']),
-                    PromiseTimeout<false>(4000, false)
+                    downloadText(cdn_modlinks['JSDELIVR'], undefined, undefined, undefined, 'ModLinks CDN'),
+                    PromiseTimeout<false>(40000, false)
                 ]);
             }
             if (mcontent != false) {

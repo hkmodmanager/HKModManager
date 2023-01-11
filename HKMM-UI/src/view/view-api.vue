@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <img src="@/assets/apilogo.png" class="mx-auto d-block" v-if="getAPIVersion() > 0" />
+            <img src="@/assets/apilogo.png" class="mx-auto d-block" v-if="getAPIVersion() > 0" @click="openLink('https://github.com/hk-modding/api')"/>
             <img src="@/assets/hklogo.png" class="mx-auto d-block" v-if="getAPIVersion() <= 0" />
         </div>
         <div class="text-center">
@@ -50,6 +50,7 @@ import { defineComponent } from 'vue';
 import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/renderer/apiManager'
 import { apiInfoCache, getAPIInfo } from '@/renderer/modlinks/modlinks';
 import ModalBox from '@/components/modal-box.vue';
+import { remote } from 'electron';
 
 
 export default defineComponent({
@@ -68,6 +69,9 @@ export default defineComponent({
         },
         showUnistallAPI() {
             (this.$refs.uninstallModal as any).getModal().show();
+        },
+        openLink(link: string) {
+            remote.shell.openExternal(link);
         },
         uninstallAPI() {
             (this.$refs.uninstallModal as any).getModal().hide();

@@ -7,16 +7,22 @@
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
                 :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true"
-                @show-export-to-scarab-confirm="showISConfirm"></CModsItem>
+                @show-export-to-scarab-confirm="showESConfirm"></CModsItem>
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'">
-        <button class="btn btn-primary w-100" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
+        <div class="d-flex">
+        <button class="btn btn-primary flex-grow-1" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
             $t('mods.importScarab.btn')
         }}</button>
+        <button class="btn btn-primary flex-grow-1" @click="showImportLocalModal()" :disabled="!canImportFromScarab()">{{
+            $t('mods.importLocal.btn')
+        }}</button>
+        </div>
     </div>
     <ModalScarab ref="modal_import_scarab">
     </ModalScarab>
+    <ModalLocal ref="modal_import_local"></ModalLocal>
     <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.exportScarab.confirmTitle')"
         ref="modal_export_scarab">
         <div class="alert alert-danger" copyable>{{ $t('mods.exportScarab.alertMsg') }}</div>
@@ -26,7 +32,7 @@
                 <label class="form-check-label">{{ $t('mods.exportScarab.dontAsk') }}</label>
             </div>
             <button class="btn btn-outline-danger" @click="beginES()">{{ $t('mods.exportScarab.confirmBtn') }}</button>
-            <button class="btn btn-primary" @click="hideISConfirm()">{{ $t('mods.exportScarab.cancelBtn') }}</button>
+            <button class="btn btn-primary" @click="hideESConfirm()">{{ $t('mods.exportScarab.cancelBtn') }}</button>
         </template>
     </ModalBox>
 </template>
@@ -43,6 +49,7 @@ import ModalScarab from './relocation/modal-scarab.vue';
 import ModalBox from '@/components/modal-box.vue';
 import { exportMods } from '@/renderer/relocation/Scarab/RScarab';
 import { store } from '@/renderer/settings';
+import ModalLocal from './relocation/modal-local.vue';
 
 export default defineComponent({
     methods: {
@@ -64,7 +71,7 @@ export default defineComponent({
                 if (!m) continue;
                 if (this.tag && this.tag != 'None') {
                     if (this.tag == 'ScarabImported') {
-                        if(!m.getLatest()?.info.importFromScarab) continue;
+                        if (!m.getLatest()?.info.importFromScarab) continue;
                     } else {
                         if (!m.getLatest()?.info.modinfo.tags.includes(this.tag as ModTag)) continue;
                     }
@@ -87,7 +94,11 @@ export default defineComponent({
             const modal = this.$refs.modal_import_scarab as any;
             modal.showModal();
         },
-        showISConfirm(mod: LocalModInstance) {
+        showImportLocalModal() {
+            const modal = this.$refs.modal_import_local as any;
+            modal.showModal();
+        },
+        showESConfirm(mod: LocalModInstance) {
             this.ets_mod = mod;
             //if (hasOption('HIDE_ALERT_EXPORT_TO_SCARAB')) {
             //    this.beginES();
@@ -96,7 +107,7 @@ export default defineComponent({
             const modal = this.$refs.modal_export_scarab as any;
             modal.getModal().show();
         },
-        hideISConfirm() {
+        hideESConfirm() {
             const modal = this.$refs.modal_export_scarab as any;
             modal.getModal().hide();
         },
@@ -104,7 +115,7 @@ export default defineComponent({
             return hasModLink_ei_files();
         },
         beginES() {
-            this.hideISConfirm();
+            this.hideESConfirm();
             if (!this.ets_mod) return;
             exportMods([this.ets_mod as any]);
             this.ets_mod = undefined as any;
@@ -155,6 +166,6 @@ export default defineComponent({
     mounted() {
         this.refresh();
     },
-    components: { CModsItem, CModsSearch, ModalScarab, ModalBox }
+    components: { CModsItem, CModsSearch, ModalScarab, ModalBox, ModalLocal }
 });
 </script>

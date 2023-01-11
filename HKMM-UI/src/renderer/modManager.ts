@@ -13,11 +13,12 @@ import { config, installGameInject, loadConfig, saveConfig } from "./gameinject"
 import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
+import { IRLocalModInfo } from "./relocation/RLocal";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
 
-export function getRealModPath(name: string, disabled = false) {
+export function getRealModPath(name: string = '', disabled = false) {
     const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
     if (!existsSync(p)) mkdirSync(p);
     return p;
@@ -38,13 +39,16 @@ export function getCacheModsPath() {
     return mods;
 }
 
-export class LocalModInfo {
-    public name: string = "";
-    public version: string = "";
-    public install: number = 0;
-    public path: string = "";
-    public importFromScarab?: boolean = false;
-    public modinfo: ModLinksManifestData = undefined as any;
+export interface LocalModInfo {
+    name: string;
+    version: string;
+    install: number;
+    path: string;
+    importFromScarab?: boolean;
+    modinfo: ModLinksManifestData;
+    imported?: {
+        localmod?: IRLocalModInfo
+    };
 }
 
 export class LocalModInstance {
@@ -222,12 +226,13 @@ export class LocalModsVersionGroup {
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });
-        const info = new LocalModInfo();
-        info.install = new Date().valueOf();
-        info.name = mod.name;
-        info.version = mod.version;
-        info.path = verdir;
-        info.modinfo = mod;
+        const info: LocalModInfo = {
+            install: Date.now(),
+            name: mod.name,
+            version: mod.version,
+            path: verdir,
+            modinfo: mod
+        }
         const download = new URL(mod.link);
         const dp = parse(download.pathname);
         if (dp.ext == ".dll") {

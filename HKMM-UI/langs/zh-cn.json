@@ -105,6 +105,7 @@
         "publishTime": "发布时间",
         "installTime": "安装时间",
         "badge_importFromScarab": "从Scarab导入",
+        "badge_importFromLocal": "从本地导入",
         "exportToScarab": "导出到Scarab",
         "releasePath": "发布页面",
         "openDataFolder": "打开Mod文件夹",
@@ -122,6 +123,24 @@
 
             "exclusive": "独占式导入",
             "nonexclusive": "非独占式导入"
+        },
+        "importLocal": {
+            "title": "从本地导入",
+            "alertMsg_exclusive": "注意：导入后的Mods将被完全转交HKMM管理",
+            "alertMsg_nonexclusive": "注意：导入后的Mods在日后可能会和原始Mods出现版本冲突或其他问题",
+            "confirmTitle": "确认操作",
+            "confirmBtn": "确认",
+            "cancelBtn": "取消",
+            "import": "导入",
+            "btn": "导入手动安装的Mods",
+
+            "exclusive": "独占式导入",
+            "nonexclusive": "非独占式导入",
+
+            "alert_dllnotfull": "丢失了关键的Mod文件，可能根本无法使用",
+            "alert_dllfull": "丢失了一些资源文件，可能会影响正常使用",
+            "alert_resourcefull": "丢失了一些非必要的文件，一般不会影响使用",
+            "alert_full": "Mod文件完整"
         },
         "exportScarab": {
             "title": "导出到Scarab",

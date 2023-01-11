@@ -148,7 +148,6 @@ import "./renderer/plugins"
 import RequireExpmode from "./components/require-expmode.vue";
 import { appVersion } from "./renderer/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
-import "./renderer/bugReport"
 import { br_build_zip } from "./renderer/bugReport";
 
 export default defineComponent({

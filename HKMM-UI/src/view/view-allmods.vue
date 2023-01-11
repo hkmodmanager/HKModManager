@@ -7,6 +7,7 @@
     </div>
     <ModalScarab ref="modal_import_scarab" :force-import="hopeImportFromScarab">
     </ModalScarab>
+    <ModalLocal ref="modal_import_local"  :force-import="hopeImportFromLocal"></ModalLocal>
 </template>
 
 <script lang="ts">
@@ -19,6 +20,8 @@ import { I18nLanguages } from '@/lang/langs';
 import { getShortName } from '@/renderer/utils/utils';
 import { ModInfo, scanScarabMods } from '@/renderer/relocation/Scarab/RScarab';
 import ModalScarab from './relocation/modal-scarab.vue';
+import ModalLocal from './relocation/modal-local.vue';
+import { RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
 
 export default defineComponent({
     methods: {
@@ -73,6 +76,9 @@ export default defineComponent({
         scarabInstalled(mod: ModLinksManifestData) {
             return this.scarabMods.find(x => x.name == mod.name && x.mod.Version == mod.version);
         },
+        localInstalled(mod: ModLinksManifestData) {
+            return this.localMods.find(x => x.name == mod.name && x.mod.version == mod.version);
+        },
         importFromScarab(mod: ModInfo) {
             const modal = this.$refs.modal_import_scarab as any;
             this.hopeImportFromScarab = mod;
@@ -84,7 +90,9 @@ export default defineComponent({
             filter: undefined as any as (string | undefined),
             tag: 'None',
             hopeImportFromScarab: undefined as any,
-            scarabMods: scanScarabMods()
+            hopeImportFromLocal: undefined as any,
+            scarabMods: scanScarabMods(),
+            localMods: RL_ScanLocalMods(true)
         };
     },
     beforeUpdate() {
@@ -95,7 +103,7 @@ export default defineComponent({
             this.$forceUpdate();
         });
     },
-    components: { CModsItem, CModsSearch, ModalScarab }
+    components: { CModsItem, CModsSearch, ModalScarab, ModalLocal }
 })
 </script>
 

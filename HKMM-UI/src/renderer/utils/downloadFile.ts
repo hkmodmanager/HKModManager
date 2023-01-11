@@ -14,10 +14,10 @@ export async function downloadFileFast(url: string, size: number, allowChangePro
     config = { ...config };
     config.responseType = 'arraybuffer';
     let segments = 16;
-    if (size < 1024 * 1024 * 5) segments = 16;
-    else if (size < 1024 * 1024 * 20) segments = 32;
-    else if (size < 1024 * 1024 * 50) segments = 64;
-    else segments = 128;
+    if (size < 1024 * 1024 * 10) segments = 4;
+    else if (size < 1024 * 1024 * 20) segments = 8;
+    else if (size < 1024 * 1024 * 50) segments = 12;
+    else segments = 16;
     const persegments = Math.round(size / segments);
     taskinfo?.pushState(`Total segments: ${segments}(${ConvertSize(persegments)})`);
     const ranges: [number, number][] = [];
