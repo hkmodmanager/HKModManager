@@ -85,6 +85,7 @@
         "unuse": "Disable",
         "desc": "Description",
         "badge_scarabInstalled": "Installed in Scarab",
+        "badge_localInstalled": "Installed locally",
         "missingDep": "Not installed",
         "depOnThis": "The following mods depend on this mod",
         "integrateWithThis": "The following mods are integrated with this mod",
@@ -94,6 +95,11 @@
         "installTime": "Install",
         "badge_importFromScarab": "Import from Scarab",
         "badge_importFromLocal": "Import from Local",
+        "badge_nonExclusiveImport": "Non-exclusive import",
+        "badge_missingFileLevel0": "Non-critical files missing",
+        "badge_missingFileLevel1": "Resource files missing",
+        "badge_missingFileLevel2": "Critical files missing",
+        "alert_nonExclusiveImport": "Non-exclusive imported mods may have version conflicts or other issues with the original mod in the future\nUninstalling from HKMM will not affect the original mod",
         "exportToScarab": "Export mod to Scarab",
         "releasePath": "Release",
         "openDataFolder": "Open the Mod folder",
@@ -125,6 +131,8 @@
             "exclusive": "Exclusive import",
             "nonexclusive": "Non-exclusive import",
 
+            "missing_files": "The following files are missing",
+
             "alert_dllnotfull": "Missing critical mod files that may not be available at all",
             "alert_dllfull": "Some resource files are missing, which may affect normal use",
             "alert_resourcefull": "Some non-essential files are missing, which generally do not affect the use",
@@ -147,7 +155,10 @@
             "Library": "Library",
             "Utility": "Utility",
             "ScarabInstalled": "Installed in Scarab",
-            "ScarabImported": "Imported from Scarab"
+            "ScarabImported": "Imported from Scarab",
+            "LocalInstalled": "Locally installed",
+            "LocalImported": "Import from local",
+            "NonExclusiveImported": "Non-exclusive imported"
         }
     },
     "settings": {

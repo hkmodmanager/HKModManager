@@ -97,6 +97,7 @@ function GetSettingsLocal() {
 })();
 
 export function hasOption(name: SettingOptions) {
+    if(name == 'FAST_DOWNLOAD') return false;
     const options = store.get('options');
     return options.includes(name);
 }

@@ -2,7 +2,7 @@
     <div class="spinner spinner-border text-primary mx-auto d-block" v-if="showSpinner()">
     </div>
     <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag"
-        :custom-tags="filter !== 'requireUpdate' ? ['ScarabImported'] : []" />
+        :custom-tags="filter !== 'requireUpdate' ? ['ScarabImported', 'LocalImported', 'NonExclusiveImported'] : []" />
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
@@ -10,14 +10,15 @@
                 @show-export-to-scarab-confirm="showESConfirm"></CModsItem>
         </div>
     </div>
-    <div v-if="filter !== 'requireUpdate'">
+    <div v-if="filter !== 'requireUpdate'" class="sticky-bottom">
         <div class="d-flex">
-        <button class="btn btn-primary flex-grow-1" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
-            $t('mods.importScarab.btn')
-        }}</button>
-        <button class="btn btn-primary flex-grow-1" @click="showImportLocalModal()" :disabled="!canImportFromScarab()">{{
-            $t('mods.importLocal.btn')
-        }}</button>
+            <button class="btn btn-primary flex-grow-1" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
+                $t('mods.importScarab.btn')
+            }}</button>
+            <button class="btn btn-primary flex-grow-1" @click="showImportLocalModal()"
+                :disabled="!canImportFromScarab()">{{
+                    $t('mods.importLocal.btn')
+                }}</button>
         </div>
     </div>
     <ModalScarab ref="modal_import_scarab">
@@ -71,7 +72,11 @@ export default defineComponent({
                 if (!m) continue;
                 if (this.tag && this.tag != 'None') {
                     if (this.tag == 'ScarabImported') {
-                        if (!m.getLatest()?.info.importFromScarab) continue;
+                        if (!m.getLatest()?.info.imported?.fromScarab) continue;
+                    } else if (this.tag == 'LocalImported') {
+                        if (!m.getLatest()?.info.imported?.localmod) continue;
+                    } else if (this.tag == 'NonExclusiveImported') {
+                        if (!m.getLatest()?.info.imported?.nonExclusiveImport) continue;
                     } else {
                         if (!m.getLatest()?.info.modinfo.tags.includes(this.tag as ModTag)) continue;
                     }

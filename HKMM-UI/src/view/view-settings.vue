@@ -28,12 +28,12 @@
         <input class="form-check-input" type="checkbox" v-model="options" value="HIDE_MOD_ALIAS" />
         <label class="form-check-label">{{ $t("settings.options.hide_mod_alias") }}</label>
       </div>
-      <div class="form-check form-switch">
+      <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
           <label class="form-check-label" :title="$t('settings.options.fastdownload_od')">{{
             $t("settings.options.fastdownload")
           }}</label>
-      </div>
+      </div-->
     </div>
     <hr />
     <!--CDN-->

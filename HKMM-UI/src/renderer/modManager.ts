@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
-import { dirname, join, parse } from "path";
+import { dirname, extname, join, parse } from "path";
 import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
@@ -13,7 +13,7 @@ import { config, installGameInject, loadConfig, saveConfig } from "./gameinject"
 import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
-import { IRLocalModInfo } from "./relocation/RLocal";
+import { RL_ClearCache } from "./relocation/RLocal";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
@@ -39,15 +39,29 @@ export function getCacheModsPath() {
     return mods;
 }
 
+export enum LocalMod_FullLevel {
+    DllNotFull = 0,
+    DllFullButResourceNotFull = 1,
+    ResourceFull = 2,
+    Full
+}
+
+export interface IImportedLocalModVaild {
+    fulllevel: LocalMod_FullLevel;
+    missingFiles: string[];
+}
+
 export interface LocalModInfo {
     name: string;
     version: string;
     install: number;
     path: string;
-    importFromScarab?: boolean;
     modinfo: ModLinksManifestData;
     imported?: {
-        localmod?: IRLocalModInfo
+        localmod?: IImportedLocalModVaild,
+        fromScarab?: boolean,
+        nonExclusiveImport: Boolean,
+        modVaild: IImportedLocalModVaild
     };
 }
 
@@ -71,9 +85,30 @@ export class LocalModInstance {
     }
 
     private fixOld() {
-        const zipp = join(this.info.path, "mod.zip");
-        if (existsSync(zipp)) rmSync(zipp, { force: true });
-        this.save();
+        try {
+            let shouldSave = false;
+            if ((this.info as any)['importFromScarab']) {
+                this.info.imported ??= {
+                    nonExclusiveImport: false,
+                    modVaild: {
+                        missingFiles: [],
+                        fulllevel: LocalMod_FullLevel.Full
+                    }
+                };
+                this.info.imported.fromScarab = true;
+                shouldSave = true;
+                delete (this.info as any)['importFromScarab'];
+            }
+
+
+            const zipp = join(this.info.path, "mod.zip");
+            if (existsSync(zipp)) rmSync(zipp, { force: true });
+            if (shouldSave) {
+                this.save();
+            }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
 
@@ -253,6 +288,7 @@ export class LocalModsVersionGroup {
         this.versionsArray.push(inst);
         inst.save();
         inst.install(false);
+        RL_ClearCache();
         return inst;
     }
     public async installNew(mod: ModLinksManifestData, justCheckDep = false) {
@@ -345,6 +381,7 @@ export class LocalModsVersionGroup {
                 this.versionsArray.push(origArray[i2]);
             }
         }
+        RL_ClearCache();
     }
     public isInstalled() {
         return this.versionsArray.length > 0;
@@ -492,7 +529,7 @@ export function getIntegrationsMods(name: string, onlyLatest: boolean = true) {
     }
     const self = getLocalMod(name)?.getLatest();
     for (const iterator of inst) {
-        if (iterator.info.modinfo.integrations.includes(name) || 
+        if (iterator.info.modinfo.integrations.includes(name) ||
             (self?.info.modinfo?.integrations.includes(iterator.name))) result.push(iterator);
     }
     return result;
@@ -515,6 +552,30 @@ export function getRequireUpdateModsSync() {
     }
 
     return result;
+}
+
+export function vaildModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
+    const optionFileExt = ['.md', '.pdb'];
+    let fulllevel = LocalMod_FullLevel.Full;
+    for (const fn in files) {
+        const sha = files[fn];
+        const fp = join(root, fn);
+        const isDll = extname(fn).toLowerCase() == '.dll';
+        const isOption = optionFileExt.includes(extname(fn)?.toLowerCase());
+        const fsha = existsSync(fp) ? createHash('sha256').update(readFileSync(fp)).digest('hex') : undefined;
+        if (fsha != sha) {
+            if (isDll) {
+                if (fulllevel > LocalMod_FullLevel.DllNotFull) fulllevel = LocalMod_FullLevel.DllNotFull;
+            } else if (isOption) {
+                if (fulllevel > LocalMod_FullLevel.ResourceFull) fulllevel = LocalMod_FullLevel.ResourceFull;
+            } else {
+                if (fulllevel > LocalMod_FullLevel.DllFullButResourceNotFull) fulllevel = LocalMod_FullLevel.DllFullButResourceNotFull;
+            }
+            missingFilesRec?.push(fn);
+            continue;
+        }
+    }
+    return fulllevel;
 }
 
 const gl = window as any;

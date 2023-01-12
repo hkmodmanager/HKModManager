@@ -1,13 +1,14 @@
 <template>
-    <CModsSearch @update="updateSearch" @update-tag="updateTag" :custom-tags="[ 'ScarabInstalled' ]">
+    <CModsSearch @update="updateSearch" @update-tag="updateTag" :custom-tags="[ 'ScarabInstalled', 'LocalInstalled' ]">
     </CModsSearch>
     <div class="accordion">
         <CModsItem v-for="(mod) in getMods()" :key="mod.name" :inmod="mod" :scarab-installed="scarabInstalled(mod)"
-            @import-from-scarab="importFromScarab"></CModsItem>
+            :local-installed="localInstalled(mod)" @import-from-scarab="importFromScarab"
+            @import-from-local="importFromLocal"></CModsItem>
     </div>
     <ModalScarab ref="modal_import_scarab" :force-import="hopeImportFromScarab">
     </ModalScarab>
-    <ModalLocal ref="modal_import_local"  :force-import="hopeImportFromLocal"></ModalLocal>
+    <ModalLocal ref="modal_import_local" :force-import="hopeImportFromLocal"></ModalLocal>
 </template>
 
 <script lang="ts">
@@ -21,7 +22,7 @@ import { getShortName } from '@/renderer/utils/utils';
 import { ModInfo, scanScarabMods } from '@/renderer/relocation/Scarab/RScarab';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalLocal from './relocation/modal-local.vue';
-import { RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
+import { IRLocalMod, RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
 
 export default defineComponent({
     methods: {
@@ -40,7 +41,9 @@ export default defineComponent({
                 }
                 if (this.tag && this.tag != 'None') {
                     if (this.tag == 'ScarabInstalled') {
-                        if(!this.scarabInstalled(v)) continue;
+                        if (!this.scarabInstalled(v)) continue;
+                    } else if (this.tag == 'LocalInstalled') {
+                        if(!this.localInstalled(v)) continue;
                     } else {
                         if (!v.tags.includes(this.tag as ModTag)) continue;
                     }
@@ -79,6 +82,11 @@ export default defineComponent({
         localInstalled(mod: ModLinksManifestData) {
             return this.localMods.find(x => x.name == mod.name && x.mod.version == mod.version);
         },
+        importFromLocal(mod: IRLocalMod) {
+            const modal = this.$refs.modal_import_local as any;
+            this.hopeImportFromLocal = mod;
+            modal.showModal();
+        },
         importFromScarab(mod: ModInfo) {
             const modal = this.$refs.modal_import_scarab as any;
             this.hopeImportFromScarab = mod;
@@ -89,18 +97,20 @@ export default defineComponent({
         return {
             filter: undefined as any as (string | undefined),
             tag: 'None',
-            hopeImportFromScarab: undefined as any,
-            hopeImportFromLocal: undefined as any,
+            hopeImportFromScarab: undefined as any as ModInfo,
+            hopeImportFromLocal: undefined as any as IRLocalMod,
             scarabMods: scanScarabMods(),
-            localMods: RL_ScanLocalMods(true)
+            localMods: RL_ScanLocalMods(true, true)
         };
     },
     beforeUpdate() {
         this.scarabMods = scanScarabMods();
+        this.localMods = RL_ScanLocalMods(true, true);
     },
     mounted() {
         getModLinks().then(() => {
             this.$forceUpdate();
+            this.localMods = RL_ScanLocalMods(true, true);
         });
     },
     components: { CModsItem, CModsSearch, ModalScarab, ModalLocal }

@@ -97,6 +97,7 @@
         "unuse": "禁用",
         "desc": "描述",
         "badge_scarabInstalled": "Scarab已安装",
+        "badge_localInstalled": "本地已安装",
         "missingDep": "未安装",
         "depOnThis": "以下Mods依赖于该Mod",
         "integrateWithThis": "以下Mods与该Mod协调工作",
@@ -106,6 +107,11 @@
         "installTime": "安装时间",
         "badge_importFromScarab": "从Scarab导入",
         "badge_importFromLocal": "从本地导入",
+        "badge_nonExclusiveImport": "非独占式导入",
+        "badge_missingFileLevel0": "非关键文件缺失",
+        "badge_missingFileLevel1": "资源文件缺失",
+        "badge_missingFileLevel2": "关键文件缺失",
+        "alert_nonExclusiveImport": "非独占式导入的Mods在日后可能会和原始Mod出现版本冲突或其他问题\n从HKMM中卸载不会影响到原始Mod",
         "exportToScarab": "导出到Scarab",
         "releasePath": "发布页面",
         "openDataFolder": "打开Mod文件夹",
@@ -137,6 +143,8 @@
             "exclusive": "独占式导入",
             "nonexclusive": "非独占式导入",
 
+            "missing_files": "丢失了以下的文件",
+
             "alert_dllnotfull": "丢失了关键的Mod文件，可能根本无法使用",
             "alert_dllfull": "丢失了一些资源文件，可能会影响正常使用",
             "alert_resourcefull": "丢失了一些非必要的文件，一般不会影响使用",
@@ -159,7 +167,10 @@
             "Library": "前置",
             "Utility": "工具",
             "ScarabInstalled": "Scarab已安装",
-            "ScarabImported": "从Scarab导入"
+            "ScarabImported": "从Scarab导入",
+            "LocalInstalled": "本地已安装",
+            "LocalImported": "从本地导入",
+            "NonExclusiveImported": "非独占式导入"
         }
     },
     "settings": {

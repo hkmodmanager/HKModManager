@@ -9,7 +9,7 @@
         }}</div>
         <div v-else class="alert alert-danger" copyable>{{ $t('mods.importLocal.alertMsg_nonexclusive') }}</div>
         <template v-if="!forceImportMod">
-            <div v-for="(mod) in getMods()" :key="mod.name">
+            <div v-for="(mod) in mods" :key="mod.name">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" v-model="selectedMods" :value="mod" />
                     <label class="form-check-label" copyable>
@@ -18,11 +18,11 @@
                             $t('mods.depInstall')
                         }})</span>
                         <i class="bi bi-exclamation-triangle text-danger" v-if="mod.fulllevel == 0"
-                            :title="$t('mods.importLocal.alert_dllnotfull')"></i>
+                            :title="$t('mods.importLocal.alert_dllnotfull') + getMissingFileText(mod)"></i>
                         <i class="bi bi-exclamation-circle text-warning" v-if="mod.fulllevel == 1"
-                            :title="$t('mods.importLocal.alert_dllfull')"></i>
+                            :title="$t('mods.importLocal.alert_dllfull') + getMissingFileText(mod)"></i>
                         <i class="bi bi-info-circle text-success" v-if="mod.fulllevel == 2"
-                            :title="$t('mods.importLocal.alert_resourcefull')"></i>
+                            :title="$t('mods.importLocal.alert_resourcefull') + getMissingFileText(mod)"></i>
                         <i class="bi bi-check-circle text-success" v-if="mod.fulllevel == 3"
                             :title="$t('mods.importLocal.alert_full')"></i>
                     </label>
@@ -39,11 +39,11 @@
                         $t('mods.depInstall')
                     }})</span>
                     <i class="bi bi-exclamation-triangle text-danger" v-if="forceImportMod.fulllevel == 0"
-                        :title="$t('mods.importLocal.alert_dllnotfull')"></i>
+                        :title="$t('mods.importLocal.alert_dllnotfull') + getMissingFileText(forceImportMod)"></i>
                     <i class="bi bi-exclamation-circle text-warning" v-if="forceImportMod.fulllevel == 1"
-                        :title="$t('mods.importLocal.alert_dllfull')"></i>
+                        :title="$t('mods.importLocal.alert_dllfull') + getMissingFileText(forceImportMod)"></i>
                     <i class="bi bi-info-circle text-success" v-if="forceImportMod.fulllevel == 2"
-                        :title="$t('mods.importLocal.alert_resourcefull')"></i>
+                        :title="$t('mods.importLocal.alert_resourcefull') + getMissingFileText(forceImportMod)"></i>
                     <i class="bi bi-check-circle text-success" v-if="forceImportMod.fulllevel == 3"
                         :title="$t('mods.importLocal.alert_full')"></i></label>
             </div>
@@ -80,7 +80,11 @@ export default defineComponent({
     },
     methods: {
         showModal() {
-            if (!this.inited) this.inited = true;
+            if(this.forceImportMod) {
+                this.mods = [this.forceImportMod];
+            } else {
+                this.mods = RL_ScanLocalMods(true);
+            }
             const modal = this.$refs.modal as any;
             modal.getModal().show();
         },
@@ -115,16 +119,17 @@ export default defineComponent({
             refreshLocalMods(true);
             this.$parent?.$forceUpdate();
         },
-        getMods() {
-            if (this.dontAutoRefresh || !this.inited) return this.forceImportMod ? [this.forceImportMod] : [];
-            if (this.forceImportMod) return [this.forceImportMod];
-            return RL_ScanLocalMods();
+        getMissingFileText(mod: IRLocalMod) {
+            const files = mod.missingFiles;
+            if(!files) return "";
+            return `\n${this.$t('mods.importLocal.missing_files')}:\n${files.join('\n')}`;
         }
     },
     data() {
         return {
             selectedMods: [] as IRLocalMod[],
             importMode: 'exclusive',
+            mods: [] as IRLocalMod[],
             inited: false
         };
     },
@@ -134,8 +139,7 @@ export default defineComponent({
         }
     },
     props: {
-        forceImport: Object,
-        dontAutoRefresh: Boolean
+        forceImport: Object
     },
 });
 </script>

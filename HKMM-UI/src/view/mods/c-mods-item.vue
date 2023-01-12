@@ -20,14 +20,37 @@
                         class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
-                    <span v-if="localmod && localmod.info.importFromScarab" class="badge bg-success mt-2">
-                        {{ $t("mods.badge_importFromScarab") }}
-                    </span>
-                    <span v-if="localmod && localmod.info.imported?.localmod" class="badge bg-success mt-2">
-                        {{ $t("mods.badge_importFromLocal") }}
-                    </span>
+                    <template v-if="localmod && localmod.info.imported">
+                        <span v-if="localmod.info.imported.fromScarab" class="badge bg-success mt-2">
+                            {{ $t("mods.badge_importFromScarab") }}
+                        </span>
+                        <span v-if="localmod.info.imported.localmod" class="badge bg-success mt-2">
+                            {{ $t("mods.badge_importFromLocal") }}
+                        </span>
+                        <span v-if="localmod.info.imported.nonExclusiveImport"
+                            class="badge bg-warning mt-2" :title="$t('mods.alert_nonExclusiveImport')">
+                            {{ $t("mods.badge_nonExclusiveImport") }}
+                        </span>
+                        <template v-if="localmod.info.imported.modVaild && localmod.info.imported.modVaild.fulllevel < 3">
+                            <span v-if="localmod.info.imported.modVaild.fulllevel == 2" class="badge bg-success mt-2" 
+                                :title="$t('mods.importLocal.alert_resourcefull') + getMissingFileText(localmod.info.imported.modVaild)">
+                                {{ $t('mods.badge_missingFileLevel0') }}
+                            </span>
+                            <span v-if="localmod.info.imported.modVaild.fulllevel == 1" class="badge bg-warning mt-2" 
+                                :title="$t('mods.importLocal.alert_dllfull') + getMissingFileText(localmod.info.imported.modVaild)">
+                                {{ $t('mods.badge_missingFileLevel1') }}
+                            </span>
+                            <span v-if="localmod.info.imported.modVaild.fulllevel == 0" class="badge bg-danger mt-2" 
+                                :title="$t('mods.importLocal.alert_dllnotfull') + getMissingFileText(localmod.info.imported.modVaild)">
+                                {{ $t('mods.badge_missingFileLevel2') }}
+                            </span>
+                        </template>
+                    </template>
                     <span v-if="!isLocal && scarab" class="badge bg-success mt-2">
                         {{ $t("mods.badge_scarabInstalled") }}
+                    </span>
+                    <span v-if="!isLocal && rlocal" class="badge bg-success mt-2">
+                        {{ $t("mods.badge_localInstalled") }}
                     </span>
                     <span v-if="(isRequireUpdate(mod?.name ?? '') && !disableUpdate)" class="badge bg-warning mt-2">
                         {{ $t("mods.requireUpdate") }}
@@ -55,13 +78,16 @@
                 <div>
                     <div class="d-flex w-100">
                         <template v-if="!isInstallMod(mod?.name as string)">
-                            <button class="btn btn-primary" @click="$emit('importFromScarab', scarab)"
-                                :disabled="isDownload || (modSize == undefined)" v-if="scarab">{{
+                            <button class="btn btn-primary flex-grow-1" @click="$emit('importFromScarab', scarab)"
+                                :disabled="isDownload" v-if="scarab">{{
                                 $t("mods.importScarab.title") }}</button>
+                            <button class="btn btn-primary flex-grow-1" @click="$emit('importFromLocal', rlocal)"
+                                :disabled="isDownload" v-if="rlocal">{{
+                                $t("mods.importLocal.title") }}</button>
                             <button class="btn btn-primary flex-grow-1" @click="installMod"
                                 :disabled="isDownload || (modSize == undefined)">{{ $t("mods.install") }}</button>
                         </template>
-                        <div class="flex-grow-1 d-flex" v-if="isInstallMod(mod?.name as string)">
+                        <div class="flex-grow-1 d-flex" v-else>
 
                             <div class="flex-grow-1 d-flex">
                                 <template v-if="localmod">
@@ -89,13 +115,16 @@
                                 </div>
                                 <button class="btn btn-danger flex-grow-1" @click="uninstallMod" :disabled="isDownload">
                                     {{ $t("mods.uninstall") }}</button>
+                                <div class="flex-grow-1 d-flex"
+                                    v-if="(isRequireUpdate(mod?.name as string) && !disableUpdate)">
+                                    <button class="btn btn-primary flex-grow-1" :disabled="isDownload"
+                                        @click="updateMod()">
+                                        {{ $t("mods.update") }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-grow-1 d-flex" v-if="(isRequireUpdate(mod?.name as string) && !disableUpdate)">
-                            <button class="btn btn-primary flex-grow-1" :disabled="isDownload" @click="updateMod()">
-                                {{ $t("mods.update") }}
-                            </button>
-                        </div>
+
                     </div>
 
                     <div>
@@ -109,7 +138,7 @@
                         <span v-else copyable>{{ mod?.version }}</span>
                     </div>
                     <div v-if="licenseName != null">
-                        <span>{{  $t('mods.license')  }}: </span>
+                        <span>{{ $t('mods.license') }}: </span>
                         <span copyable>{{ licenseName }}</span>
                     </div>
                     <div v-if="modSize">
@@ -213,7 +242,7 @@
 
 <script lang="ts">
 import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath } from '@/renderer/modManager';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVaild } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import { remote, shell } from 'electron';
@@ -225,6 +254,7 @@ import { getScarabModConfig, ModInfo } from '@/renderer/relocation/Scarab/RScara
 import { existsSync } from 'fs';
 import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
+import { IRLocalMod } from '@/renderer/relocation/RLocal';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -328,6 +358,7 @@ export default defineComponent({
             const group = getOrAddLocalMod(this.mod.name);
             (await group.installNew(this.mod)).install(true);
             this.$forceUpdate();
+            this.$parent?.$forceUpdate();
         },
         async installModDep() {
             if (this.mod === undefined)
@@ -335,6 +366,7 @@ export default defineComponent({
             const group = getOrAddLocalMod(this.mod.name);
             await group.getLatest()?.checkDependencies();
             this.$forceUpdate();
+            this.$parent?.$forceUpdate();
         },
         uninstallMod() {
             if (this.mod === undefined)
@@ -342,6 +374,7 @@ export default defineComponent({
             const group = getOrAddLocalMod(this.mod.name);
             group.uninstall(undefined);
             this.$forceUpdate();
+            this.$parent?.$forceUpdate();
         },
         isUsed(name: string) {
             if (this.mod === undefined)
@@ -416,6 +449,11 @@ export default defineComponent({
             const r = getModRepo(repo);
             if (!r) return undefined;
             return `https://img.shields.io/github/license/${r[0]}/${r[1]}?style=for-the-badge`;
+        },
+        getMissingFileText(mod: IImportedLocalModVaild) {
+            const files = mod.missingFiles;
+            if(!files) return "";
+            return `\n${this.$t('mods.importLocal.missing_files')}:\n${files.join('\n')}`;
         }
     },
     props: {
@@ -423,11 +461,15 @@ export default defineComponent({
         localmod: LocalModInstance,
         isLocal: Boolean,
         disableUpdate: Boolean,
-        scarabInstalled: Object
+        scarabInstalled: Object,
+        localInstalled: Object
     },
     computed: {
         scarab(): ModInfo {
             return this.scarabInstalled as ModInfo;
+        },
+        rlocal(): IRLocalMod {
+            return this.localInstalled as IRLocalMod;
         },
         releasePath(): string | undefined {
             if (!this.mod?.link) return undefined;
@@ -490,7 +532,8 @@ export default defineComponent({
     },
     emits: {
         showExportToScarabConfirm: null,
-        importFromScarab: null
+        importFromScarab: null,
+        importFromLocal: null
     },
     components: { CModsDiList }
 });

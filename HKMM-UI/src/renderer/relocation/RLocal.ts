@@ -3,28 +3,16 @@ import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
 import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
-import { getOrAddLocalMod, getRealModPath } from "../modManager";
+import { getOrAddLocalMod, getRealModPath, IImportedLocalModVaild, isLaterVersion, LocalMod_FullLevel, refreshLocalMods, vaildModFiles } from "../modManager";
 import { scanScarabMods } from "./Scarab/RScarab";
 
-export interface IRLocalModInfo {
-    fulllevel: LocalMod_FullLevel;
-    missingFiles: string[];
-}
 
-export interface IRLocalMod extends IRLocalModInfo {
+
+export interface IRLocalMod extends IImportedLocalModVaild {
     name: string;
     path: string;
     mod: ModLinksManifestData;
 }
-
-export enum LocalMod_FullLevel {
-    DllNotFull = 0,
-    DllFullButResourceNotFull = 1,
-    ResourceFull =  2,
-    Full
-}
-
-export const optionFileExt = [ '.md', '.pdb' ];
 
 export function RL_CheckMod(root: string): IRLocalMod | undefined {
     const ml = modlinksCache;
@@ -81,58 +69,62 @@ export function RL_CheckMod(root: string): IRLocalMod | undefined {
         if (!match) return;
         matchmod = match[0];
     }
-    let fulllevel: LocalMod_FullLevel = LocalMod_FullLevel.Full;
     const missingFiles: string[] = [];
     const m_files = matchmod.ei_files?.files as Record<string, string>;
-    for (const fn in m_files) {
-        const sha = m_files[fn];
-        const fp = join(root, fn);
-        const isDll = extname(fn).toLowerCase() == '.dll';
-        const isOption = optionFileExt.includes(extname(fn)?.toLowerCase());
-        const fsha = existsSync(fp) ? createHash('sha256').update(readFileSync(fp)).digest('hex') : undefined;
-        if(fsha != sha) {
-            if(isDll) {
-                if(fulllevel > LocalMod_FullLevel.DllNotFull) fulllevel = LocalMod_FullLevel.DllNotFull;
-            } else if(isOption) {
-                if(fulllevel > LocalMod_FullLevel.ResourceFull) fulllevel = LocalMod_FullLevel.ResourceFull;
-            } else {
-                if(fulllevel > LocalMod_FullLevel.DllFullButResourceNotFull) fulllevel = LocalMod_FullLevel.DllFullButResourceNotFull;
-            }
-            missingFiles.push(fn);
-            continue;
-        }
-    }
+    
+    
     return {
         name: matchmod.name,
         path: root,
         mod: matchmod,
-        fulllevel,
+        fulllevel: vaildModFiles(root, m_files, missingFiles),
         missingFiles
     };
 }
+let localmodsCache: IRLocalMod[] | undefined = undefined;
 
-export function RL_ScanLocalMods(ignoreScarab: boolean = true) {
+export function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM: boolean = true, force: boolean = false) {
+
+    const ignoreMods: [string, string][] = [];
+    if (ignoreScarab) {
+        for (const mod of scanScarabMods()) {
+            ignoreMods.push([mod.name, "99999.999999.999999"]);
+        }
+    }
+    if (ignoreHKMM) {
+        const lms = refreshLocalMods();
+        for (const name in lms) {
+            const lm = lms[name];
+            const lv = lm.getLatestVersion();
+            if (lv) ignoreMods.push([name, lv]);
+        }
+    }
+    const result: IRLocalMod[] = [];
+    if (localmodsCache && !force) {
+        for (const mod of localmodsCache) {
+            if (ignoreMods.find(x => x[0] == mod.name && (isLaterVersion(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
+            result.push(mod);
+        }
+        return result;
+    }
     const ml = modlinksCache;
     if (!ml || !hasModLink_ei_files()) {
         console.log(`No ModLinks`);
         return [];
     }
-    const ignoreMods: string[] = [];
-    if (ignoreScarab) {
-        for (const mod of scanScarabMods()) {
-            ignoreMods.push(mod.name);
-        }
-    }
-    const result: IRLocalMod[] = [];
+
     const root = getRealModPath();
     console.log(`[RL]Begin search local mod in ${root}`);
+    localmodsCache = [];
     for (const modname of readdirSync(root, 'utf-8')) {
-        if (modname == 'Disabled' || ignoreMods.includes(modname)) continue;
+        if (modname == 'Disabled') continue;
         const p = join(root, modname);
         const state = statSync(p);
         if (!state.isDirectory()) continue;
         const mod = RL_CheckMod(p);
-        if(!mod) continue;
+        if (!mod) continue;
+        localmodsCache.push(mod);
+        if (ignoreMods.find(x => x[0] == mod.name && (isLaterVersion(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
         result.push(mod);
     }
     return result;
@@ -142,10 +134,10 @@ export function RL_ImportLocalMods(mods: IRLocalMod[], exclusive = true) {
     for (const mod of mods) {
         const name = mod.name;
         const lm = getOrAddLocalMod(name);
-        const modinfo: IRLocalModInfo = {
-            fulllevel: mod.fulllevel,
-            missingFiles: mod.missingFiles
+        const modinfo: IRLocalMod = {
+            ...mod
         };
+        delete (modinfo as any)['mod'];
         lm.installLocalMod({
             name: mod.name,
             version: mod.mod.version,
@@ -153,10 +145,17 @@ export function RL_ImportLocalMods(mods: IRLocalMod[], exclusive = true) {
             path: mod.path,
             modinfo: mod.mod,
             imported: {
-                localmod: modinfo
+                localmod: modinfo,
+                nonExclusiveImport: !exclusive,
+                modVaild: modinfo
             }
         }, mod.path, mod.mod.ei_files?.files as Record<string, string>, exclusive);
     }
+    RL_ClearCache();
+}
+
+export function RL_ClearCache() {
+    localmodsCache = undefined;
 }
 
 gl.RL_ScanLocalMods = RL_ScanLocalMods;
