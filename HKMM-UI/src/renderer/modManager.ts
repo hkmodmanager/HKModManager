@@ -20,7 +20,7 @@ export const hkmmmMetaDataFileName = "HKMM-Metadata";
 
 export function getRealModPath(name: string = '', disabled = false) {
     const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
-    if (!existsSync(p)) mkdirSync(p);
+    if (!existsSync(p)) mkdirSync(p, { recursive: true });
     return p;
 }
 
@@ -395,7 +395,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version] || !files) return undefined;
         const info = { ...mod };
         const mp = join(getCacheModsPath(), mod.name, mod.version);
-        if (!existsSync(mp)) mkdirSync(mp);
+        if (!existsSync(mp)) mkdirSync(mp, { recursive: true });
         info.path = mp;
         console.log("Instance Local Mod");
         /*copySync(root, mp, {
@@ -412,7 +412,7 @@ export class LocalModsVersionGroup {
                 if (sha256 != srcSHA) continue;
             }
             const ddir = dirname(dest);
-            if (!existsSync(ddir)) mkdirSync(ddir);
+            if (!existsSync(ddir)) mkdirSync(ddir, { recursive: true });
             copySync(srcpath, dest, {
                 overwrite: true
             });

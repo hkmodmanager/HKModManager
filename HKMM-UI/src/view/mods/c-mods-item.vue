@@ -85,7 +85,7 @@
                                 :disabled="isDownload" v-if="rlocal">{{
                                 $t("mods.importLocal.title") }}</button>
                             <button class="btn btn-primary flex-grow-1" @click="installMod"
-                                :disabled="isDownload || (modSize == undefined)">{{ $t("mods.install") }}</button>
+                                :disabled="isDownload || (modSize == undefined) || !isOnline()">{{ $t("mods.install") }}</button>
                         </template>
                         <div class="flex-grow-1 d-flex" v-else>
 
@@ -109,7 +109,7 @@
                                         {{ $t("mods.unuse") }}
                                     </button>
                                     <button class="btn btn-primary flex-grow-1" @click="installMod"
-                                        v-if="!canEnable(mod?.name as string)" :disabled="isDownload">{{
+                                        v-if="!canEnable(mod?.name as string)" :disabled="isDownload || !isOnline()">{{
                                         $t("mods.installDep")
                                         }}</button>
                                 </div>
@@ -117,7 +117,7 @@
                                     {{ $t("mods.uninstall") }}</button>
                                 <div class="flex-grow-1 d-flex"
                                     v-if="(isRequireUpdate(mod?.name as string) && !disableUpdate)">
-                                    <button class="btn btn-primary flex-grow-1" :disabled="isDownload"
+                                    <button class="btn btn-primary flex-grow-1" :disabled="isDownload || !isOnline()"
                                         @click="updateMod()">
                                         {{ $t("mods.update") }}
                                     </button>
@@ -454,6 +454,13 @@ export default defineComponent({
             const files = mod.missingFiles;
             if(!files) return "";
             return `\n${this.$t('mods.importLocal.missing_files')}:\n${files.join('\n')}`;
+        },
+        isOnline() {
+            if(!navigator.onLine) return false;
+            if(modlinksCache) {
+                return modlinksCache.offline;
+            }
+            return true;
         }
     },
     props: {
@@ -507,7 +514,7 @@ export default defineComponent({
             this.modSizeGet = true;
             this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         });
-        if (this.mod.repository && hasOption('SHOW_LICENCE')) {
+        if (this.mod.repository && hasOption('SHOW_LICENCE') && navigator.onLine) {
             const repo = this.mod.repository;
             if (licenseCache[repo] != undefined) {
                 this.licenseName = licenseCache[repo];

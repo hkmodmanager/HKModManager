@@ -41,6 +41,7 @@ jobs:
       - name: Build
         run: |
           cd HKMM-UI
+          npm run build:offlineModLinks
           npm run electron:build
           npm run build:update
         env:

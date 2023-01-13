@@ -74,7 +74,7 @@ export async function br_build_zip() {
     console.log(`Game Version: ${getGameVersion()}`);
     console.log(`Modding API Version: ${getAPIVersion()}`);
     const tmp = join(tmpdir(), Guid.create().toString());
-    mkdirSync(tmp);
+    mkdirSync(tmp, { recursive: true });
     writeJSONSync(join(tmp, "hkmm-renderer-log.json"), br_loadLogs(), {
         spaces: 4
     });

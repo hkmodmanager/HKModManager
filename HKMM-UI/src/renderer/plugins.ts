@@ -39,7 +39,7 @@ export const allPlugins: IHKMMPlugin[] = [];
 
 export function getCompileCacheDir() {
     const result = join(userData, 'plugins-cache');
-    if (!existsSync(result)) mkdirSync(result);
+    if (!existsSync(result)) mkdirSync(result, { recursive: true });
     return result;
 }
 

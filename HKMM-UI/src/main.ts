@@ -168,4 +168,3 @@ ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     }
 });
 
-

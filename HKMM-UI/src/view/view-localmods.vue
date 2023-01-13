@@ -7,7 +7,7 @@
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
                 :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true"
-                @show-export-to-scarab-confirm="showESConfirm"></CModsItem>
+                @show-export-to-scarab-confirm="showESConfirm" :disable-update="shouldDisableUpdate()"></CModsItem>
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'" class="sticky-bottom">
@@ -144,6 +144,12 @@ export default defineComponent({
         },
         getModLinks() {
             return modlinksCache;
+        },
+        shouldDisableUpdate() {
+            if(modlinksCache) {
+                return modlinksCache.offline;
+            }
+            return false;
         }
     },
     props: {

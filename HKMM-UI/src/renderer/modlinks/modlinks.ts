@@ -1,12 +1,13 @@
 
 import { remote } from 'electron';
-import { readFileSync } from 'fs';
-import { readJSONSync } from 'fs-extra';
+import { existsSync, readFileSync } from 'fs';
+import { readJSON, readJSONSync, writeJSONSync } from 'fs-extra';
+import { dirname, join } from 'path';
 import process from 'process';
 import { Parser, ast } from 'tsxml'
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
 import { isLaterVersion, refreshLocalMods } from '../modManager';
-import { isPackaged } from '../remoteCache';
+import { appDir, isPackaged, publicDir, srcRoot, userData } from '../remoteCache';
 import { CDN, store } from '../settings';
 import { downloadFile, downloadText } from '../utils/downloadFile';
 import { PromiseTimeout } from '../utils/utils';
@@ -30,6 +31,7 @@ export type ModTag = "Boss" | "Cosmetic" | "Expansion" | "Gameplay" | "Library" 
 export interface ModCollection {
     mods: Record<string, ModVersionCollection>;
     latestCommit?: string;
+    saveDate?: number;
 }
 
 export type ModVersionCollection = Record<string, ModLinksManifestData>;
@@ -52,7 +54,7 @@ export interface ModLinksManifestData {
 
 
 export class ModLinksData {
-    public constructor(public mods: ModCollection) { }
+    public constructor(public mods: ModCollection, public offline = false) { }
     public lastGet: number = 0;
     public getModVersions(name: string): ModVersionCollection | undefined {
         return this.mods.mods[name];
@@ -95,6 +97,32 @@ function getCDATANodeText(parent: ContainerNode, tagName: string): string | unde
 
 let promise_get_modlinks: Promise<ModLinksData> | undefined;
 export let modlinksCache: ModLinksData | undefined;
+
+export function getLocalModLinksPath() {
+    return join(userData, 'offline_modlinks.json');
+}
+
+function loadLocalModLinks() {
+    const offlinePath = join(publicDir, 'offline', 'modlinks.json');
+    console.log(`[ModLinks]internal offline data: ${offlinePath}`);
+    const result = readJSONSync(offlinePath) as ModCollection;
+    if(existsSync(getLocalModLinksPath())) {
+        const local = readJSONSync(getLocalModLinksPath()) as ModCollection;
+        if(local.saveDate) {
+            if(!result.saveDate || local.saveDate > result.saveDate) return local;
+        }
+    }
+    saveLocalModLinks(result);
+    return result;
+}
+
+function saveLocalModLinks(data: ModCollection) {
+    data = {...data};
+    data.saveDate = Date.now();
+    writeJSONSync(getLocalModLinksPath(), data, {
+        spaces: 4
+    });
+}
 
 export async function parseModLinks(content: string): Promise<ModCollection> {
     const result: ModCollection = {
@@ -179,16 +207,23 @@ export async function parseModLinks(content: string): Promise<ModCollection> {
     return result;
 }
 
-export async function getModLinksFromRepo() {
+export async function getModLinksFromRepo(force = false) {
     if (promise_get_modlinks) {
         return await promise_get_modlinks;
     }
-    if (modlinksCache) {
-        const ts = new Date().valueOf() - modlinksCache.lastGet;
-        if (ts < 3600000) {
-            promise_get_modlinks = undefined;
-            return modlinksCache;
+
+    if (modlinksCache && !force) {
+        if (!navigator.onLine && modlinksCache.offline) return modlinksCache;
+        if (!modlinksCache.offline) {
+            const ts = new Date().valueOf() - modlinksCache.lastGet;
+            if (ts < 3600000) {
+                promise_get_modlinks = undefined;
+                return modlinksCache;
+            }
         }
+    }
+    if (!navigator.onLine) {
+        return modlinksCache = new ModLinksData(loadLocalModLinks(), true);
     }
     //const url = "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json";
     //const url =  "https://cdn.jsdelivr.net/gh/HKLab/modlinks-archive@latest/modlinks.json";
@@ -201,12 +236,14 @@ export async function getModLinksFromRepo() {
                 downloadText(cdn_modlinks['GITHUB_RAW']),
                 PromiseTimeout<false>(4000, false)
             ]);
-            if(mcontent == false) {
+            if (mcontent == false) {
                 console.log(`Try load cdn`);
                 mcontent = await Promise.race([
-                    downloadText(cdn_modlinks['JSDELIVR'], undefined, undefined, undefined, 'ModLinks CDN'),
+                    downloadText(cdn_modlinks['JSDELIVR'], undefined, undefined, undefined),
                     PromiseTimeout<false>(40000, false)
                 ]);
+            } else {
+                saveLocalModLinks(JSON.parse(mcontent));
             }
             if (mcontent != false) {
                 const mc = JSON.parse(mcontent) as ModCollection;
@@ -237,6 +274,7 @@ export async function getModLinksFromRepo() {
     }
     else {
         content = JSON.parse(await downloadText(url, undefined, undefined, false, "ModLinks", "Download"));
+        saveLocalModLinks(content);
     }
 
     modlinksCache = new ModLinksData(content);
@@ -263,8 +301,8 @@ export async function getModLinksFromRepo() {
     return modlinksCache;
 }
 
-export async function getModLinks() {
-    const p = promise_get_modlinks ?? getModLinksFromRepo();
+export async function getModLinks(force = false) {
+    const p = promise_get_modlinks ?? getModLinksFromRepo(force);
     promise_get_modlinks = p;
     if (!modlinksCache) return await p;
     return p;
@@ -429,7 +467,13 @@ export function getIntegrationsMods_ModLinks(name: string) {
 
 export function getModRepo(repo: string): [string, string] | undefined {
     const url = new URL(repo);
-    if(url.hostname != "github.com") return undefined;
+    if (url.hostname != "github.com") return undefined;
     const parts = url.pathname.split('/');
     return [parts[1], parts[2]];
 }
+
+window.addEventListener('online', () => {
+    if (!modlinksCache || modlinksCache.offline) {
+        getModLinksFromRepo(true);
+    }
+});

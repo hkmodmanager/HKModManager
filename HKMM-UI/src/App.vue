@@ -206,6 +206,7 @@ export default defineComponent({
       return getAPIVersion() > 0;
     },
     isRequireUpdateMods() {
+      if(modlinksCache?.offline) return false;
       return getRequireUpdateModsSync().length > 0;
     },
     exportDebugPackage() {

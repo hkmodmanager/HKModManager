@@ -1,10 +1,13 @@
 <template>
     <CModsSearch @update="updateSearch" @update-tag="updateTag" :custom-tags="[ 'ScarabInstalled', 'LocalInstalled' ]">
     </CModsSearch>
+    <div class="alert alert-danger" v-if="isUseModlinksBackup()">
+        {{ $t('allmods_offline', { date: getModlinksBackupDate().toLocaleString() }) }}
+    </div>
     <div class="accordion">
         <CModsItem v-for="(mod) in getMods()" :key="mod.name" :inmod="mod" :scarab-installed="scarabInstalled(mod)"
             :local-installed="localInstalled(mod)" @import-from-scarab="importFromScarab"
-            @import-from-local="importFromLocal"></CModsItem>
+            @import-from-local="importFromLocal" :disable-update="isUseModlinksBackup()"></CModsItem>
     </div>
     <ModalScarab ref="modal_import_scarab" :force-import="hopeImportFromScarab">
     </ModalScarab>
@@ -43,7 +46,7 @@ export default defineComponent({
                     if (this.tag == 'ScarabInstalled') {
                         if (!this.scarabInstalled(v)) continue;
                     } else if (this.tag == 'LocalInstalled') {
-                        if(!this.localInstalled(v)) continue;
+                        if (!this.localInstalled(v)) continue;
                     } else {
                         if (!v.tags.includes(this.tag as ModTag)) continue;
                     }
@@ -91,6 +94,29 @@ export default defineComponent({
             const modal = this.$refs.modal_import_scarab as any;
             this.hopeImportFromScarab = mod;
             modal.showModal();
+        },
+        isUseModlinksBackup() {
+            if (modlinksCache) {
+                return modlinksCache.offline;
+            }
+            return false;
+        },
+        getModlinksBackupDate() {
+            if (modlinksCache) {
+                if (modlinksCache.mods.saveDate) {
+                    return new Date(modlinksCache.mods.saveDate);
+                }
+            }
+            return new Date();
+        },
+        onlineRefresh() {
+            this.refreshModLinks(true);
+        },
+        refreshModLinks(force = false) {
+            getModLinks(force).then(() => {
+                this.$forceUpdate();
+                this.localMods = RL_ScanLocalMods(true, true);
+            });
         }
     },
     data() {
@@ -108,10 +134,11 @@ export default defineComponent({
         this.localMods = RL_ScanLocalMods(true, true);
     },
     mounted() {
-        getModLinks().then(() => {
-            this.$forceUpdate();
-            this.localMods = RL_ScanLocalMods(true, true);
-        });
+        this.refreshModLinks();
+        window.addEventListener('online', this.onlineRefresh);
+    },
+    unmounted() {
+        window.removeEventListener('online', this.onlineRefresh);
     },
     components: { CModsItem, CModsSearch, ModalScarab, ModalLocal }
 })
