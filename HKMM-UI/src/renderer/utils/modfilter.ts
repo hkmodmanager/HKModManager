@@ -1,4 +1,4 @@
-import { getModRepo, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
+import { getModDate, getModRepo, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
 import { getShortName } from "./utils";
 
 function processingModName(name: string) {
@@ -7,10 +7,10 @@ function processingModName(name: string) {
 
 export type ModFilterInfo = [string, ((mod: ModLinksManifestData) => [boolean, number])][];
 
-export function prepareFilter(input?: string, 
+export function prepareFilter(input?: string,
     customFilter?: Record<string, (parts: string[], mod: ModLinksManifestData) => [boolean, number]>,
     aliasGetter?: (mod: ModLinksManifestData) => string) {
-    if(!input) return [];
+    if (!input) return [];
     const filters: ModFilterInfo = [];
     for (const part of input.split(/(?=[:])/)) {
         const p = part.trim();
@@ -29,7 +29,7 @@ export function prepareFilter(input?: string,
             const matchname = p[0] == ':' ? fparts[1] : p;
             filters.push(['name', (mod) => {
                 let modname = processingModName(mod.name);
-                if(aliasGetter) {
+                if (aliasGetter) {
                     modname += aliasGetter(mod);
                 }
                 const index = modname.indexOf(matchname.toLowerCase());
@@ -41,29 +41,49 @@ export function prepareFilter(input?: string,
                 }
                 return [pass, order]
             }]);
-            continue;
         } else if (filterName == 'tag') {
             //Tag
-            filters.push(['tag',(mod) => {
+            filters.push(['tag', (mod) => {
                 return [mod.tags.includes(fparts[1] as ModTag), 0];
             }]);
-            continue;
-        } else if(filterName == 'author') {
+        } else if (filterName == 'author') {
             //Author
             const authorName = fparts[1]?.toLowerCase();
             filters.push(['author', (mod) => {
-                if(!authorName) return [true, 0];
-                if(mod.authors) {
-                    if(mod.authors.map(x => x.toLowerCase()).includes(authorName)) return [true, 0];
+                if (!authorName) return [true, 0];
+                if (mod.authors) {
+                    if (mod.authors.map(x => x.toLowerCase()).includes(authorName)) return [true, 0];
                 }
-                if(!mod.repository) return [false, 0];
+                if (!mod.repository) return [false, 0];
                 const repo = getModRepo(mod.repository);
-                if(!repo) return [false, 0];
+                if (!repo) return [false, 0];
                 return [repo[0]?.toLowerCase() == authorName, 0];
             }]);
-            continue;
+        } else if(filterName == 'sort') {
+            const sortMode = fparts[1]?.toLowerCase();
+            if(sortMode) {
+                if(sortMode == 'lastupdate') {
+                    filters.push(['sort-lastUpdate', (mod) => {
+                        return [true, mod.date ? (getModDate(mod.date).valueOf()) : 0];
+                    }]);
+                } else if(sortMode == 'lastupdate-reverse') {
+                    filters.push(['sort-lastUpdate', (mod) => {
+                        return [true, mod.date ? (-getModDate(mod.date).valueOf()) : 0];
+                    }]);
+                } else if(sortMode == 'size') {
+                    filters.push(['sort-size', (mod) => {
+                        return [true, mod.ei_files?.size ?? 0];
+                    }]);
+                } else if(sortMode == 'size-reverse') {
+                    filters.push(['sort-size', (mod) => {
+                        return [true, -(mod.ei_files?.size ?? 0)];
+                    }]);
+                }
+            }
+        } else {
+            console.log(`[ModFilter]Unknown filter: ${filterName}`);
         }
-        console.log(`[ModFilter]Unknown filter: ${filterName}`);
+
     }
     console.log(`[MF]Filters: ` + filters.map(x => x[0]).join(','));
     return filters;
@@ -74,9 +94,9 @@ export function filterMods<T = ModLinksManifestData>(inmods: (T | undefined)[],
     convert: ((mod: T) => ModLinksManifestData | undefined) = (mod: T) => (mod as any as ModLinksManifestData)) {
     const result: [T, ModLinksManifestData, number][] = [];
     for (const mod of inmods) {
-        if(!mod) continue;
+        if (!mod) continue;
         const modinfo = convert(mod);
-        if(!modinfo) continue;
+        if (!modinfo) continue;
         let order = 0;
         let pass = true;
         for (const filter of filters) {
