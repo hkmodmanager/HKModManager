@@ -1,53 +1,91 @@
 
 <template>
-    <div class="input-group sticky-top">
-        <input class="form-control" placeholder="..." v-model="text" @keyup.enter="refresh()"/>
-        <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag">
-            <option  value="None">{{ $t('mods.tags.None') }}</option>
-            <option v-for="(tag) in ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility', ...(customTags as string[] ?? [])]" 
-            :key="tag" :value="tag">{{ $t('mods.tags.' + tag) }}</option>
-        </select>
+    <div class="sticky-top p-1">
+        <div class="input-group ">
+            <input class="form-control" placeholder="..." v-model="textinput" @keyup.enter="refresh()" />
+            <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag" @change="refresh()">
+                <option value="None">{{ $t('mods.tags.None') }}</option>
+                <option v-for="(tag) in tags" :key="tag" :value="tag">{{
+                $t('mods.tags.' + tag) }}({{ (customTags ?? {})[tag] ? `:${(customTags ?? {})[tag]}` : `:tag=${tag}`
+    }})
+                </option>
+            </select>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+export let searchText: string = '';
+let searchTag: string = 'None';
+let curSearch: any = undefined;
+
+export function getSearchText(): string {
+    return curSearch?.textinput ?? searchText;
+}
+
+export function setSearchText(text: string) {
+    searchText = text;
+    if (curSearch) {
+        curSearch.textinput = text;
+        curSearch.refresh();
+    }
+}
+
 export default defineComponent({
     data() {
         return {
-            text: "",
-            ftag: "None"
+            ftag: searchTag,
+            textinput: searchText
         };
     },
     methods: {
         refresh() {
-            const name = this.text.trim();
-            if(name == '') {
+            searchTag = this.ftag;
+            searchText = this.textinput.trim();
+            let name = searchText;
+            if (this.ftag != 'None') {
+                const cn = this.customTags ? this.customTags[this.ftag] : undefined;
+                if (cn) {
+                    name += ':' + cn;
+                } else {
+                    name += ':tag=' + this.ftag;
+                }
+            }
+            if (name == '') {
                 this.$emit('update', undefined);
             } else {
                 this.$emit('update', name);
             }
-            console.log(this.text.trim());
+            console.log(name);
+        },
+    },
+    mounted() {
+        curSearch = this;
+        if (!this.tags.includes(this.ftag)) {
+            this.ftag = 'None';
+            this.refresh();
+            return;
         }
+        if (searchTag != 'None' || searchText != '') {
+            this.refresh();
+        }
+    },
+    unmounted() {
+        curSearch = undefined;
     },
     computed: {
         tags() {
-            return [];
-        }
-    },
-    watch: {
-        ftag(n) {
-            this.$emit('updateTag', n);
-            console.log(n);
+            return ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility',
+                ...(this.customTags ? Object.keys(this.customTags) : [])];
         }
     },
     props: {
-        customTags: Array
+        customTags: Object
     },
     emits: {
-        update: null,
-        updateTag: null
+        update: null
     }
 });
 </script>

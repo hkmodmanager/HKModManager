@@ -82,6 +82,8 @@
     },
     "mods": {
         "authors": "贡献者",
+        "owner": "所有者",
+        "ownerOtherMods": "查看其他Mods",
         "repo": "代码仓库",
         "version": "版本",
         "dep": "依赖Mods",

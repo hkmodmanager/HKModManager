@@ -70,6 +70,8 @@
     },
     "mods": {
         "authors": "Authors",
+        "owner": "Owner",
+        "ownerOtherMods": "Look at other mods",
         "repo": "Repository",
         "version": "Version",
         "dep": "Dependencies",

@@ -60,7 +60,7 @@ export interface LocalModInfo {
     imported?: {
         localmod?: IImportedLocalModVaild,
         fromScarab?: boolean,
-        nonExclusiveImport: Boolean,
+        nonExclusiveImport: boolean,
         modVaild: IImportedLocalModVaild
     };
 }

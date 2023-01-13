@@ -1,8 +1,11 @@
 <template>
     <div class="spinner spinner-border text-primary mx-auto d-block" v-if="showSpinner()">
     </div>
-    <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag"
-        :custom-tags="filter !== 'requireUpdate' ? ['ScarabImported', 'LocalImported', 'NonExclusiveImported'] : []" />
+    <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag" :custom-tags="filter !== 'requireUpdate' ? {
+    'ScarabImported': 'ScarabImported',
+    'LocalImported': 'LocalImported',
+    'NonExclusiveImported': 'NonExclusiveImported'
+    } : {}" />
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
@@ -39,54 +42,38 @@
 </template>
 
 <script lang="ts">
-import { refreshLocalMods, LocalModsVersionGroup, getRequireUpdateModsSync, getLocalMod, LocalModInstance } from '@/renderer/modManager';
+import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance } from '@/renderer/modManager';
 import { defineComponent } from 'vue';
-import { getModLinks, hasModLink_ei_files, modlinksCache, ModTag } from '@/renderer/modlinks/modlinks';
+import { getModLinks, hasModLink_ei_files, modlinksCache } from '@/renderer/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
-import { getShortName } from '@/renderer/utils/utils';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalBox from '@/components/modal-box.vue';
 import { exportMods } from '@/renderer/relocation/Scarab/RScarab';
 import { store } from '@/renderer/settings';
 import ModalLocal from './relocation/modal-local.vue';
+import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
 
 export default defineComponent({
     methods: {
         getMods() {
+            if(!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
             const src = (this.filter === 'all' || !this.filter) ? Object.keys(refreshLocalMods()) : getRequireUpdateModsSync();
-            const result: LocalModsVersionGroup[] = [];
-            //if (!modlinksCache) return result;
-            const filterT = this.search?.trim();
-            for (const mod of src) {
-                const mname = mod.toLowerCase().replaceAll(' ', '').trim()
-                    + (this.getModAliasName(mod) ?? '');
-
-                if (filterT) {
-                    const fname = this.search.toLowerCase().replaceAll(' ', '').trim();
-                    if (!mname.includes(fname) && !getShortName(mod).startsWith(filterT.trim())) continue;
+            const filter = prepareFilter(this.search, {
+                scarabimported: (_parts, mod) => {
+                    return [getLocalMod(mod.name)?.getLatest()?.info.imported?.fromScarab ?? false, 0];
+                },
+                localimported: (_parts, mod) => {
+                    return [getLocalMod(mod.name)?.getLatest()?.info.imported?.localmod != undefined, 0];
+                },
+                nonexclusiveimported: (_parts, mod) => {
+                    return [getLocalMod(mod.name)?.getLatest()?.info.imported?.nonExclusiveImport ?? false, 0];
                 }
-
-                const m = getLocalMod(mod);
-                if (!m) continue;
-                if (this.tag && this.tag != 'None') {
-                    if (this.tag == 'ScarabImported') {
-                        if (!m.getLatest()?.info.imported?.fromScarab) continue;
-                    } else if (this.tag == 'LocalImported') {
-                        if (!m.getLatest()?.info.imported?.localmod) continue;
-                    } else if (this.tag == 'NonExclusiveImported') {
-                        if (!m.getLatest()?.info.imported?.nonExclusiveImport) continue;
-                    } else {
-                        if (!m.getLatest()?.info.modinfo.tags.includes(this.tag as ModTag)) continue;
-                    }
-                }
-                result.push(m);
-            }
-            return result.sort((a, b) => a.name.localeCompare(b.name) + (filterT ? (
-                (getShortName(a.name).startsWith(filterT) ? -100 : 0) +
-                (getShortName(b.name).startsWith(filterT) ? 100 : 0)
-            ) : 0));
+            }, (mod) => this.getModAliasName(mod.name));
+            return filterMods(src, filter, (mod) => {
+                return getLocalMod(mod)?.getLatest()?.info.modinfo;
+            }).map(mod => getLocalMod(mod));
         },
         refresh() {
             if (!modlinksCache) {
@@ -146,7 +133,7 @@ export default defineComponent({
             return modlinksCache;
         },
         shouldDisableUpdate() {
-            if(modlinksCache) {
+            if (modlinksCache) {
                 return modlinksCache.offline;
             }
             return false;

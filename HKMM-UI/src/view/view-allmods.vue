@@ -1,5 +1,7 @@
 <template>
-    <CModsSearch @update="updateSearch" @update-tag="updateTag" :custom-tags="[ 'ScarabInstalled', 'LocalInstalled' ]">
+    <CModsSearch @update="updateSearch" :custom-tags="{ 
+        'ScarabInstalled': 'ScarabInstalled', 
+        'LocalInstalled': 'LocalInstalled' }">
     </CModsSearch>
     <div class="alert alert-danger" v-if="isUseModlinksBackup()">
         {{ $t('allmods_offline', { date: getModlinksBackupDate().toLocaleString() }) }}
@@ -16,61 +18,35 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { getModLinks, modlinksCache, ModLinksManifestData, ModTag } from '@/renderer/modlinks/modlinks'
+import { getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks'
 import CModsItem from './mods/c-mods-item.vue';
 import { hasOption } from '@/renderer/settings';
 import CModsSearch from './mods/c-mods-search.vue';
 import { I18nLanguages } from '@/lang/langs';
-import { getShortName } from '@/renderer/utils/utils';
 import { ModInfo, scanScarabMods } from '@/renderer/relocation/Scarab/RScarab';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalLocal from './relocation/modal-local.vue';
 import { IRLocalMod, RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
+import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
 
 export default defineComponent({
     methods: {
         getMods() {
             const names = modlinksCache?.getAllModNames();
             if (!names || !modlinksCache) return [];
-            const arr: ModLinksManifestData[] = [];
-            const filterT = this.filter?.trim();
-            const fname = this.filter?.toLowerCase().replaceAll(' ', '').trim();
-            for (const name of names) {
-                const v = modlinksCache.getMod(name);
-                if (!v) continue;
-                const mname = name.toLowerCase().replaceAll(' ', '').trim() + (this.getModAliasName(name) ?? '');
-                if (filterT && fname) {
-                    if (!mname.includes(fname) && !getShortName(name).startsWith(filterT)) continue;
-                }
-                if (this.tag && this.tag != 'None') {
-                    if (this.tag == 'ScarabInstalled') {
-                        if (!this.scarabInstalled(v)) continue;
-                    } else if (this.tag == 'LocalInstalled') {
-                        if (!this.localInstalled(v)) continue;
-                    } else {
-                        if (!v.tags.includes(this.tag as ModTag)) continue;
-                    }
-
-                }
-                if (!v.isDeleted || hasOption('SHOW_DELETED_MODS')) {
-                    arr.push(v);
-                }
-            }
-            return arr.sort((a, b) =>
-                a.name.localeCompare(b.name) +
-                (a.isDeleted ? 100 : 0) +
-                (b.isDeleted ? -100 : 0) +
-                (filterT ? (
-                    (getShortName(a.name).startsWith(filterT) ? -100 : 0) +
-                    (getShortName(b.name).startsWith(filterT) ? 100 : 0)
-                ) : 0));
+            const filter = prepareFilter(this.filter, {
+                'localinstalled': (_parts, mod) => [this.localInstalled(mod) != undefined, 0],
+                'scarabinstalled': (_parts, mod) => [this.scarabInstalled(mod) != undefined, 0]
+            }, (mod) => this.getModAliasName(mod.name));
+            return filterMods<ModLinksManifestData>(names.map(x => {
+                const mod = modlinksCache?.getMod(x);
+                if(!mod) return;
+                if(mod.isDeleted && !hasOption('SHOW_DELETED_MODS')) return;
+                return mod;
+            }), filter);
         },
         updateSearch(f: string) {
             this.filter = f;
-            this.$forceUpdate();
-        },
-        updateTag(tag: string) {
-            this.tag = tag;
             this.$forceUpdate();
         },
         getModAliasName(name: string) {
@@ -103,8 +79,9 @@ export default defineComponent({
         },
         getModlinksBackupDate() {
             if (modlinksCache) {
-                if (modlinksCache.mods.saveDate) {
-                    return new Date(modlinksCache.mods.saveDate);
+                const sdate = modlinksCache.mods.lastUpdate ?? modlinksCache.mods.saveDate;
+                if (sdate) {
+                    return new Date(sdate);
                 }
             }
             return new Date();
@@ -122,7 +99,6 @@ export default defineComponent({
     data() {
         return {
             filter: undefined as any as (string | undefined),
-            tag: 'None',
             hopeImportFromScarab: undefined as any as ModInfo,
             hopeImportFromLocal: undefined as any as IRLocalMod,
             scarabMods: scanScarabMods(),

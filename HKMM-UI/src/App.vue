@@ -22,7 +22,7 @@
           href="javascript:;"></a>
         <a class="bi bi-discord p-2 link-light" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')"
           href="javascript:;"></a>
-        <a class="bi bi-wrench-adjustable-circle p-2 link-light" title="Dev Tools" @click="openDevTools()"
+        <a class="bi bi-code-slash p-2 link-light" title="Dev Tools" @click="openDevTools()"
           href="javascript:;"></a>
       </div>
 

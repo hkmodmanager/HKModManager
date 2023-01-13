@@ -145,6 +145,11 @@
                         <span>{{ $t("mods.size") }}: </span>
                         <span copyable>{{ getModSize() }}</span>
                     </div>
+                    <div v-if="mod.owner">
+                        <span>{{ $t("mods.owner") }}:</span>
+                        <a :style="{ 'textDecoration': 'none' }" href='javascript:;' @click="openLink(`https://github.com/${mod.owner}`)" copyable>{{ mod.owner }}</a>
+                        <a :style="{ 'textDecoration': 'none' }" href="javascript:;" @click="lookAtAuthor(mod.owner ?? '')">    ({{ $t('mods.ownerOtherMods') }})</a>
+                    </div>
                     <div>
                         <span>{{ $t("mods.repo") }}:</span>
                         <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository
@@ -255,6 +260,7 @@ import { existsSync } from 'fs';
 import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
 import { IRLocalMod } from '@/renderer/relocation/RLocal';
+import { getSearchText, setSearchText } from './c-mods-search.vue';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -458,9 +464,20 @@ export default defineComponent({
         isOnline() {
             if(!navigator.onLine) return false;
             if(modlinksCache) {
-                return modlinksCache.offline;
+                return !modlinksCache.offline;
             }
             return true;
+        },
+        lookAtAuthor(author: string) {
+            let search = getSearchText();
+            const index = search.indexOf(':author=');
+            if(index == -1) {
+                setSearchText(search + " :author=" + author);
+                return;
+            }
+            if(search.includes(':author=' + author)) return;
+            search = search.replace(/:author=([-A-Za-z0-9_]+)/g, " :author=" + author);
+            setSearchText(search);
         }
     },
     props: {
