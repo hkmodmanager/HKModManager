@@ -158,11 +158,10 @@ The program will start automatically after the Electron update is complete, plea
         rep.on('end', () => {
           try {
             const data = Buffer.concat(chunks);
-            const outp = app.isPackaged ? join(dirname(app.getPath('exe')), 'update.zip')
-              : "C:\\Users\\29676\\AppData\\Local\\Programs\\HKModManager\\update.zip";
+            const outp = join(dirname(app.getPath('exe')), 'update.zip');
             writeFileSync(outp, data);
             const updater = join(dirname(outp), 'updater.exe');
-            copyFileSync(app.isPackaged ? join(appDir, 'updater', 'updater.exe') : join(srcRoot, '..', 'updater', 'bin', 'Debug', 'updater.exe'),
+            copyFileSync(join(appDir, 'updater', 'updater.exe'),
               updater);
             console.log(updater);
             spawn(updater, ['true', process.pid.toString()], {

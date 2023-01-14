@@ -27,7 +27,8 @@
     "postuninstall": "electron-builder install-app-deps",
     "release": "vue-cli-service electron:build",
     "build:update": "node ./tools/bundleUpdate.cjs",
-    "build:offlineModLinks": "node ./tools/fetchOfflineModLinks.mjs"
+    "build:offlineModLinks": "node ./tools/fetchOfflineModLinks.mjs",
+    "build:metadata": "node ./tools/buildMetadata.cjs"
   },
   "dependencies": {
     "@babel/core": "^7.12.16",

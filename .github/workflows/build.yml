@@ -42,6 +42,7 @@ jobs:
         run: |
           cd HKMM-UI
           npm run build:offlineModLinks
+          npm run build:metadata
           npm run electron:build
           npm run build:update
         env:
@@ -58,15 +59,14 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: setup
-          path: "HKMM-UI/dist_electron/*.exe"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload artifact
-        uses: actions/upload-artifact@v3
-        with:
           name: update
           path: "HKMM-UI/dist_electron/update.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+      - name: upload alpha
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: HKMM-UI/dist_electron/alpha
+          commit-message: update alpha
+          branch: alpha-binary
+

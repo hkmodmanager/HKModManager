@@ -26,3 +26,4 @@ pnpm-debug.log*
 /dist_electron
 
 /public/offline
+/public/build-metadata.json

@@ -13,7 +13,7 @@
       <h3>
         HKMM
         <span v-if="isRelease()" :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
-        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Beta: {{
+        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Alpha: {{
           getShortCommitSHA()
         }}</span>
       </h3>
@@ -149,6 +149,7 @@ import RequireExpmode from "./components/require-expmode.vue";
 import { appVersion } from "./renderer/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
 import { br_build_zip } from "./renderer/bugReport";
+import { buildMetadata } from "./renderer/exportGlobal";
 
 export default defineComponent({
   data: function () {
@@ -179,13 +180,16 @@ export default defineComponent({
       return appVersion;
     },
     isRelease() {
-      return true;
+      return buildMetadata.isTag;
+    },
+    getBuildMeta() {
+      return buildMetadata;
     },
     getCommitSHA() {
-      return "9d743e7: feat: search for mods by short name";
+      return buildMetadata.headCommit;
     },
     getShortCommitSHA() {
-      return "9d743e7";
+      return this.getCommitSHA().substring(0, 7);
     },
     openModalLanguage() {
       this.current_language = this.$i18n.locale;

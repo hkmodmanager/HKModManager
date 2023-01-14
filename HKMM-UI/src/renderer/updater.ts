@@ -10,6 +10,9 @@ import { appDir, appVersion, isPackaged, srcRoot, userData } from "./remoteCache
 import { node_import, node_require } from "./plugins";
 import * as semver from "semver"
 import { hasOption } from "./settings";
+import { getModDate } from "./modlinks/modlinks";
+import { buildMetadata } from "./exportGlobal";
+import axios from "axios";
 
 export interface ReleaseInfo {
     name: string;
@@ -17,6 +20,16 @@ export interface ReleaseInfo {
         name: string;
         browser_download_url: string
     }[];
+}
+
+export interface ArtifactInfo {
+    name: string;
+    size_in_bytes: number;
+    created_at: string;
+    workflow_run: {
+        id: number;
+        head_sha: string;
+    };
 }
 
 export interface UpdateInfo {

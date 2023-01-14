@@ -1,7 +1,7 @@
 
 const { zip } = require('compressing');
 const { dirname, join } = require('path');
-const { readdirSync, statSync, createWriteStream } = require('fs');
+const { readdirSync, statSync, createWriteStream, copyFileSync, existsSync, mkdirSync } = require('fs');
 
 const buildPath = join(dirname(__dirname), 'dist_electron', 'win-unpacked');
 console.log(`Build Path: ${buildPath}`);
@@ -31,7 +31,12 @@ function fdir(parent, op) {
 }
 
 fdir(buildPath, '');
+const udpateFile = join(dirname(buildPath), 'update.zip');
+const ws = createWriteStream(udpateFile, 'binary');
 
-const ws = createWriteStream(join(dirname(buildPath), 'update.zip'), 'binary');
-
-stream.pipe(ws);
+stream.pipe(ws).on('finish', () => {
+    const alphaDir = join(dirname(buildPath), 'alpha');
+    if(!existsSync(alphaDir)) mkdirSync(alphaDir, { recursive: true });
+    copyFileSync(udpateFile, join(alphaDir, "update.zip"));
+    copyFileSync("public/build-metadata.json", join(alphaDir, "hkmm.json"));
+});
