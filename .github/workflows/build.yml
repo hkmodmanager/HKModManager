@@ -5,6 +5,21 @@ on:
   push
 
 jobs:
+  upload-alpha:
+    name: Upload alpha
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+      - name: Download alpha
+        uses: actions/download-artifact@v3
+        with: 
+          name: alpha
+      - name: upload alpha
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: alpha
+          commit-message: update alpha
+          branch: alpha-binary
 
   release:
     name: Build
@@ -59,14 +74,8 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: update
-          path: "HKMM-UI/dist_electron/update.zip"
+          name: alpha
+          path: HKMM-UI/dist_electron/alpha
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload alpha
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: HKMM-UI/dist_electron/alpha
-          commit-message: update alpha
-          branch: alpha-binary
 
