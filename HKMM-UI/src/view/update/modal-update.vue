@@ -7,8 +7,9 @@
         <button class="btn-close" @click="closeAlert()"></button>
     </div>
     <ModalBox ref="modal" :title="$t('updateTitle')">
-        {{ $t('hasUpdate') }}&nbsp;(<span class="text-danger">v{{ getVersion() }}</span><i class="bi bi-arrow-right"></i><span class="text-success">v{{
-                updateInfo?.version
+        {{ $t('hasUpdate') }}&nbsp;(<span class="text-danger">{{ getVersion() }}</span><i class="bi bi-arrow-right"></i>
+        <span class="text-success">{{
+                getLatestVersion()
         }}</span>)
         <p>
             {{ $t('updateSize') }}:&nbsp;{{ getSize() }}
@@ -22,6 +23,7 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
+import { buildMetadata } from '@/renderer/exportGlobal';
 import { appVersion } from '@/renderer/remoteCache';
 import { checkUpdate, installUpdate, UpdateInfo } from '@/renderer/updater';
 import { ConvertSize } from '@/renderer/utils/utils';
@@ -50,7 +52,14 @@ export default defineComponent({
             this.alert.hide();
         },
         getVersion() {
-            return appVersion;
+            if(!buildMetadata.isTag) {
+                return `v${appVersion}-alpha-${buildMetadata.headCommit.substring(0, 7)}`;
+            }
+            return 'v' + appVersion;
+        },
+        getLatestVersion() {
+            if(this.updateInfo?.version.startsWith('alpha')) return this.updateInfo.version;
+            return 'v' + this.updateInfo?.version;
         },
         installUpdate() {
             this.hideModal();

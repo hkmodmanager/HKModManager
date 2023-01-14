@@ -1,18 +1,14 @@
-import { app, ipcRenderer } from "electron";
 import * as remote from "@electron/remote";
-import { constants, copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { copyFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { isLaterVersion } from "./modManager";
-import { downloadFile, downloadRaw, downloadText, getFileSize } from "./utils/downloadFile";
-import { ChildProcessWithoutNullStreams, exec, spawn, spawnSync } from 'child_process'
-import { zip } from "compressing";
-import { appDir, appVersion, isPackaged, srcRoot, userData } from "./remoteCache";
-import { node_import, node_require } from "./plugins";
+import { downloadRaw, downloadText, getFileSize } from "./utils/downloadFile";
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
+import { appDir, appVersion, isPackaged, srcRoot } from "./remoteCache";
+import { node_import } from "./plugins";
 import * as semver from "semver"
 import { hasOption } from "./settings";
 import { getModDate } from "./modlinks/modlinks";
-import { buildMetadata } from "./exportGlobal";
-import axios from "axios";
+import { buildMetadata, IBuildMetadata } from "./exportGlobal";
 
 export interface ReleaseInfo {
     name: string;
@@ -22,23 +18,30 @@ export interface ReleaseInfo {
     }[];
 }
 
-export interface ArtifactInfo {
-    name: string;
-    size_in_bytes: number;
-    created_at: string;
-    workflow_run: {
-        id: number;
-        head_sha: string;
-    };
-}
-
 export interface UpdateInfo {
     version: string;
     url: string;
     size?: number;
 }
 
+async function checkUpdateAsync(rsize = false): Promise <UpdateInfo | undefined> {
+    const alpha: IBuildMetadata = JSON.parse(await downloadText(`https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/hkmm.json`));
+    if(alpha.buildTime < buildMetadata.buildTime || alpha.headCommit == buildMetadata.headCommit) return undefined;
+    const durl = `https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/update.zip`;
+    return {
+        version: `alpha-${alpha.headCommit.substring(0, 7)}`,
+        url: durl,
+        size: (rsize ? (await getFileSize(durl)) : undefined)
+    };
+}
+
 export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined> {
+    try  {
+        const r = await checkUpdateAsync(rsize);
+        if(r) return r;
+    } catch(e) {
+        console.error(e);
+    }
     const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/releases'));
     if (releases.length == 0) return undefined;
     for (const release of releases) {
@@ -47,7 +50,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
         const sver = semver.clean(release.name);
         if (!sver) return undefined;
         const pre = semver.prerelease(sver);
-        if((pre?.length ?? 0) > 0 && !hasOption('ACCEPT_PRE_RELEASE')) continue;
+        if ((pre?.length ?? 0) > 0 && !hasOption('ACCEPT_PRE_RELEASE')) continue;
         if (semver.gt(sver, cver)) {
             const durl = release.assets.find(x => x.name == 'update.zip')?.browser_download_url;
             if (!durl) return undefined;

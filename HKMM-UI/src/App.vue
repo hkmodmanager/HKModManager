@@ -12,11 +12,13 @@
     ">
       <h3>
         HKMM
-        <span v-if="isRelease()" :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
-        <span v-else :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()">Alpha: {{
+        <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
+        
+      </h3>
+      <span v-if="!isRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()"
+        @click="openLink(`https://github.com/HKLab/HKModManager/commit/${getCommitSHA()}`)">Alpha-{{
           getShortCommitSHA()
         }}</span>
-      </h3>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
         <a class="bi bi-github p-2 link-light" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')"
           href="javascript:;"></a>
