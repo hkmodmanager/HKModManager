@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu, net } from 'electron'
+import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu, net, shell } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -124,61 +124,12 @@ const startAfterQuit: Set<string> = new Set<string>();
 
 app.on('ready', async () => {
   if (semver.lt(process.versions.electron, "22.0.0")) {
-    const result = dialog.showMessageBoxSync({
+    dialog.showMessageBoxSync({
       title: "Breaking update",
-      message: `Electron需要更新(${process.versions.electron}->22.0.2)
-Electron needs to be updated (${process.versions.electron}->22.0.2)`,
-      buttons: ['下载 Download', '关闭 Close'],
-      defaultId: 2
+      message: `Electron需要更新(${process.versions.electron}->22.0.2)，请通过Setup重新安装程序
+Electron needs to be updated (${process.versions.electron}->22.0.2),Please reinstall the program via Setup`,
     });
-    if (result == 1) app.exit();
-    if (result == 0) {
-      dialog.showMessageBox({
-        message: `将会在Electron更新完成后自动启动程序，请不要再次手动启动程序
-The program will start automatically after the Electron update is complete, please do not start the program manually again`
-      });
-      const url = app.getLocaleCountryCode() == 'CN' ?
-        'https://cdn.npmmirror.com/binaries/electron/v22.0.2/electron-v22.0.2-win32-x64.zip'
-        : 'https://github.com/electron/electron/releases/download/v22.0.2/electron-v22.0.2-win32-x64.zip';
-      console.log("Download from " + url);
-      const req = net.request(url);
-      req.on('error', (e) => {
-        dialog.showErrorBox('Error!', e.stack ?? e.message);
-        app.exit();
-      });
-      req.on('response', (rep) => {
-        const chunks: Buffer[] = [];
-        rep.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        rep.on('error', (e: any) => {
-          dialog.showErrorBox('Error!', e.stack ?? e?.message);
-          app.exit();
-        });
-        rep.on('end', () => {
-          try {
-            const data = Buffer.concat(chunks);
-            const outp = app.isPackaged ? join(dirname(app.getPath('exe')), 'update.zip')
-              : "C:\\Users\\29676\\AppData\\Local\\Programs\\HKModManager\\update.zip";
-            writeFileSync(outp, data);
-            const updater = join(dirname(outp), 'updater.exe');
-            copyFileSync(app.isPackaged ? join(appDir, 'updater', 'updater.exe') : join(srcRoot, '..', 'updater', 'bin', 'Debug', 'updater.exe'),
-              updater);
-            console.log(updater);
-            spawn(updater, ['true', process.pid.toString()], {
-              shell: false,
-              detached: true
-            });
-            app.exit(0);
-          } catch (e) {
-            console.error(e);
-            dialog.showErrorBox('Error!', e?.toString());
-          }
-        });
-      });
-      req.end();
-      return;
-    }
+    shell.openExternal("https://github.com/HKLab/HKModManager/releases/latest");
   }
 
 
