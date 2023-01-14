@@ -91,7 +91,7 @@ import {
     getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG
 } from '@/renderer/modgroup';
 import { defineComponent } from 'vue';
-import { remote } from 'electron'
+import * as remote from "@electron/remote";
 import CGroupsGroupItem from './groups/c-groups-groupItem.vue';
 import { zip } from 'compressing';
 import { createWriteStream } from 'fs';

@@ -1,15 +1,13 @@
 
-import { remote } from 'electron';
-import { existsSync, readFileSync } from 'fs';
-import { readJSON, readJSONSync, writeJSONSync } from 'fs-extra';
-import { dirname, join } from 'path';
-import process from 'process';
+import { existsSync } from 'fs';
+import { readJSONSync, writeJSONSync } from 'fs-extra';
+import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
 import { isLaterVersion, refreshLocalMods } from '../modManager';
-import { appDir, isPackaged, publicDir, srcRoot, userData } from '../remoteCache';
-import { CDN, store } from '../settings';
-import { downloadFile, downloadText } from '../utils/downloadFile';
+import { publicDir, userData } from '../remoteCache';
+import { store } from '../settings';
+import { downloadText } from '../utils/downloadFile';
 import { PromiseTimeout } from '../utils/utils';
 
 type ContainerNode = ast.ContainerNode<ast.Node>;

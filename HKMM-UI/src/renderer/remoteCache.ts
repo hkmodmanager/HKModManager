@@ -1,4 +1,4 @@
-import { remote } from "electron";
+import * as remote from "@electron/remote";
 import { dirname, join } from "path";
 
 export const exePath = remote.app.getPath('exe');

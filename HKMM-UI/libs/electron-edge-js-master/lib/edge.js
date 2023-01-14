@@ -1,10 +1,10 @@
 import { existsSync } from 'fs';
-import { remote } from 'electron'
+import { app } from '@electron/remote'
 import { parse, dirname, resolve, join } from 'path';
 
-const exename = parse(remote.app.getPath("exe"));
+const exename = parse(app.getPath("exe"));
 
-let rootPath = !remote.app.isPackaged ? (
+let rootPath = !app.isPackaged ? (
     join(dirname(dirname(dirname(exename.dir))), "libs", "electron-edge-js-master", "lib") //Debug
 ) : (
     join(exename.dir, "edge")
@@ -14,7 +14,7 @@ const nn_require = "require";
 const n_require = window[nn_require];
 
 function checkForPreCompiled() {
-    if (!remote.app.isPackaged) {
+    if (!app.isPackaged) {
         const version = `${process.versions.electron.split(".")[0]}.0.0`;
         const preCompiledPath = resolve(join(rootPath, './native/', process.platform, process.arch, version, 'edge_nativeclr'));
         console.log(preCompiledPath);

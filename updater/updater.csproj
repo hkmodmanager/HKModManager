@@ -10,7 +10,9 @@
 
   <ItemGroup>
     <Content Include="MZ_Death_Skull.ico" />
-
+    <Content Include="rcedit.exe">
+      <CopyToOutputDirectory>always</CopyToOutputDirectory>
+    </Content>
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 

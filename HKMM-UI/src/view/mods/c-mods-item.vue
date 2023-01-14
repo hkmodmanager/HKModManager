@@ -250,7 +250,7 @@ import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getMod
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVaild } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
-import { remote, shell } from 'electron';
+import * as remote from "@electron/remote";
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
@@ -261,6 +261,7 @@ import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
 import { IRLocalMod } from '@/renderer/relocation/RLocal';
 import { getSearchText, setSearchText } from './c-mods-search.vue';
+import { shell } from 'electron';
 
 const licenseCache: Record<string, string | null> = {};
 

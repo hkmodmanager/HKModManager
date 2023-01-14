@@ -4,7 +4,7 @@ import { appDir, appVersion } from './remoteCache';
 import { gl } from './exportGlobal'
 import { LocalModInfo, refreshLocalMods } from './modManager';
 import { dirname, extname, join } from 'path';
-import { remote, shell } from 'electron';
+import * as remote from "@electron/remote";
 import { tmpdir } from 'os';
 import { Guid } from 'guid-typescript';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';

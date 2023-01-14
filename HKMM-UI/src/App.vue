@@ -142,7 +142,7 @@ import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
 import { store } from "./renderer/settings";
 //import { checkUpdate, installUpdate } from "./renderer/updater";
-import { remote } from "electron";
+import * as remote from "@electron/remote";
 
 import "./renderer/plugins"
 import RequireExpmode from "./components/require-expmode.vue";

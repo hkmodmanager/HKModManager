@@ -209,7 +209,8 @@
             "hide_mod_alias": "隐藏Mod别称",
             "fastdownload": "多线程下载",
             "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。",
-            "show_licence": "显示Mods的许可证"
+            "show_licence": "显示Mods的许可证",
+            "accept_pre_release": "接收预览版更新"
         },
         "cdn": {
             "title": "下载源",

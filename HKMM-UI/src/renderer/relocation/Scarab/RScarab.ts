@@ -1,7 +1,7 @@
 import { getModLinkModSync, modlinksCache } from "@/renderer/modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, vaildModFiles } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
-import { remote } from "electron";
+import * as remote from "@electron/remote";
 import { copyFileSync, existsSync, readdirSync, rmSync, writeFileSync } from "fs";
 import { copySync, readJSONSync, writeJSONSync } from "fs-extra";
 import { dirname, join } from "path";

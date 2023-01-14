@@ -1,12 +1,11 @@
 
 import { transformSync } from '@babel/core';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { basename, dirname, join } from 'path';
+import { dirname, join } from 'path';
 //@ts-ignore
 import env from '@babel/preset-env'
 //@ts-ignore
 import ts from '@babel/preset-typescript'
-import { remote } from 'electron';
 import { createHash } from 'crypto';
 import { store } from './settings';
 import { userData } from './remoteCache';

@@ -1,6 +1,6 @@
 
 import { appDir, exePath, isPackaged, srcRoot } from '@/renderer/remoteCache';
-import { remote } from 'electron';
+import * as remote from "@electron/remote";
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { dirname, extname, join, parse } from 'path';
 

@@ -50,7 +50,7 @@ import { defineComponent } from 'vue';
 import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/renderer/apiManager'
 import { apiInfoCache, getAPIInfo } from '@/renderer/modlinks/modlinks';
 import ModalBox from '@/components/modal-box.vue';
-import { remote } from 'electron';
+import * as remote from "@electron/remote";
 
 
 export default defineComponent({

@@ -1,5 +1,5 @@
 import { zip } from "compressing";
-import { remote } from "electron";
+import * as remote from "@electron/remote";
 import { fstat, readdirSync, readJSONSync, outputJSONSync, statSync, existsSync, rm, rmSync, copySync } from "fs-extra";
 import { Guid } from "guid-typescript";
 import { tmpdir } from "os";

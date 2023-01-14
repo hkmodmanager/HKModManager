@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { remote } from 'electron';
+import * as remote from "@electron/remote";
 import { parse } from 'path';
 import { defineComponent } from 'vue';
 import { checkGameFile, findHKPath } from '@/renderer/apiManager';

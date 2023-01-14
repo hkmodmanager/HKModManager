@@ -28,7 +28,7 @@ module.exports = defineConfig({
                         ]
                     },
                     {
-                        from: "./libs/electron-edge-js-master/lib/native/win32/x64/13.0.0",
+                        from: "./libs/electron-edge-js-master/lib/native/win32/x64/22.0.0",
                         to: "../edge",
                         filter: [
                             "**/*"
@@ -58,6 +58,14 @@ module.exports = defineConfig({
                     {
                         from: "../updater/bin/Debug/updater.exe",
                         to: "../updater/updater.exe"
+                    },
+                    {
+                        from: "../updater/bin/Debug/rcedit.exe",
+                        to: "../updater/rcedit.exe"
+                    },
+                    {
+                        from: "./public/MZ_Death_Skull.ico",
+                        to: "../updater/appicon.ico"
                     }
                 ]
                 ,
