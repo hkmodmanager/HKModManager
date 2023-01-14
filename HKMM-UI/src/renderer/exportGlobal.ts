@@ -9,6 +9,7 @@ export interface IBuildMetadata {
     buildTime: number;
     headCommit: string;
     isTag: boolean;
+    version: string;
 }
 
 export const cdn_modlinks: Record<CDN, string> = {

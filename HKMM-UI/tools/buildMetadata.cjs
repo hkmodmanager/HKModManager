@@ -1,5 +1,5 @@
 const { readFileSync, readdirSync } = require("fs");
-const { writeJSONSync } = require("fs-extra");
+const { writeJSONSync, readJSONSync } = require("fs-extra");
 const { dirname, join } = require("path");
 
 
@@ -18,7 +18,8 @@ console.log(`Is tag: ${isTag}`);
 writeJSONSync("public/build-metadata.json", {
     buildTime: Date.now(),
     headCommit: headcommit,
-    isTag
+    isTag,
+    version: readJSONSync("package.json").version
 }, {
     spaces: 4
 });
