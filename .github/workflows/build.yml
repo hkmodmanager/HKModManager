@@ -21,6 +21,7 @@ jobs:
           folder: alpha
           commit-message: update alpha
           branch: alpha-binary
+          force: true
 
   release:
     name: Build
