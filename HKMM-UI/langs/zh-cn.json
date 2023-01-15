@@ -99,6 +99,8 @@
         "use": "启用",
         "unuse": "禁用",
         "desc": "描述",
+        "verifyMod": "验证Mods完整性",
+        "lastVerify": "上次校验：{date}",
         "badge_scarabInstalled": "Scarab已安装",
         "badge_localInstalled": "本地已安装",
         "missingDep": "未安装",
@@ -114,6 +116,7 @@
         "badge_missingFileLevel0": "非关键文件缺失",
         "badge_missingFileLevel1": "资源文件缺失",
         "badge_missingFileLevel2": "关键文件缺失",
+        "badge_missingFileLevel_full": "无文件缺失",
         "alert_nonExclusiveImport": "非独占式导入的Mods在日后可能会和原始Mod出现版本冲突或其他问题\nHKMM中的操作不会影响到原始Mod",
         "exportToScarab": "导出到Scarab",
         "releasePath": "发布页面",
@@ -211,7 +214,8 @@
             "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。",
             "show_licence": "显示Mods的许可证",
             "accept_pre_release": "接收预览版更新",
-            "accept_alpha_release": "接收Alpha更新 (这通常包括尚未完全测试的新功能)"
+            "accept_alpha_release": "接收Alpha更新 (这通常包括尚未完全测试的新功能)",
+            "verify_mods_auto": "自动校验Mods"
         },
         "cdn": {
             "title": "下载源",

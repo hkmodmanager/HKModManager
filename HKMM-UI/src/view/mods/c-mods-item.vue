@@ -20,6 +20,7 @@
                         class="badge bg-success mt-2">
                         {{ $t("mods.depInstall") }}
                     </span>
+
                     <template v-if="localmod && localmod.info.imported">
                         <span v-if="localmod.info.imported.fromScarab" class="badge bg-success mt-2">
                             {{ $t("mods.badge_importFromScarab") }}
@@ -27,24 +28,21 @@
                         <span v-if="localmod.info.imported.localmod" class="badge bg-success mt-2">
                             {{ $t("mods.badge_importFromLocal") }}
                         </span>
-                        <span v-if="localmod.info.imported.nonExclusiveImport"
-                            class="badge bg-warning mt-2" :title="$t('mods.alert_nonExclusiveImport')">
+                        <span v-if="localmod.info.imported.nonExclusiveImport" class="badge bg-warning mt-2"
+                            :title="$t('mods.alert_nonExclusiveImport')">
                             {{ $t("mods.badge_nonExclusiveImport") }}
                         </span>
-                        <template v-if="localmod.info.imported.modVaild && localmod.info.imported.modVaild.fulllevel < 3">
-                            <span v-if="localmod.info.imported.modVaild.fulllevel == 2" class="badge bg-success mt-2" 
-                                :title="$t('mods.importLocal.alert_resourcefull') + getMissingFileText(localmod.info.imported.modVaild)">
-                                {{ $t('mods.badge_missingFileLevel0') }}
-                            </span>
-                            <span v-if="localmod.info.imported.modVaild.fulllevel == 1" class="badge bg-warning mt-2" 
-                                :title="$t('mods.importLocal.alert_dllfull') + getMissingFileText(localmod.info.imported.modVaild)">
+                        <!--
+                        <template v-if="localmod.info.modVerify && localmod.info.modVerify.fulllevel <= 3">
+                            <span v-if="localmod.info.modVerify.fulllevel == 1" class="badge bg-warning mt-2"
+                                :title="$t('mods.importLocal.alert_dllfull') + getMissingFileText(localmod.info.modVerify)">
                                 {{ $t('mods.badge_missingFileLevel1') }}
                             </span>
-                            <span v-if="localmod.info.imported.modVaild.fulllevel == 0" class="badge bg-danger mt-2" 
-                                :title="$t('mods.importLocal.alert_dllnotfull') + getMissingFileText(localmod.info.imported.modVaild)">
+                            <span v-if="localmod.info.modVerify.fulllevel == 0" class="badge bg-danger mt-2"
+                                :title="$t('mods.importLocal.alert_dllnotfull') + getMissingFileText(localmod.info.modVerify)">
                                 {{ $t('mods.badge_missingFileLevel2') }}
                             </span>
-                        </template>
+                        </template>-->
                     </template>
                     <span v-if="!isLocal && scarab" class="badge bg-success mt-2">
                         {{ $t("mods.badge_scarabInstalled") }}
@@ -68,6 +66,25 @@
                         class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
                     </span>
+                    <template v-if="localmod?.info.modVerify">
+                        <span v-if="localmod.info.modVerify.fulllevel >= 2" class="badge mt-2 text-success"
+                            style="font-size: .75rem" :title="$t('mods.importLocal.alert_full') 
+                            + getVerifyDate(localmod.info.modVerify)">
+                            <i class="bi bi-patch-check"></i>
+                        </span>
+                        <span v-if="localmod.info.modVerify.fulllevel == 1" class="badge mt-2 text-warning"
+                            style="font-size: .75rem" :title="$t('mods.importLocal.alert_dllfull') 
+                            + getVerifyDate(localmod.info.modVerify)
+                            + getMissingFileText(localmod.info.modVerify)">
+                            <i class="bi bi-patch-exclamation"></i>
+                        </span>
+                        <span v-if="localmod.info.modVerify.fulllevel == 0" class="badge mt-2 text-danger"
+                            style="font-size: .75rem" :title="$t('mods.importLocal.alert_dllnotfull') 
+                            + getVerifyDate(localmod.info.modVerify)
+                            + getMissingFileText(localmod.info.modVerify)">
+                            <i class="bi bi-patch-exclamation"></i>
+                        </span>
+                    </template>
                 </div>
             </button>
 
@@ -85,7 +102,8 @@
                                 :disabled="isDownload" v-if="rlocal">{{
                                 $t("mods.importLocal.title") }}</button>
                             <button class="btn btn-primary flex-grow-1" @click="installMod"
-                                :disabled="isDownload || (modSize == undefined) || !isOnline()">{{ $t("mods.install") }}</button>
+                                :disabled="isDownload || (modSize == undefined) || !isOnline()">{{ $t("mods.install")
+                                }}</button>
                         </template>
                         <div class="flex-grow-1 d-flex" v-else>
 
@@ -97,6 +115,8 @@
                                         @click="openModFolder(localmod?.name ?? '')"></a>
                                     <a class="btn btn-primary bi bi-file-earmark" :title="$t('mods.openDllFolder')"
                                         @click="openFolder(localmod?.info.path ?? '')"></a>
+                                    <a class="btn btn-primary bi bi-patch-check" :title="$t('mods.verifyMod')"
+                                        @click="vaildMod()"></a>
                                 </template>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
@@ -132,7 +152,7 @@
                         <span v-if="isRequireUpdate(mod.name)" class="text-success" copyable>
                             {{
                             isLocal ? `${ mod.version } -> ${ getLatestVersion(mod.name) } ` :
-                            `${ getLocalLatestModVer(mod.name) } -> ${ mod.version }`
+                            `${ getLocalLatestModVer(mod.name) } -> ${ mod.version } `
                             }}
                         </span>
                         <span v-else copyable>{{ mod?.version }}</span>
@@ -147,12 +167,15 @@
                     </div>
                     <div v-if="mod.owner">
                         <span>{{ $t("mods.owner") }}:</span>
-                        <a :style="{ 'textDecoration': 'none' }" href='javascript:;' @click="openLink(`https://github.com/${mod.owner}`)" copyable>{{ mod.owner }}</a>
-                        <a :style="{ 'textDecoration': 'none' }" href="javascript:;" @click="lookAtAuthor(mod.owner ?? '')">    ({{ $t('mods.ownerOtherMods') }})</a>
+                        <a :style="{ 'textDecoration': 'none' }" href='javascript:;'
+                            @click="openLink(`https://github.com/${mod.owner}`)" copyable>{{ mod.owner }}</a>
+                        <a :style="{ 'textDecoration': 'none' }" href="javascript:;"
+                            @click="lookAtAuthor(mod.owner ?? '')"> ({{ $t('mods.ownerOtherMods') }})</a>
                     </div>
                     <div>
                         <span>{{ $t("mods.repo") }}:</span>
-                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{ mod?.repository
+                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{
+                            mod?.repository
                         }}</a>
                     </div>
                     <div v-if="releasePath">
@@ -184,7 +207,8 @@
                         <template v-if="isLocal || mod.date == '1970-12-22T04:50:23Z'">
                             <h6 v-for="(dep, i) in mod?.dependencies" :key="i" copyable>
                                 <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(dep)" href="javascript:;">{{
-                                dep }}</a>
+                                    dep
+                                }}</a>
                                 <span v-if="isInstallMod(dep) && (isUsed(dep) || !isLocal)" class="text-success"
                                     notcopyable>
                                     ({{ $t("mods.depInstall") }})
@@ -247,7 +271,7 @@
 
 <script lang="ts">
 import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVaild } from '@/renderer/modManager';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/renderer/modManager';
 import { getCurrentGroup } from '@/renderer/modgroup'
 import { Collapse } from 'bootstrap';
 import * as remote from "@electron/remote";
@@ -321,6 +345,21 @@ export default defineComponent({
             const lv = lm.getLatestVersion();
 
             return lv;
+        },
+        vaildMod() {
+            if (this.mod === undefined) return;
+            const lm = getLocalMod(this.mod.name);
+            if (!lm) return;
+            const ver = lm.getLatest();
+            if (!ver || !ver.info.modinfo.ei_files?.files) return;
+            const missing_files: string[] = [];
+            ver.info.modVerify = {
+                fulllevel: verifyModFiles(ver.info.path, ver.info.modinfo.ei_files?.files, missing_files),
+                missingFiles: missing_files,
+                verifyDate: Date.now()
+            };
+            ver.save();
+            this.$forceUpdate();
         },
         getModAliasName(name: string) {
             if (store.get("options").includes("HIDE_MOD_ALIAS"))
@@ -457,14 +496,20 @@ export default defineComponent({
             if (!r) return undefined;
             return `https://img.shields.io/github/license/${r[0]}/${r[1]}?style=for-the-badge`;
         },
-        getMissingFileText(mod: IImportedLocalModVaild) {
+        getMissingFileText(mod: IImportedLocalModVerify) {
             const files = mod.missingFiles;
-            if(!files) return "";
+            if (!files) return "";
             return `\n${this.$t('mods.importLocal.missing_files')}:\n${files.join('\n')}`;
         },
+        getVerifyDate(mod: IImportedLocalModVerify) {
+            return "\n" + this.$t('mods.lastVerify', {
+                date: new Date(mod.verifyDate).toLocaleString(),
+                past: Math.round((Date.now() - mod.verifyDate) / 1000)
+            });
+        },
         isOnline() {
-            if(!navigator.onLine) return false;
-            if(modlinksCache) {
+            if (!navigator.onLine) return false;
+            if (modlinksCache) {
                 return !modlinksCache.offline;
             }
             return true;
@@ -472,11 +517,11 @@ export default defineComponent({
         lookAtAuthor(author: string) {
             let search = getSearchText();
             const index = search.indexOf(':author=');
-            if(index == -1) {
+            if (index == -1) {
                 setSearchText(search + " :author=" + author);
                 return;
             }
-            if(search.includes(':author=' + author)) return;
+            if (search.includes(':author=' + author)) return;
             search = search.replace(/:author=([-A-Za-z0-9_]+)/g, " :author=" + author);
             setSearchText(search);
         }

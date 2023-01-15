@@ -1,5 +1,5 @@
 import { getModLinkModSync, modlinksCache } from "@/renderer/modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, vaildModFiles } from "@/renderer/modManager";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "@/renderer/modManager";
 import { isVaildModDir } from "@/renderer/utils/utils";
 import * as remote from "@electron/remote";
 import { copyFileSync, existsSync, readdirSync, rmSync, writeFileSync } from "fs";
@@ -71,19 +71,21 @@ export function importMods(mods: ModInfo[], exclusive = true) {
             name: mod.name,
             version: mod.mod.Version,
             install: Date.now(),
+            modVerify: {
+                fulllevel: mlm.ei_files?.files ? verifyModFiles(mod.path, mlm.ei_files?.files, missingFiles) : LocalMod_FullLevel.Full,
+                missingFiles,
+                verifyDate: Date.now()
+            },
             imported: {
                 fromScarab: true,
                 nonExclusiveImport: !exclusive,
-                modVaild: {
-                    fulllevel: mlm.ei_files?.files ? vaildModFiles(mod.path, mlm.ei_files?.files, missingFiles) : LocalMod_FullLevel.Full,
-                    missingFiles
-                }
+
             }
         }, mod.path, undefined, exclusive);
-        if(!result) continue;
+        if (!result) continue;
         copySync(join(result.info.path, 'modversion.json'), join(mod.path, 'modversion.json'));
         result.writeMetadataPath();
-        if(exclusive) delete mc.Mods[mod.name];
+        if (exclusive) delete mc.Mods[mod.name];
         /*try {
             rmSync(mod.path, {
                 recursive: true
@@ -124,8 +126,8 @@ export function scanScarabMods() {
             }
         }
         const mm = modlinksCache?.getMod(name, mod.Version);
-        if(!mm) continue;
-        if(!mm.ei_files) continue;
+        if (!mm) continue;
+        if (!mm.ei_files) continue;
         result.push({
             mod: mod,
             name: name,

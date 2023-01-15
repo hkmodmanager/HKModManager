@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, extname, join, parse } from "path";
 import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
-import { store, ModSavePathMode } from "./settings";
+import { store, ModSavePathMode, hasOption } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
@@ -40,15 +40,17 @@ export function getCacheModsPath() {
 }
 
 export enum LocalMod_FullLevel {
+    None = -1,
     DllNotFull = 0,
     DllFullButResourceNotFull = 1,
     ResourceFull = 2,
     Full
 }
 
-export interface IImportedLocalModVaild {
+export interface IImportedLocalModVerify {
     fulllevel: LocalMod_FullLevel;
     missingFiles: string[];
+    verifyDate: number;
 }
 
 export interface LocalModInfo {
@@ -57,11 +59,13 @@ export interface LocalModInfo {
     install: number;
     path: string;
     modinfo: ModLinksManifestData;
+    modVerify: IImportedLocalModVerify;
     imported?: {
-        localmod?: IImportedLocalModVaild,
+        localmod?: IImportedLocalModVerify,
         fromScarab?: boolean,
         nonExclusiveImport: boolean,
-        modVaild: IImportedLocalModVaild
+        /**@deprecated  */
+        modVaild?: IImportedLocalModVerify;
     };
 }
 
@@ -89,15 +93,21 @@ export class LocalModInstance {
             let shouldSave = false;
             if ((this.info as any)['importFromScarab']) {
                 this.info.imported ??= {
-                    nonExclusiveImport: false,
-                    modVaild: {
-                        missingFiles: [],
-                        fulllevel: LocalMod_FullLevel.Full
-                    }
+                    nonExclusiveImport: false
                 };
                 this.info.imported.fromScarab = true;
                 shouldSave = true;
                 delete (this.info as any)['importFromScarab'];
+            }
+            if ((!this.info.modVerify || !this.info.modVerify.verifyDate 
+                    || (hasOption('VERIFY_MODS_ON_AUTO') && Date.now() - this.info.modVerify.verifyDate > 1000 * 60)) && this.info.modinfo.ei_files?.files) {
+                const missingFiles: string[] = [];
+                this.info.modVerify = {
+                    fulllevel: verifyModFiles(this.info.path, this.info.modinfo.ei_files.files, missingFiles),
+                    missingFiles,
+                    verifyDate: Date.now()
+                };
+                shouldSave = true;
             }
 
 
@@ -266,8 +276,13 @@ export class LocalModsVersionGroup {
             name: mod.name,
             version: mod.version,
             path: verdir,
-            modinfo: mod
-        }
+            modinfo: mod,
+            modVerify: {
+                fulllevel: LocalMod_FullLevel.Full,
+                missingFiles: [],
+                verifyDate: Date.now()
+            }
+        };
         const download = new URL(mod.link);
         const dp = parse(download.pathname);
         if (dp.ext == ".dll") {
@@ -554,7 +569,7 @@ export function getRequireUpdateModsSync() {
     return result;
 }
 
-export function vaildModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
+export function verifyModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
     const optionFileExt = ['.md', '.pdb'];
     let fulllevel = LocalMod_FullLevel.Full;
     for (const fn in files) {

@@ -3,12 +3,12 @@ import { existsSync, readdirSync, readFileSync, statSync } from "fs";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
 import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
-import { getOrAddLocalMod, getRealModPath, IImportedLocalModVaild, isLaterVersion, LocalMod_FullLevel, refreshLocalMods, vaildModFiles } from "../modManager";
+import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, isLaterVersion, LocalMod_FullLevel, refreshLocalMods, verifyModFiles } from "../modManager";
 import { scanScarabMods } from "./Scarab/RScarab";
 
 
 
-export interface IRLocalMod extends IImportedLocalModVaild {
+export interface IRLocalMod extends IImportedLocalModVerify {
     name: string;
     path: string;
     mod: ModLinksManifestData;
@@ -77,8 +77,9 @@ export function RL_CheckMod(root: string): IRLocalMod | undefined {
         name: matchmod.name,
         path: root,
         mod: matchmod,
-        fulllevel: vaildModFiles(root, m_files, missingFiles),
-        missingFiles
+        fulllevel: verifyModFiles(root, m_files, missingFiles),
+        missingFiles,
+        verifyDate: Date.now()
     };
 }
 let localmodsCache: IRLocalMod[] | undefined = undefined;
@@ -144,10 +145,10 @@ export function RL_ImportLocalMods(mods: IRLocalMod[], exclusive = true) {
             install: Date.now(),
             path: mod.path,
             modinfo: mod.mod,
+            modVerify: modinfo,
             imported: {
                 localmod: modinfo,
-                nonExclusiveImport: !exclusive,
-                modVaild: modinfo
+                nonExclusiveImport: !exclusive
             }
         }, mod.path, mod.mod.ei_files?.files as Record<string, string>, exclusive);
     }

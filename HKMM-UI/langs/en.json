@@ -87,6 +87,8 @@
         "use": "Enable",
         "unuse": "Disable",
         "desc": "Description",
+        "verifyMod": "Verify mods integrity",
+        "lastVerify": "Last checked: {date}",
         "badge_scarabInstalled": "Installed in Scarab",
         "badge_localInstalled": "Installed locally",
         "missingDep": "Not installed",
@@ -193,7 +195,8 @@
             "fastdownload_od": "Use multithreading whenever possible to download oversized mods, which in some cases may result in slow download speeds.",
             "show_licence": "Displays the license for the mods",
             "accept_pre_release": "Receive preview updates",
-            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)"
+            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)",
+            "verify_mods_auto": "Automatic verification of mods"
         },
         "cdn": {
             "title": "CDN",

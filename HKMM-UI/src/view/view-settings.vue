@@ -28,13 +28,17 @@
         <input class="form-check-input" type="checkbox" v-model="options" value="HIDE_MOD_ALIAS" />
         <label class="form-check-label">{{ $t("settings.options.hide_mod_alias") }}</label>
       </div>
-      <div class="form-check form-switch" v-if="$i18n.locale == 'zh'">
+      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_PRE_RELEASE" />
         <label class="form-check-label">{{ $t("settings.options.accept_pre_release") }}</label>
       </div>
-      <div class="form-check form-switch" v-if="$i18n.locale == 'zh'">
+      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_APLHA_RELEASE" />
         <label class="form-check-label">{{ $t("settings.options.accept_alpha_release") }}</label>
+      </div>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" v-model="options" value="VERIFY_MODS_AUTO" />
+        <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
       <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
