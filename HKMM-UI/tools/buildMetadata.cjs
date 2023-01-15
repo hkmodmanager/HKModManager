@@ -1,4 +1,4 @@
-const { readFileSync, readdirSync } = require("fs");
+const { readFileSync, readdirSync, existsSync } = require("fs");
 const { writeJSONSync, readJSONSync } = require("fs-extra");
 const { dirname, join } = require("path");
 
@@ -7,10 +7,20 @@ const gitdir = join(dirname(dirname(__dirname)), ".git");
 const tags = [];
 const tagRoot = join(gitdir, "refs", "tags");
 for (const tagName of readdirSync(tagRoot)) {
-    tags.push(readFileSync(join(tagRoot, tagName), 'utf-8').trim());
+    const tag = readFileSync(join(tagRoot, tagName), 'utf-8').trim();
+    console.log(`Tag ${tagName} -> ${tag}`)
+    tags.push(tag);
 }
-const headcommit = readFileSync(join(gitdir, "refs", "heads", "master"), 'utf-8').trim();
-const isTag = tags.includes(headcommit);
+const masterPath = join(gitdir, "refs", "heads", "master");
+let headcommit = "";
+let isTag = false;
+if (existsSync(masterPath)) {
+    headcommit = readFileSync(masterPath, 'utf-8').trim();
+} else {
+    headcommit = tags[0];
+    isTag =  true;
+}
+
 console.log(`Git: ${gitdir}`);
 console.log(`Commit: ${headcommit}`);
 console.log(`Is tag: ${isTag}`);
