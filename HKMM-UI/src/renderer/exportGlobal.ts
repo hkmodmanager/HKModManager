@@ -1,5 +1,7 @@
+import { readFileSync } from "fs";
 import { readJSONSync } from "fs-extra";
 import { join } from "path";
+import { modfilesOffline } from "./offlineFileCache";
 import { publicDir } from "./remoteCache";
 import { CDN } from "./settings";
 
@@ -24,4 +26,9 @@ export const cdn_api: Record<CDN, string> = {
     "SCARABCN": "https://hk-modlinks.clazex.net/ApiLinks.xml"
 };
 
+export const localModFilesCache: string[] = modfilesOffline.getData()?.toString('utf-8').split('\n').map(x => x.trim()) ?? [];
+
 export const buildMetadata: IBuildMetadata = readJSONSync(join(publicDir, "build-metadata.json"));
+
+//@ts-ignore
+gl.exportGlobal = __webpack_exports__;

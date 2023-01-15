@@ -100,6 +100,7 @@
         "unuse": "禁用",
         "desc": "描述",
         "verifyMod": "验证Mods完整性",
+        "repairMod": "修复Mods文件",
         "lastVerify": "上次校验：{date}",
         "badge_scarabInstalled": "Scarab已安装",
         "badge_localInstalled": "本地已安装",

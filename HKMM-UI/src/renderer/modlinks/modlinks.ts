@@ -5,6 +5,7 @@ import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
 import { isLaterVersion, refreshLocalMods } from '../modManager';
+import { modlinksOffline } from '../offlineFileCache';
 import { publicDir, userData } from '../remoteCache';
 import { store } from '../settings';
 import { downloadText } from '../utils/downloadFile';
@@ -121,20 +122,9 @@ function fixModLinks(modlinks: ModCollection) {
 }
 
 function loadLocalModLinks() {
-    const offlinePath = join(publicDir, 'offline', 'modlinks.json');
-    console.log(`[ModLinks]internal offline data: ${offlinePath}`);
-    const result = readJSONSync(offlinePath) as ModCollection;
-    const internalDate = result.lastUpdate ?? result.saveDate;
-    if (existsSync(getLocalModLinksPath())) {
-        const local = readJSONSync(getLocalModLinksPath()) as ModCollection;
-        const localDate = local.lastUpdate ?? result.saveDate;
-        if (localDate) {
-            if (!internalDate || localDate) {
-                fixModLinks(local);
-                return local;
-            }
-        }
-    }
+    const offline = modlinksOffline.getData();
+    if(!offline) throw new Error("loadLocalModLinks[0]");
+    const result = JSON.parse(offline.toString('utf-8')) as ModCollection;
     fixModLinks(result);
     saveLocalModLinks(result);
     return result;
@@ -143,9 +133,8 @@ function loadLocalModLinks() {
 function saveLocalModLinks(data: ModCollection) {
     data = { ...data };
     data.saveDate = Date.now();
-    writeJSONSync(getLocalModLinksPath(), data, {
-        spaces: 4
-    });
+    const d = JSON.stringify(data, undefined, 4);
+    modlinksOffline.saveLocal(Buffer.from(d, 'utf8'), data.saveDate);
 }
 
 export async function parseModLinks(content: string): Promise<ModCollection> {

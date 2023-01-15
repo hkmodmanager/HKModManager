@@ -49,6 +49,7 @@ async function checkUpdateAsync(rsize = false): Promise<UpdateInfo | undefined> 
 }
 
 export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined> {
+    if(!isPackaged) return undefined;
     let alphaUpdate: UpdateInfo | undefined = undefined;
     let releaseUpdate: UpdateInfo | undefined = undefined;
     try {

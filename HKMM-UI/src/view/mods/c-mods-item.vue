@@ -117,6 +117,9 @@
                                         @click="openFolder(localmod?.info.path ?? '')"></a>
                                     <a class="btn btn-primary bi bi-patch-check" :title="$t('mods.verifyMod')"
                                         @click="vaildMod()"></a>
+                                    <button class="btn btn-primary bi bi-wrench-adjustable" :title="$t('mods.repairMod')"
+                                        v-if="localmod?.info.modVerify && localmod.info.modVerify.fulllevel < 2"
+                                        :disabled="isDisbaleRepairModBtn()" @click="repairMod()"></button>
                                 </template>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
@@ -286,6 +289,8 @@ import { dirname, join, parse } from 'path';
 import { IRLocalMod } from '@/renderer/relocation/RLocal';
 import { getSearchText, setSearchText } from './c-mods-search.vue';
 import { shell } from 'electron';
+import { ignoreVerifyMods, repairMod } from '@/renderer/modrepairer';
+import { startTask } from '@/renderer/taskManager';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -360,6 +365,20 @@ export default defineComponent({
             };
             ver.save();
             this.$forceUpdate();
+        },
+        repairMod() {
+            if (this.mod === undefined) return;
+            const lm = getLocalMod(this.mod.name);
+            if (!lm) return;
+            const ver = lm.getLatest();
+            if (!ver || !ver.info.modinfo.ei_files?.files) return;
+            startTask(`Repair mod ${lm.name}-v${ver.info.version}`, undefined, async (task) => {
+                this.$forceUpdate();
+                await repairMod(ver, task);
+            });
+        },
+        isDisbaleRepairModBtn() {
+            return ignoreVerifyMods.has(this.localmod?.info.path ?? "") || isDownloadingMod(this.mod?.name ?? '');
         },
         getModAliasName(name: string) {
             if (store.get("options").includes("HIDE_MOD_ALIAS"))

@@ -81,7 +81,7 @@ export function importMods(mods: ModInfo[], exclusive = true) {
                 nonExclusiveImport: !exclusive,
 
             }
-        }, mod.path, undefined, exclusive);
+        }, mod.path, undefined, exclusive, true);
         if (!result) continue;
         copySync(join(result.info.path, 'modversion.json'), join(mod.path, 'modversion.json'));
         result.writeMetadataPath();

@@ -150,7 +150,7 @@ export function RL_ImportLocalMods(mods: IRLocalMod[], exclusive = true) {
                 localmod: modinfo,
                 nonExclusiveImport: !exclusive
             }
-        }, mod.path, mod.mod.ei_files?.files as Record<string, string>, exclusive);
+        }, mod.path, mod.mod.ei_files?.files as Record<string, string>, exclusive, true);
     }
     RL_ClearCache();
 }

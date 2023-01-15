@@ -362,7 +362,7 @@ export async function importFromZip(source: string | Buffer) {
         const metadata = readJSONSync(mdp) as ExportedModGroupMetadata;
         importGroup(metadata.info);
         for (const mod of metadata.mods) {
-            getOrAddLocalMod(mod.name).installLocalMod(mod, join(od, mod.path));
+            getOrAddLocalMod(mod.name).installLocalMod(mod, join(od, mod.path), undefined, false, true);
         }
         if (metadata.api) {
             if (getAPIVersion() < metadata.api.version) {

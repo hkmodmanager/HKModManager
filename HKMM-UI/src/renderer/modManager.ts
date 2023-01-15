@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
-import { dirname, extname, join, parse } from "path";
+import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rename, renameSync, rmSync, statSync, writeFileSync } from "fs";
+import { dirname, extname, join, parse, basename } from "path";
 import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
@@ -14,6 +14,7 @@ import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
 import { RL_ClearCache } from "./relocation/RLocal";
+import { ignoreVerifyMods } from "./modrepairer";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
@@ -306,14 +307,14 @@ export class LocalModsVersionGroup {
         RL_ClearCache();
         return inst;
     }
-    public async installNew(mod: ModLinksManifestData, justCheckDep = false) {
+    public async installNew(mod: ModLinksManifestData, justCheckDep = false, ignoreDep = false) {
         const task = createTask(mod.name);
         task.category = "Download";
         const promise = (async () => {
             try {
                 const wp = justCheckDep ? undefined : await this.installWithoutNewTask(mod, task);
                 const req: Promise<LocalModInstance>[] = [];
-                const deps = getLowestDep(mod);
+                const deps = ignoreDep ? [] : getLowestDep(mod);
                 if (deps) {
                     for (let i = 0; i < deps.length; i++) {
                         const element = deps[i];
@@ -405,7 +406,7 @@ export class LocalModsVersionGroup {
 
     public installLocalMod(mod: LocalModInfo, root: string,
         files?: Record<string, string | undefined>,
-        deleteFile: boolean = false) {
+        deleteFile: boolean = false, moveToCorrectDir = true) {
         files ??= mod.modinfo.ei_files?.files;
         if (this.versions[mod.version] || !files) return undefined;
         const info = { ...mod };
@@ -439,6 +440,12 @@ export class LocalModsVersionGroup {
         inst.save();
         this.versionsArray.push(inst);
         this.versions[mod.name] = inst;
+        const rroot = getRealModPath(info.name);
+        if(moveToCorrectDir && root != rroot) {
+            for (const file of readdirSync(rroot)) {
+                renameSync(join(rroot, file), join(root, file));
+            }
+        }
         return inst;
     }
 
@@ -570,13 +577,15 @@ export function getRequireUpdateModsSync() {
 }
 
 export function verifyModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
+    if(ignoreVerifyMods.has(root)) return LocalMod_FullLevel.None;
     const optionFileExt = ['.md', '.pdb'];
+    const optionFileName = [ 'readme', 'license', 'license.txt' ];
     let fulllevel = LocalMod_FullLevel.Full;
     for (const fn in files) {
         const sha = files[fn];
         const fp = join(root, fn);
         const isDll = extname(fn).toLowerCase() == '.dll';
-        const isOption = optionFileExt.includes(extname(fn)?.toLowerCase());
+        const isOption = optionFileExt.includes(extname(fn)?.toLowerCase()) || optionFileName.includes(basename(fn)?.toLowerCase());
         const fsha = existsSync(fp) ? createHash('sha256').update(readFileSync(fp)).digest('hex') : undefined;
         if (fsha != sha) {
             if (isDll) {
