@@ -52,7 +52,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
     let alphaUpdate: UpdateInfo | undefined = undefined;
     let releaseUpdate: UpdateInfo | undefined = undefined;
     try {
-        alphaUpdate = await checkUpdateAsync(rsize);
+        if(hasOption('ACCEPT_APLHA_RELEASE')) alphaUpdate = await checkUpdateAsync(rsize);
     } catch (e) {
         console.error(e);
     }
