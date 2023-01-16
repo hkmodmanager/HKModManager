@@ -2,8 +2,6 @@
 
 A Hollow Knight Mods Manager for version 1.5
 
-~~Originally, I wanted to maintain Scarab, but I was dissuaded by those PRs who had been left for 3 months~~
-
 ## Featured features
 
 ### 1. Mods filter
