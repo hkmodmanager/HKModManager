@@ -56,6 +56,8 @@
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
       </CCdnRadio>
+      <CCdnRadio value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")' v-model:cdnProp="cdn">
+      </CCdnRadio>
     </div>
     <!--Exp Mode-->
     <hr />

@@ -17,13 +17,15 @@ export interface IBuildMetadata {
 export const cdn_modlinks: Record<CDN, string> = {
     "GITHUB_RAW": "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json",
     "JSDELIVR": "https://cdn.jsdelivr.net/gh/HKLab/modlinks-archive@latest/modlinks.json",
-    "SCARABCN": "https://hk-modlinks.clazex.net/ModLinks.xml"
+    "SCARABCN": "https://hk-modlinks.clazex.net/ModLinks.xml",
+    "GH_PROXY": "https://ghproxy.net/https://raw.githubusercontent.com/Clazex/hk-modlinks-cn/ghproxy/ModLinks.xml"
 };
 
 export const cdn_api: Record<CDN, string> = {
     "GITHUB_RAW": "https://raw.githubusercontent.com/hk-modding/modlinks/main/ApiLinks.xml",
     "JSDELIVR": "https://cdn.jsdelivr.net/gh/hk-modding/modlinks@latest/ApiLinks.xml",
-    "SCARABCN": "https://hk-modlinks.clazex.net/ApiLinks.xml"
+    "SCARABCN": "https://hk-modlinks.clazex.net/ApiLinks.xml",
+    "GH_PROXY": "https://ghproxy.net/https://raw.githubusercontent.com/Clazex/hk-modlinks-cn/ghproxy/ApiLinks.xml"
 };
 
 export const localModFilesCache: string[] = modfilesOffline.getData()?.toString('utf-8').split('\n').map(x => x.trim()) ?? [];

@@ -1,0 +1,3 @@
+[submodule "HKMM-UI/libs/EdgeJs"]
+	path = HKMM-UI/libs/EdgeJs
+	url = https://github.com/HKLab/hkmm-electron-edge-js.git

@@ -28,10 +28,17 @@ module.exports = defineConfig({
                         ]
                     },
                     {
-                        from: "./libs/electron-edge-js-master/lib/native/win32/x64/22.0.0",
+                        from: "./libs/EdgeJS/lib/native/win32/x64/22.0.0",
                         to: "../edge",
                         filter: [
                             "**/*"
+                        ]
+                    },
+                    {
+                        from: "./libs/EdgeJS/lib/native/win32/x640.0",
+                        to: "../edge",
+                        filter: [
+                            "*.dll"
                         ]
                     },
                     {

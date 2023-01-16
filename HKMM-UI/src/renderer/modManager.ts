@@ -579,7 +579,7 @@ export function getRequireUpdateModsSync() {
 export function verifyModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
     if(ignoreVerifyMods.has(root)) return LocalMod_FullLevel.None;
     const optionFileExt = ['.md', '.pdb'];
-    const optionFileName = [ 'readme', 'license', 'license.txt' ];
+    const optionFileName = [ 'readme', 'readme.txt', 'license', 'license.txt' ];
     let fulllevel = LocalMod_FullLevel.Full;
     for (const fn in files) {
         const sha = files[fn];
