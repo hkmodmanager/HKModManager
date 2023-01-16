@@ -18,7 +18,7 @@ export const cdn_modlinks: Record<CDN, string> = {
     "GITHUB_RAW": "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json",
     "JSDELIVR": "https://cdn.jsdelivr.net/gh/HKLab/modlinks-archive@latest/modlinks.json",
     "SCARABCN": "https://hk-modlinks.clazex.net/ModLinks.xml",
-    "GH_PROXY": "https://ghproxy.net/https://raw.githubusercontent.com/Clazex/hk-modlinks-cn/ghproxy/ModLinks.xml"
+    "GH_PROXY": "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json"
 };
 
 export const cdn_api: Record<CDN, string> = {

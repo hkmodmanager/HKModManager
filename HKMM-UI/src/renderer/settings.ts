@@ -9,22 +9,13 @@ export enum ModSavePathMode {
     Gamepath
 }
 
-export class MirrorItem {
-    public target: string = "";
-}
-
-export class MirrorGroup {
-    public items: MirrorItem[] = []
-}
-
 export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB' | 'SHOW_MOD_SHORT_NAME' | 
     'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB' | 'FAST_DOWNLOAD' | 'SHOW_LICENCE' | 'ACCEPT_PRE_RELEASE' 
-    | 'ACCEPT_APLHA_RELEASE' | 'VERIFY_MODS_ON_AUTO';
+    | 'ACCEPT_APLHA_RELEASE' | 'VERIFY_MODS_ON_AUTO' | 'USE_GH_PROXY';
 export type CDN = 'GITHUB_RAW' | 'JSDELIVR' | 'SCARABCN' | 'GH_PROXY';
 
 export class HKMMSettings {
-    public mirror_github = new MirrorGroup();
-    public mirror_githubapi = new MirrorGroup();
+    public mirror_github: string[] = []
     public enabled_exp_mode = false;
     public gamepath: string = "";
     public modsavepath: string = "";
@@ -88,6 +79,13 @@ function GetSettingsLocal() {
     }
     if(!store.store.cdn || store.store.cdn == 'JSDELIVR') {
         store.set('cdn', 'GITHUB_RAW');
+    }
+    if(store.store.cdn == 'GH_PROXY') {
+        store.set('cdn', 'GITHUB_RAW');
+        store.set('options', [...store.store.options, 'USE_GH_PROXY']);
+    }
+    if((store.store.mirror_github as any).items != undefined) {
+        store.set('mirror_github', []);
     }
     if(!store.store.maxConnection) {
         store.set('maxConnection', 16);

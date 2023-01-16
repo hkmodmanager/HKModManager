@@ -183,7 +183,7 @@
     "settings": {
         "checkupdate": "检查更新",
         "mirror": {
-            "githubmirror": "Github 镜像"
+            "githubmirror": "gh-proxy服务器地址"
         },
         "exp": {
             "title": "实验性功能",
@@ -216,7 +216,8 @@
             "show_licence": "显示Mods的许可证",
             "accept_pre_release": "接收预览版更新",
             "accept_alpha_release": "接收Alpha更新 (这通常包括尚未完全测试的新功能)",
-            "verify_mods_auto": "自动校验Mods"
+            "verify_mods_auto": "自动校验Mods",
+            "use_gh_proxy": "使用gh-proxy"
         },
         "cdn": {
             "title": "下载源",

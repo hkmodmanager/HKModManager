@@ -8,7 +8,8 @@ import { hasOption, store } from '../settings';
 import asyncPool from 'tiny-async-pool'
 import { ConvertSize } from './utils';
 
-export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
+export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean, 
+    config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
     taskinfo?.pushState(`Download file ${url} using segments`);
     config ??= {};
     config = { ...config };
@@ -62,7 +63,8 @@ export async function downloadFile<T = any>(url: string
     taskinfo?: TaskInfo,
     allowChangeProgress: boolean = false,
     taskName?: string,
-    taskCategory?: TaskCategory, fallback?: string): Promise<AxiosResponse<T, any> | Buffer> {
+    taskCategory?: TaskCategory, fallback?: string, 
+    useGhProxy = hasOption('USE_GH_PROXY'), mirrors: string[] = store.store.mirror_github): Promise<AxiosResponse<T, any> | Buffer> {
     if (taskName) {
         return await startTask(taskName, undefined, async (info): Promise<AxiosResponse<T, any> | Buffer> => {
             info.category = taskCategory;
@@ -71,9 +73,9 @@ export async function downloadFile<T = any>(url: string
     }
     if (config) config = { ...config };
     else config = {};
+    const origURL = url;
 
     try {
-
         let acceptRanges = false;
         let size: number | undefined = undefined;
         try {
@@ -87,6 +89,18 @@ export async function downloadFile<T = any>(url: string
         if (acceptRanges && size && size > 1024 * 1024 * 5 && canUseFast && hasOption('FAST_DOWNLOAD')) {
             return await downloadFileFast(url, size, allowChangeProgress, config, taskinfo);
         }
+        if(useGhProxy && mirrors.length > 0) {
+            const ur = new URL(url);
+            if(ur.hostname == 'github.com' || ur.hostname == 'raw.githubusercontent.com') {
+                ur.pathname = '/' + ur.hostname + ur.pathname;
+                ur.hostname = mirrors[0];
+                url = ur.toString();
+            } else {
+                useGhProxy = false;
+            }
+        } else {
+            useGhProxy = false;
+        }
         if (taskinfo) {
             config.onDownloadProgress = ev => {
                 if (!ev.total || !ev.progress) return;
@@ -97,6 +111,7 @@ export async function downloadFile<T = any>(url: string
                 }
             };
         }
+        
         const promise = axios.get<T>(url, config);
         taskinfo?.pushState(`Downloading '${url}'`);
         taskinfo?.exitState();
@@ -106,6 +121,11 @@ export async function downloadFile<T = any>(url: string
         taskinfo?.reportProgress(100);
         return r;
     } catch (e) {
+        if(useGhProxy) {
+            console.log(`Fallback to next github mirror`);
+            return await downloadFile<T>(origURL, config, canUseFast, taskinfo, allowChangeProgress, 
+                taskName, taskCategory, fallback, true, mirrors.slice(1));
+        }
         if (!fallback) throw e;
         return await downloadFile<T>(fallback, config, canUseFast, taskinfo, allowChangeProgress, taskName, taskCategory);
     }

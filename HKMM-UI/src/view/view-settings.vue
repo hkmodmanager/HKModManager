@@ -40,6 +40,22 @@
         <input class="form-check-input" type="checkbox" v-model="options" value="VERIFY_MODS_AUTO" />
         <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
+      <div v-if="$i18n.locale == 'zh'">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" v-model="options" value="USE_GH_PROXY" />
+          <label class="form-check-label">{{ $t("settings.options.use_gh_proxy") }}</label>
+        </div>
+        <hr />
+        <div v-if="hasOption('USE_GH_PROXY')">
+          <div class="form-group">
+            <label class="form-label">{{
+              $t("settings.mirror.githubmirror")
+            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="javascript:;"
+                @click="openLink(`https://github.com/hunshcn/gh-proxy`)"></a></label>
+            <mirrorlist key-name="mirror_github"></mirrorlist>
+          </div>
+        </div>
+      </div>
       <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
           <label class="form-check-label" :title="$t('settings.options.fastdownload_od')">{{
@@ -55,8 +71,6 @@
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
-      </CCdnRadio>
-      <CCdnRadio value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")' v-model:cdnProp="cdn">
       </CCdnRadio>
     </div>
     <!--Exp Mode-->
@@ -79,30 +93,17 @@
       </div>
       <RequireExpmode>
         <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
-        <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
-      </div>
+          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
+          <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
+        </div>
       </RequireExpmode>
     </div>
-
-    <!--Mirror-->
-    <RequireExpmode v-if="false">
-      <div class="p-3">
-        <div class="form-group">
-          <label class="form-label">{{
-            $t("settings.mirror.githubmirror")
-          }}</label>
-          <mirrorlist key-name="mirror_github"></mirrorlist>
-        </div>
-      </div>
-      <hr />
-    </RequireExpmode>
   </form>
 </template>
 
 <script lang="ts">
 import RequireExpmode from "@/components/require-expmode.vue";
-import { store, ModSavePathMode } from "@/renderer/settings";
+import { store, ModSavePathMode, hasOption, SettingOptions } from "@/renderer/settings";
 import { defineComponent, InputHTMLAttributes, SelectHTMLAttributes } from "vue";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
@@ -158,6 +159,9 @@ export default defineComponent({
       this.$forceUpdate();
       this.$root?.$forceUpdate();
     },
+    openLink(link: string) {
+      remote.shell.openExternal(link);
+    },
     shouldShowCustomModSavePath() {
       return store.get("modsavepathMode") == ModSavePathMode.Custom;
     },
@@ -169,6 +173,9 @@ export default defineComponent({
     },
     shouldShowAlertRestart(): boolean {
       return sessionStorage.getItem("exp_query_restart") ? true : false;
+    },
+    hasOption(option: SettingOptions) {
+      return hasOption(option);
     },
     selectModsSavePath() {
       const result = remote.dialog.showOpenDialogSync({
