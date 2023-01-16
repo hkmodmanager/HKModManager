@@ -2,8 +2,9 @@ const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
     transpileDependencies: true,
     runtimeCompiler: true,
-    configureWebpack: {
-        target: "electron-renderer"
+    configureWebpack: (config) => {
+        config.target = "electron-renderer";
+        config.plugins = config.plugins.filter(x => x.constructor.name != 'CaseSensitivePathsPlugin');
     },
     pluginOptions: {
         electronBuilder: {
@@ -28,14 +29,11 @@ module.exports = defineConfig({
                         ]
                     },
                     {
-                        from: "./libs/EdgeJS/lib/native/win32/x64/22.0.0",
-                        to: "../edge",
-                        filter: [
-                            "**/*"
-                        ]
+                        from: "./libs/EdgeJS/lib/native/win32/x64/22.0.0/edge_nativeclr.node",
+                        to: "../edge/edge_nativeclr.node"
                     },
                     {
-                        from: "./libs/EdgeJS/lib/native/win32/x640.0",
+                        from: "./libs/EdgeJS/lib/native/win32/x64",
                         to: "../edge",
                         filter: [
                             "*.dll"

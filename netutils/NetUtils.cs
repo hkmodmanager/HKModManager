@@ -9,9 +9,9 @@ global using System.Threading;
 
 namespace HKMM;
 
-public class NetUtils
+public static class NetUtils
 {
-    public async Task<object> GetAPIVersion(dynamic input)
+    public static async Task<object> GetAPIVersion(dynamic input)
     {
         var apiPath = (string)input.apiPath;
         if (!File.Exists(apiPath)) return -1;
@@ -24,7 +24,7 @@ public class NetUtils
             return ver.Constant;
         }
     }
-    public async Task<object?> GetGameVersion(dynamic input)
+    public static async Task<object?> GetGameVersion(dynamic input)
     {
         var apiPath = (string)input.apiPath;
         if (!File.Exists(apiPath)) return "";
@@ -37,11 +37,11 @@ public class NetUtils
             return ver.Constant;
         }
     }
-    public async Task<object?> SearchHKFile(dynamic input)
+    public static async Task<object?> SearchHKFile(dynamic input)
     {
         return GameFileHelper.FindSteamGamePath(GameFileHelper.HOLLOWKNIGHT_APP_ID, GameFileHelper.HOLLOWKNIGHT_GAME_NAME);
     }
-    public async Task<object?> ClipboardCopyFile(dynamic input)
+    public static async Task<object?> ClipboardCopyFile(dynamic input)
     {
         var thread = new Thread(() =>
         {
@@ -54,7 +54,7 @@ public class NetUtils
         thread.Join();
         return null;
     }
-    public async Task<object> DownloadFileSeg(dynamic input)
+    public static async Task<object> DownloadFileSeg(dynamic input)
     {
         return await FileDownload.DownloadFileSegment(input.url, ((int)input.from, (int)input.to), null);
     }

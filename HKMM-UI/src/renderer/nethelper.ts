@@ -15,7 +15,8 @@ export function netfunc(method: string, type: string = "HKMM.NetUtils") {
     return func({
         assemblyFile: getNetUtilsPath(),
         typeName: type,
-        methodName: method
+        methodName: method,
+        singleInstance: true
     })
 }
 
