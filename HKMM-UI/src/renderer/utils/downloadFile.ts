@@ -8,7 +8,7 @@ import { hasOption, store } from '../settings';
 import asyncPool from 'tiny-async-pool'
 import { ConvertSize } from './utils';
 
-export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean, 
+export async function downloadFileFast(url: string, size: number, allowChangeProgress: Boolean,
     config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo): Promise<Buffer> {
     taskinfo?.pushState(`Download file ${url} using segments`);
     config ??= {};
@@ -63,7 +63,7 @@ export async function downloadFile<T = any>(url: string
     taskinfo?: TaskInfo,
     allowChangeProgress: boolean = false,
     taskName?: string,
-    taskCategory?: TaskCategory, fallback?: string, 
+    taskCategory?: TaskCategory, fallback?: string,
     useGhProxy = hasOption('USE_GH_PROXY'), mirrors: string[] = store.store.mirror_github): Promise<AxiosResponse<T, any> | Buffer> {
     if (taskName) {
         return await startTask(taskName, undefined, async (info): Promise<AxiosResponse<T, any> | Buffer> => {
@@ -72,26 +72,30 @@ export async function downloadFile<T = any>(url: string
         }).task as AxiosResponse<T, any>;
     }
     if (config) config = { ...config };
-    else config = {};
+    else config = {}; 
+    config.headers = new AxiosHeaders();
+    //config.httpAgent = config.httpsAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) hkmm/2.2.0 Chrome/108.0.5359.179 Electron/22.0.2 Safari/537.36 HKMM/fetch-pass";
     const origURL = url;
 
     try {
-        let acceptRanges = false;
-        let size: number | undefined = undefined;
-        try {
-            const head = await axios.head(url, config);
-            const header = head.headers as AxiosResponseHeaders;
-            acceptRanges = header.get('Accept-Ranges') === 'bytes';
-            size = header.getContentLength() as number;
-        } catch (e) {
-            console.error(e);
+        if (canUseFast && hasOption('FAST_DOWNLOAD')) {
+            let acceptRanges = false;
+            let size: number | undefined = undefined;
+            try {
+                const head = await axios.head(url, config);
+                const header = head.headers as AxiosResponseHeaders;
+                acceptRanges = header.get('Accept-Ranges') === 'bytes';
+                size = header.getContentLength() as number;
+            } catch (e) {
+                console.error(e);
+            }
+            if (acceptRanges && size && size > 1024 * 1024 * 5) {
+                return await downloadFileFast(url, size, allowChangeProgress, config, taskinfo);
+            }
         }
-        if (acceptRanges && size && size > 1024 * 1024 * 5 && canUseFast && hasOption('FAST_DOWNLOAD')) {
-            return await downloadFileFast(url, size, allowChangeProgress, config, taskinfo);
-        }
-        if(useGhProxy && mirrors.length > 0) {
+        if (useGhProxy && mirrors.length > 0) {
             const ur = new URL(url);
-            if(ur.hostname == 'github.com' || ur.hostname == 'raw.githubusercontent.com') {
+            if (ur.hostname == 'github.com' || ur.hostname == 'raw.githubusercontent.com') {
                 ur.pathname = '/' + ur.hostname + ur.pathname;
                 ur.hostname = mirrors[0];
                 url = ur.toString();
@@ -111,7 +115,7 @@ export async function downloadFile<T = any>(url: string
                 }
             };
         }
-        
+
         const promise = axios.get<T>(url, config);
         taskinfo?.pushState(`Downloading '${url}'`);
         taskinfo?.exitState();
@@ -121,9 +125,9 @@ export async function downloadFile<T = any>(url: string
         taskinfo?.reportProgress(100);
         return r;
     } catch (e) {
-        if(useGhProxy) {
+        if (useGhProxy) {
             console.log(`Fallback to next github mirror`);
-            return await downloadFile<T>(origURL, config, canUseFast, taskinfo, allowChangeProgress, 
+            return await downloadFile<T>(origURL, config, canUseFast, taskinfo, allowChangeProgress,
                 taskName, taskCategory, fallback, true, mirrors.slice(1));
         }
         if (!fallback) throw e;
