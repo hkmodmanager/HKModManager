@@ -81,6 +81,7 @@
         }
     },
     "mods": {
+        "updateAll": "全部更新",
         "authors": "贡献者",
         "owner": "所有者",
         "ownerOtherMods": "查看其他Mods",

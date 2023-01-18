@@ -72,6 +72,12 @@ export default defineComponent({
             this.refresh();
         }
     },
+    beforeUpdate() {
+        if (!this.tags.includes(this.ftag)) {
+            this.ftag = 'None';
+            this.refresh();
+        }
+    },
     unmounted() {
         curSearch = undefined;
     },
@@ -81,7 +87,7 @@ export default defineComponent({
                 ...(this.gCustomTag ? Object.keys(this.gCustomTag) : [])];
         },
         gCustomTag() {
-            const t = {... this.customTags as Record<string, string>};
+            const t = { ... this.customTags as Record<string, string> };
             t['Enabled'] = 'Enabled';
             t['Disabled'] = 'Disabled';
             return t;

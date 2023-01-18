@@ -69,6 +69,7 @@
         }
     },
     "mods": {
+        "updateAll": "Update all",
         "authors": "Authors",
         "owner": "Owner",
         "ownerOtherMods": "Look at other mods",

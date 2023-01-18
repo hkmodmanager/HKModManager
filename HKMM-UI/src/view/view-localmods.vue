@@ -8,6 +8,9 @@
     'Recently': 'Recently'
     } : {}" />
     <div class="accordion" v-if="!showSpinner()">
+        <button class="btn btn-primary w-100" v-if="filter == 'requireUpdate'">
+            {{ $t('mods.updateAll') }}
+        </button>
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
                 :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true"
@@ -45,7 +48,7 @@
 <script lang="ts">
 import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance } from '@/renderer/modManager';
 import { defineComponent } from 'vue';
-import { getModLinks, hasModLink_ei_files, modlinksCache } from '@/renderer/modlinks/modlinks';
+import { getModLinkMod, getModLinks, hasModLink_ei_files, modlinksCache } from '@/renderer/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
@@ -60,11 +63,16 @@ export default defineComponent({
     methods: {
         getMods() {
             if(!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
-            const src = (this.filter === 'all' || !this.filter) ? Object.keys(refreshLocalMods()) : getRequireUpdateModsSync();
+            let search = this.search;
+            const src = refreshLocalMods();
+            const ru = getRequireUpdateModsSync();
             if(this.filter == 'recently') {
-                this.search += ':recently'
+                search += ':recently'
             }
-            const filter = prepareFilter(this.search, {
+            if(this.filter == 'requireUpdate') {
+                search += ':requireUpdate'
+            }
+            const filter = prepareFilter(search, {
                 scarabimported: (_parts, mod) => {
                     return [getLocalMod(mod.name)?.getLatest()?.info.imported?.fromScarab ?? false, 0];
                 },
@@ -78,10 +86,13 @@ export default defineComponent({
                     const ds = Date.now() - (getLocalMod(mod.name)?.getLatest()?.info.install ?? 0);
                     return [ds < 1000 * 60 * 60 * 24 * 2, -ds];
                 },
+                requireupdate: (_parts, mod) => {
+                    return [ru.includes(mod.name), 0];
+                },
             }, (mod) => this.getModAliasName(mod.name));
-            const result = filterMods(src, filter, (mod) => {
-                return getLocalMod(mod)?.getLatest()?.info.modinfo;
-            }).map(mod => getLocalMod(mod));
+            const result = filterMods(Object.values(src), filter, (mod) => {
+                return mod?.getLatest()?.info.modinfo;
+            }).map(mod => getLocalMod(mod.name));
             return result;
         },
         refresh() {
@@ -98,6 +109,13 @@ export default defineComponent({
         showImportLocalModal() {
             const modal = this.$refs.modal_import_local as any;
             modal.showModal();
+        },
+        async updateAll() {
+            for(const mod of this.getMods()) {
+                const ml = await getModLinkMod(mod.name);
+                if(!ml) continue;
+                mod.installNew(ml);
+            }
         },
         showESConfirm(mod: LocalModInstance) {
             this.ets_mod = mod;

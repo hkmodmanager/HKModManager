@@ -308,6 +308,8 @@ export class LocalModsVersionGroup {
         return inst;
     }
     public async installNew(mod: ModLinksManifestData, justCheckDep = false, ignoreDep = false) {
+        const l = LocalModsVersionGroup.downloadingMods.get(mod.name);
+        if(l) return await l;
         const task = createTask(mod.name);
         task.category = "Download";
         const promise = (async () => {
