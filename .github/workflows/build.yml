@@ -57,7 +57,7 @@ jobs:
           npm run build:metadata
       - name: Build Game Inject
         run: |
-          cd ../gameinject
+          cd gameinject
           npm install
           npm run build
       
