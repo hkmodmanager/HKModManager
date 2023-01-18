@@ -165,7 +165,8 @@
             "LocalImported": "Import from local",
             "NonExclusiveImported": "Non-exclusive imported",
             "Enabled": "Enabled",
-            "Disabled": "Disabled"
+            "Disabled": "Disabled",
+            "Recently": "Recently installed"
         }
     },
     "settings": {

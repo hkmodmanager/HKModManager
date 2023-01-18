@@ -4,7 +4,8 @@
     <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag" :custom-tags="filter !== 'requireUpdate' ? {
     'ScarabImported': 'ScarabImported',
     'LocalImported': 'LocalImported',
-    'NonExclusiveImported': 'NonExclusiveImported'
+    'NonExclusiveImported': 'NonExclusiveImported',
+    'Recently': 'Recently'
     } : {}" />
     <div class="accordion" v-if="!showSpinner()">
         <div v-for="(mod) in getMods()" :key="mod.name">
@@ -60,6 +61,9 @@ export default defineComponent({
         getMods() {
             if(!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
             const src = (this.filter === 'all' || !this.filter) ? Object.keys(refreshLocalMods()) : getRequireUpdateModsSync();
+            if(this.filter == 'recently') {
+                this.search += ':recently'
+            }
             const filter = prepareFilter(this.search, {
                 scarabimported: (_parts, mod) => {
                     return [getLocalMod(mod.name)?.getLatest()?.info.imported?.fromScarab ?? false, 0];
@@ -69,11 +73,16 @@ export default defineComponent({
                 },
                 nonexclusiveimported: (_parts, mod) => {
                     return [getLocalMod(mod.name)?.getLatest()?.info.imported?.nonExclusiveImport ?? false, 0];
-                }
+                },
+                recently: (_parts, mod) => {
+                    const ds = Date.now() - (getLocalMod(mod.name)?.getLatest()?.info.install ?? 0);
+                    return [ds < 1000 * 60 * 60 * 24 * 2, -ds];
+                },
             }, (mod) => this.getModAliasName(mod.name));
-            return filterMods(src, filter, (mod) => {
+            const result = filterMods(src, filter, (mod) => {
                 return getLocalMod(mod)?.getLatest()?.info.modinfo;
             }).map(mod => getLocalMod(mod));
+            return result;
         },
         refresh() {
             if (!modlinksCache) {

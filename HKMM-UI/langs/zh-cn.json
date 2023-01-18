@@ -179,7 +179,8 @@
             "LocalImported": "从本地导入",
             "NonExclusiveImported": "非独占式导入",
             "Enabled": "已启用",
-            "Disabled": "未启用"
+            "Disabled": "未启用",
+            "Recently": "最近安装"
         }
     },
     "settings": {
