@@ -75,7 +75,6 @@ export default defineComponent({
     beforeUpdate() {
         if (!this.tags.includes(this.ftag)) {
             this.ftag = 'None';
-            this.refresh();
         }
     },
     unmounted() {
