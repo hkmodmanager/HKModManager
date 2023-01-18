@@ -5,7 +5,7 @@ import { createI18n } from 'vue-i18n'
 import { log, error, warn, transports } from 'electron-log'
 import * as trace from 'stack-trace';
 
-import "@/css/bootstrap.css"
+import "@/css/bootstrap.dark.css"
 //import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-icons/font/bootstrap-icons.css"
 

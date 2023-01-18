@@ -77,6 +77,7 @@ export function loadConfig() {
 
 export function saveConfig() {
     loadConfig();
+    config.loadedMods = config.loadedMods.filter(x => x);
     outputJSONSync(configPath, config);
 }
 

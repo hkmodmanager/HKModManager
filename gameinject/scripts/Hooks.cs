@@ -5,22 +5,22 @@ global using Mono.Cecil.Cil;
 
 namespace GameInject;
 
-public static partial class Main
+static partial class Main
 {
     [ThreadStatic]
-    public static bool useOrigGetPath = false;
+    public static int useOrigGetPath = 0;
     [ThreadStatic]
-    public static bool useOrigGetFileAttribute = false;
+    public static int useOrigGetFileAttribute = 0;
     public static string OrigGetFullPath(string path)
     {
         try
         {
-            useOrigGetPath = true;
+            useOrigGetPath++;
             return Path.GetFullPath(path);
         }
         finally
         {
-            useOrigGetPath = false;
+            useOrigGetPath--;
         }
     }
     public static void InitHooks()
@@ -39,60 +39,19 @@ public static partial class Main
             if (get_location_redirect.TryGetValue(result, out var r1)) return r1;
             return result;
         });
-        HookEndpointManager.Add(typeof(FileStream).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] {
-            typeof(string), typeof(FileMode), typeof(FileAccess), typeof(FileShare), typeof(int), typeof(bool), typeof(FileOptions)
-        }, null),
-            (
-                Action<FileStream, string, FileMode, FileAccess, FileShare, int, bool, FileOptions> orig, FileStream self,
-                string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, bool anonymous, FileOptions options) =>
-            {
-                try
-                {
-                    if (access == FileAccess.Read)
-                    {
-                        useOrigGetFileAttribute = false;
-                        path = Path.GetFullPath(path);
-                        goto NEXT;
-                    }
-                    var of = OrigGetFullPath(path);
-                    useOrigGetFileAttribute = false;
-                    var f = Path.GetFullPath(path);
-                    if (of.Equals(f, StringComparison.OrdinalIgnoreCase))
-                    {
-                        path = of;
-                        goto NEXT;
-                    }
-                    try
-                    {
-                        useOrigGetFileAttribute = true;
-                        File.Copy(f, of, true);
-                    }
-                    finally
-                    {
-                        useOrigGetFileAttribute = false;
-                    }
-                    NEXT:
-                    orig(self, path, mode, access, share, bufferSize, anonymous, options);
-                }
-                finally
-                {
-                    useOrigGetPath = false;
-                }
-            }
-        );
         HookEndpointManager.Add(typeof(Path).GetMethod("InsecureGetFullPath", BindingFlags.Static | BindingFlags.NonPublic),
             (Func<string, string> orig, string path) =>
             {
                 var result = orig(path);
-                if (useOrigGetPath) return result;
+                if (useOrigGetPath > 0) return result;
                 try
                 {
-                    useOrigGetFileAttribute = true;
+                    useOrigGetFileAttribute++;
                     if (File.Exists(result)) return result;
                 }
                 finally
                 {
-                    useOrigGetFileAttribute = false;
+                    useOrigGetFileAttribute--;
                 }
                 if (redirectPath.TryGetValue(result.ToLower(), out var rpath))
                 {
@@ -111,7 +70,7 @@ public static partial class Main
                 try
                 {
                     Debug.Log($"[CreateFileNameIterator] {path}");
-                    useOrigGetPath = true;
+                    useOrigGetPath++;
                     IEnumerable<string>? result = null;
 
                     var op = Path.GetFullPath(path);
@@ -149,7 +108,7 @@ public static partial class Main
                 }
                 finally
                 {
-                    useOrigGetPath = false;
+                    useOrigGetPath--;
                 }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateFileInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
@@ -158,7 +117,7 @@ public static partial class Main
             {
                 try
                 {
-                    useOrigGetPath = true;
+                    useOrigGetPath++;
                     IEnumerable<FileInfo>? result = null;
                     var op = Path.GetFullPath(path);
                     if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
@@ -172,7 +131,7 @@ public static partial class Main
                 }
                 finally
                 {
-                    useOrigGetPath = false;
+                    useOrigGetPath--;
                 }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateDirectoryInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
@@ -181,7 +140,7 @@ public static partial class Main
             {
                 try
                 {
-                    useOrigGetPath = true;
+                    useOrigGetPath++;
                     IEnumerable<DirectoryInfo>? result = null;
                     if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
                     {
@@ -193,7 +152,7 @@ public static partial class Main
                 }
                 finally
                 {
-                    useOrigGetPath = false;
+                    useOrigGetPath--;
                 }
             });
         HookEndpointManager.Add(t_FileSystemEnumerableFactory.GetMethod("CreateFileSystemInfoIterator", BindingFlags.Static | BindingFlags.NonPublic),
@@ -202,7 +161,7 @@ public static partial class Main
             {
                 try
                 {
-                    useOrigGetPath = true;
+                    useOrigGetPath++;
                     IEnumerable<FileSystemInfo>? result = null;
                     if (redirectDir.TryGetValue(Path.GetFullPath(path), out var rd))
                     {
@@ -214,7 +173,7 @@ public static partial class Main
                 }
                 finally
                 {
-                    useOrigGetPath = false;
+                    useOrigGetPath--;
                 }
             });
         #endregion
@@ -230,7 +189,7 @@ public static partial class Main
                 cur.Emit(OpCodes.Ldarg_0);
                 cur.EmitDelegate((string a0) =>
                 {
-                    if (useOrigGetFileAttribute) return a0;
+                    if (useOrigGetFileAttribute > 0) return a0;
                     return Path.GetFullPath(a0);
                 });
                 cur.Emit(OpCodes.Starg, 0);

@@ -50,20 +50,21 @@ jobs:
       - name: Build NetUtils
         run: |
           dotnet build
-      - name: Build Game Inject
-        run: |
-          cd gameinject
-          npm install
-          npm run build
       - name: npm install
         run: |
           cd HKMM-UI
           npm ci
+          npm run build:metadata
+      - name: Build Game Inject
+        run: |
+          cd ../gameinject
+          npm install
+          npm run build
+      
       - name: Build
         run: |
           cd HKMM-UI
           npm run build:offlineModLinks
-          npm run build:metadata
           npm run electron:build
           npm run build:update
         env:

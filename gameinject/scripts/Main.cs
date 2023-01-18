@@ -2,7 +2,7 @@
 
 namespace GameInject;
 
-public static partial class Main
+static partial class Main
 {
     public static readonly string ModPath = Path.Combine(Application.dataPath, "Managed", "Mods");
     public static readonly Dictionary<string, string> redirectPath = new();
@@ -65,7 +65,7 @@ public static partial class Main
             var parts = vp.Split('|');
             if (parts.Length != 3) continue;
             var v = parts[2];
-            if (!Directory.Exists(v)) continue;
+            if (!Directory.Exists(v) || !v.StartsWith(config.modsPath, StringComparison.OrdinalIgnoreCase)) continue;
             var mmp = Path.Combine(v, "modversion.json");
             if (!File.Exists(mmp)) continue;
             var md = JsonConvert.DeserializeObject<ModMetadata>(File.ReadAllText(mmp))!;

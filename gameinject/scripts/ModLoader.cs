@@ -8,6 +8,6 @@ public class HKMMLoader : Mod {
     public override int LoadPriority() => -10000;
     public override string GetVersion()
     {
-        return "1.2.2";
+        return typeof(HKMMLoader).Assembly.GetName().Version.ToString();
     }
 }

@@ -6,7 +6,7 @@
             <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag" @change="refresh()">
                 <option value="None">{{ $t('mods.tags.None') }}</option>
                 <option v-for="(tag) in tags" :key="tag" :value="tag">{{
-                $t('mods.tags.' + tag) }}({{ (customTags ?? {})[tag] ? `:${(customTags ?? {})[tag]}` : `:tag=${tag}`
+                $t('mods.tags.' + tag) }}({{ (gCustomTag ?? {})[tag] ? `:${(gCustomTag ?? {})[tag]}` : `:tag=${tag}`
     }})
                 </option>
             </select>
@@ -46,7 +46,7 @@ export default defineComponent({
             searchText = this.textinput.trim();
             let name = searchText;
             if (this.ftag != 'None') {
-                const cn = this.customTags ? this.customTags[this.ftag] : undefined;
+                const cn = this.gCustomTag ? this.gCustomTag[this.ftag] : undefined;
                 if (cn) {
                     name += ':' + cn;
                 } else {
@@ -78,7 +78,13 @@ export default defineComponent({
     computed: {
         tags() {
             return ['Gameplay', 'Boss', 'Cosmetic', 'Expansion', 'Library', 'Utility',
-                ...(this.customTags ? Object.keys(this.customTags) : [])];
+                ...(this.gCustomTag ? Object.keys(this.gCustomTag) : [])];
+        },
+        gCustomTag() {
+            const t = {... this.customTags as Record<string, string>};
+            t['Enabled'] = 'Enabled';
+            t['Disabled'] = 'Disabled';
+            return t;
         }
     },
     props: {

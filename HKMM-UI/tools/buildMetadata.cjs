@@ -21,6 +21,8 @@ if (existsSync(masterPath)) {
     isTag =  true;
 }
 
+const version = readJSONSync("package.json").version;
+
 console.log(`Git: ${gitdir}`);
 console.log(`Commit: ${headcommit}`);
 console.log(`Is tag: ${isTag}`);
@@ -29,7 +31,13 @@ writeJSONSync("public/build-metadata.json", {
     buildTime: Date.now(),
     headCommit: headcommit,
     isTag,
-    version: readJSONSync("package.json").version
+    version
 }, {
+    spaces: 4
+});
+
+const mp = readJSONSync("../gameinject/modProject.json");
+mp.modVersion = version;
+writeJSONSync("../gameinject/modProject.json", mp, {
     spaces: 4
 });

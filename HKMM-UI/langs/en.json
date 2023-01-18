@@ -163,7 +163,9 @@
             "ScarabImported": "Imported from Scarab",
             "LocalInstalled": "Locally installed",
             "LocalImported": "Import from local",
-            "NonExclusiveImported": "Non-exclusive imported"
+            "NonExclusiveImported": "Non-exclusive imported",
+            "Enabled": "Enabled",
+            "Disabled": "Disabled"
         }
     },
     "settings": {

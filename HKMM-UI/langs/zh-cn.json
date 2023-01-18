@@ -177,7 +177,9 @@
             "ScarabImported": "从Scarab导入",
             "LocalInstalled": "本地已安装",
             "LocalImported": "从本地导入",
-            "NonExclusiveImported": "非独占式导入"
+            "NonExclusiveImported": "非独占式导入",
+            "Enabled": "已启用",
+            "Disabled": "未启用"
         }
     },
     "settings": {

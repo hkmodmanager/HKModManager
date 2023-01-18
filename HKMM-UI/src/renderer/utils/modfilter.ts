@@ -1,4 +1,5 @@
 import { getModDate, getModRepo, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
+import { getLocalMod } from "../modManager";
 import { getShortName } from "./utils";
 
 function processingModName(name: string) {
@@ -58,6 +59,18 @@ export function prepareFilter(input?: string,
                 const repo = getModRepo(mod.repository);
                 if (!repo) return [false, 0];
                 return [repo[0]?.toLowerCase() == authorName, 0];
+            }]);
+        } else if(filterName == 'enabled') {
+            filters.push(['enabled', (mod) => {
+                const lg = getLocalMod(mod.name);
+                if(!lg) return [false, 0];
+                return [lg.isActived(), 0];
+            }]);
+        } else if(filterName == 'disabled') {
+            filters.push(['disabled', (mod) => {
+                const lg = getLocalMod(mod.name);
+                if(!lg) return [false, 0];
+                return [!lg.isActived(), 0];
             }]);
         } else if(filterName == 'sort') {
             const sortMode = fparts[1]?.toLowerCase();

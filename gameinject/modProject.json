@@ -1,6 +1,6 @@
 {
     "modName": "GameInject",
-    "modVersion": "0.0.0.0",
+    "modVersion": "2.2.1",
     "codeDir": "./scripts",
     "libraryDir": "./library",
     "csCompileInfo": true,
@@ -20,7 +20,7 @@
         },
         {
             "name": "Vanilla",
-            "url": "https://files.catbox.moe/i4sdl6.zip",
+            "url": "https://github.com/HKLab/hkmod-files/raw/master/i4sdl6.zip",
             "ignoreFiles": [
                 "Assembly-CSharp.dll",
                 "mscorlib.dll",
