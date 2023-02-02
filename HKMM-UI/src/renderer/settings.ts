@@ -30,6 +30,7 @@ export class HKMMSettings {
     public cdn: CDN = 'GITHUB_RAW';
     public maxConnection: number = 16;
     public downloadRetry: number = 3;
+    public useDarkMode: boolean = matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 
@@ -92,6 +93,9 @@ function GetSettingsLocal() {
     }
     if(!store.store.downloadRetry) {
         store.set('downloadRetry', 3);
+    }
+    if(store.store.useDarkMode == undefined) {
+        store.set('useDarkMode', matchMedia('(prefers-color-scheme: dark)').matches);
     }
 })();
 

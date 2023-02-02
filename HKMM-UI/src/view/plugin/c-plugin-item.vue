@@ -1,6 +1,6 @@
 
 <template>
-    <div class="accordion-item text-white p-1">
+    <div class="accordion-item p-1">
         <div class="accordion-header d-flex">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" v-model="plugin.context.status.enabled" @change="plugin.context.setActive()" 

@@ -3,7 +3,7 @@
     <div class="p-3">
         <label class="form-label">{{ $t("settings.gamepath.title") }}</label>
         <div class="input-group">
-            <input type="text" class="form-control bg-dark text-white" :value="getHKPath()" readonly disabled />
+            <input type="text" class="form-control" :value="getHKPath()" readonly disabled />
             <a class="btn btn-success" @click="selectHKPath()"><i class="bi bi-folder2-open"></i></a>
         </div>
         <div class="alert alert-danger" v-if="msg != ''">

@@ -1,6 +1,6 @@
 <template>
     <ModalBox :backdrop="false" :keyboard="false" :title="$t('mods.importScarab.title')" ref="modal">
-        <select class="form-select bg-dark text-white" v-model="importMode">
+        <select class="form-select " v-model="importMode">
             <option value="nonexclusive">{{ $t('mods.importScarab.nonexclusive') }}</option>
             <option value="exclusive">{{ $t('mods.importScarab.exclusive') }}</option>
         </select>

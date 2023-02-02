@@ -5,27 +5,25 @@
       d-inline-flex
       flex-column
       p-3
-      text-white
-      bg-dark
+      app-nav
       fill-height
       flex-shrink-0
     ">
       <h3>
         HKMM
         <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
-        
+
       </h3>
       <span v-if="!isRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()"
         @click="openLink(`https://github.com/HKLab/HKModManager/commit/${getCommitSHA()}`)">Alpha-{{
           getShortCommitSHA()
         }}</span>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
-        <a class="bi bi-github p-2 link-light" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')"
+        <a class="bi bi-github p-2 link-auto" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')"
           href="javascript:;"></a>
-        <a class="bi bi-discord p-2 link-light" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')"
+        <a class="bi bi-discord p-2 link-auto" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')"
           href="javascript:;"></a>
-        <a class="bi bi-code-slash p-2 link-light" title="Dev Tools" @click="openDevTools()"
-          href="javascript:;"></a>
+        <a class="bi bi-code-slash p-2 link-auto" title="Dev Tools" @click="openDevTools()" href="javascript:;"></a>
       </div>
 
       <hr />
@@ -39,7 +37,7 @@
         <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
 
         <li class="nav-item">
-          <a class="nav-link text-white" @click="toggleNavTasks()" href="javascript:;">
+          <a class="nav-link text-nav-item-auto" @click="toggleNavTasks()" href="javascript:;">
             <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
           </a>
           <div class="list-group nav-list collapse" ref="tasksNavGroup">
@@ -63,15 +61,24 @@
       <hr />
       <ul class="nav nav-pnills flex-column">
         <li class="nav-item">
-          <a class="nav-link text-white" href="javascript:;" @click="openModalLanguage">
+          <a class="nav-link text-nav-item-auto" href="javascript:;" @click="openModalLanguage">
             <i class="bi bi-globe"></i> {{ $t("c_languages") }}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-nav-item-auto" href="javascript:;" @click="useDarkMode(true)" v-if="!isDarkMode()">
+            <i class="bi bi-moon"></i> {{ $t("c_theme_dark") }}
+          </a>
+          <a class="nav-link text-nav-item-auto" href="javascript:;" @click="useDarkMode(false)" v-else>
+            <i class="bi bi-lightbulb"></i> {{ $t("c_theme_light") }}
           </a>
         </li>
         <RequireExpmode>
           <navitem viewpath="/plugins"><i class="bi bi-puzzle"></i> {{ $t("tabs.plugins") }}</navitem>
         </RequireExpmode>
         <li class="nav-item">
-          <a class="nav-link text-white" href="javascript:;" @click="exportDebugPackage" :title="$t('debugpack_desc')">
+          <a class="nav-link text-nav-item-auto" href="javascript:;" @click="exportDebugPackage"
+            :title="$t('debugpack_desc')">
             <i class="bi bi-box-arrow-up-right"></i> {{ $t("c_exportLog") }}
           </a>
         </li>
@@ -80,13 +87,13 @@
       </ul>
     </div>
     <!--Body-->
-    <div class="text-white flex-grow-1 app-body">
+    <div class="flex-grow-1 app-body">
       <ModalUpdate />
       <router-view></router-view>
     </div>
     <!--Modals-->
     <ModalBox ref="modal_language" :title="$t('c_language_title')">
-      <select class="form-select bg-dark text-white" ref="modssavepathmode" v-model="current_language">
+      <select class="form-select" ref="modssavepathmode" v-model="current_language">
         <option v-for="(i18n, l_name) in getAllNamedLanguage()" :key="l_name" :value="i18n">{{ l_name }}</option>
       </select>
       <template #footer>
@@ -115,7 +122,7 @@ body,
 }
 
 .nav-list {
-  --bs-list-group-bg: var(--bs-dark);
+  --bs-list-group-bg: var(--bs-body-bg);
   --bs-list-group-item-padding-y: 0em;
 }
 
@@ -126,6 +133,12 @@ body,
 .app-body {
   max-height: 100vh;
   overflow: auto;
+  background-color: var(--bs-body-bg);
+}
+
+.app-nav {
+  background-color: var(--bs-body-bg);
+  border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
 html {
@@ -212,7 +225,7 @@ export default defineComponent({
       return getAPIVersion() > 0;
     },
     isRequireUpdateMods() {
-      if(modlinksCache?.offline) return false;
+      if (modlinksCache?.offline) return false;
       return getRequireUpdateModsSync().length > 0;
     },
     exportDebugPackage() {
@@ -223,6 +236,14 @@ export default defineComponent({
         });
       });
 
+    },
+    useDarkMode(e: boolean) {
+      document.body.setAttribute("data-bs-theme", e ? "dark" : "light");
+      store.set('useDarkMode', e);
+      this.$forceUpdate();
+    },
+    isDarkMode() {
+      return document.body.getAttribute("data-bs-theme") == "dark";
     }
   },
   updated() {
@@ -238,6 +259,7 @@ export default defineComponent({
         this.$forceUpdate();
       });
     }
+
   }
 });
 </script>

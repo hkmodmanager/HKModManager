@@ -1,0 +1,19 @@
+.list-group-item {
+    border: 0px;
+}
+
+hr {
+    border-top: 0px;
+}
+
+.link-auto {
+    color: var(--bs-light-text)
+}
+
+.text-nav-item-auto {
+    color: var(--bs-body-color)
+}
+
+.form-control, .form-select {
+    background-color: var(--bs-body-bg)!important;
+}

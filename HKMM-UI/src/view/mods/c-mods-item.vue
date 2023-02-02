@@ -1,6 +1,6 @@
 
 <template>
-    <div class="task-item accordion-item text-black p-1" :id="`mod-download-${mod.name.replaceAll(' ', '')}`">
+    <div class="task-item accordion-item p-1" :id="`mod-download-${mod.name.replaceAll(' ', '')}`">
         <h2 class="accordion-header">
             <button class="accordion-button collapsed" @click="toggleCollapse('body')">
                 <div class="d-flex">
@@ -89,7 +89,7 @@
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse bg-secondary text-white" ref="body">
+        <div class="accordion-collapse collapse" ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div>

@@ -9,6 +9,8 @@
     "c_languages": "Language",
     "c_language_title": "Language",
     "c_language_apply": "Apply",
+    "c_theme_dark": "Dark theme",
+    "c_theme_light": "Light theme",
     "c_exportLog": "Debug Package",
     "debugpack_done": "The file is copied to the clipboard",
     "debugpack_done_title": "Export the debug package",

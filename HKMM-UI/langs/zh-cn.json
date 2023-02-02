@@ -16,6 +16,8 @@
     "c_language_title": "更换语言",
     "c_language_apply": "确定",
     "c_exportLog": "导出调试包",
+    "c_theme_dark": "黑暗主题",
+    "c_theme_light": "明亮主题",
     "allmods_offline": "未连接网络，目前显示的是{date}时的Mods存档",
     "debugpack_done": "文件已复制至剪切板",
     "debugpack_done_title": "导出调试包",

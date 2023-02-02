@@ -1,16 +1,16 @@
 <template>
-  <form class="text-white">
+  <form>
     <HkpathChange></HkpathChange>
     <div class="p-3">
       <label class="form-label">{{ $t("settings.modsavepath.title") }}</label>
-      <select class="form-select bg-dark text-white" @change="changeModsSavePathMode()" ref="modssavepathmode">
+      <select class="form-select" @change="changeModsSavePathMode()" ref="modssavepathmode">
         <option value="appdir">{{ $t("settings.modsavepath.appdir") }}</option>
         <option value="userdir">{{ $t("settings.modsavepath.userdir") }}</option>
         <option value="gamepath">{{ $t("settings.modsavepath.gamepath") }}</option>
         <option value="custom">{{ $t("settings.modsavepath.custom") }}</option>
       </select>
       <div class="input-group p-1" v-if="shouldShowCustomModSavePath()">
-        <input class="form-control bg-dark text-white" readonly disabled :value="getModPath()" />
+        <input class="form-control" readonly disabled :value="getModPath()" />
         <a class="btn btn-success" @click="selectModsSavePath()"><i class="bi bi-folder2-open"></i></a>
       </div>
     </div>
