@@ -95,8 +95,8 @@ function registerAppScheme() {
 async function createWindow() {
   // Create the browser window.
   const win = mainWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
+    minWidth: 900,
+    minHeight: 750,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

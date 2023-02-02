@@ -281,7 +281,7 @@ import * as remote from "@electron/remote";
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/renderer/utils/utils';
-import { hasOption, store } from '@/renderer/settings';
+import { hasOption } from '@/renderer/settings';
 import { getScarabModConfig, ModInfo } from '@/renderer/relocation/Scarab/RScarab';
 import { existsSync } from 'fs';
 import CModsDiList from './c-mods-di-list.vue';
@@ -381,7 +381,7 @@ export default defineComponent({
             return ignoreVerifyMods.has(this.localmod?.info.path ?? "") || isDownloadingMod(this.mod?.name ?? '');
         },
         getModAliasName(name: string) {
-            if (store.get("options").includes("HIDE_MOD_ALIAS"))
+            if (hasOption('HIDE_MOD_ALIAS'))
                 return undefined;
             const lang = I18nLanguages[this.$i18n.locale];
             const alias = lang?.mods?.nameAlias;
@@ -390,7 +390,7 @@ export default defineComponent({
             return alias[name?.toLowerCase()?.replaceAll(" ", "")];
         },
         getShortName(name: string) {
-            if (!store.get("options").includes("SHOW_MOD_SHORT_NAME"))
+            if (!hasOption('SHOW_MOD_SHORT_NAME'))
                 return name.toUpperCase();
             return getShortName(name);
         },

@@ -1,15 +1,18 @@
 
 <template>
-    <div class="sticky-top p-1">
-        <div class="input-group ">
-            <input class="form-control" placeholder="..." v-model="textinput" @keyup.enter="refresh()" />
-            <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag" @change="refresh()">
-                <option value="None">{{ $t('mods.tags.None') }}</option>
-                <option v-for="(tag) in tags" :key="tag" :value="tag">{{
-                $t('mods.tags.' + tag) }}({{ (gCustomTag ?? {})[tag] ? `:${(gCustomTag ?? {})[tag]}` : `:tag=${tag}`
+    <div class="sticky-top bg-body">
+        <div class="p-1">
+            <div class="input-group ">
+                <input class="form-control" placeholder="..." v-model="textinput" @keyup.enter="refresh()" />
+                <select class="form-select flex-grow-0 flex-shrink-0" v-model="ftag" @change="refresh()">
+                    <option value="None">{{ $t('mods.tags.None') }}</option>
+                    <option v-for="(tag) in tags" :key="tag" :value="tag">{{
+                    $t('mods.tags.' + tag) }}({{ (gCustomTag ?? {})[tag] ? `:${(gCustomTag ?? {})[tag]}` :
+        `:tag=${tag}`
     }})
-                </option>
-            </select>
+                    </option>
+                </select>
+            </div>
         </div>
     </div>
 </template>

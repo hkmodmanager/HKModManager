@@ -18,7 +18,7 @@
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'" class="sticky-bottom">
-        <div class="d-flex">
+        <div class="d-flex bg-body">
             <button class="btn btn-primary flex-grow-1" @click="showScarabModal()" :disabled="!canImportFromScarab()">{{
                 $t('mods.importScarab.btn')
             }}</button>

@@ -99,8 +99,13 @@ function GetSettingsLocal() {
     }
 })();
 
+let optionsCache: SettingOptions[] | undefined = undefined;
+
 export function hasOption(name: SettingOptions) {
     if(name == 'FAST_DOWNLOAD') return false;
-    const options = store.get('options');
-    return options.includes(name);
+    if(optionsCache == undefined) {
+        optionsCache = store.get('options');
+        setTimeout(() => optionsCache = undefined, 500);
+    }
+    return optionsCache.includes(name);
 }

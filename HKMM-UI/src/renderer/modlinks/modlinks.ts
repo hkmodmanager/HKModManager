@@ -59,6 +59,7 @@ export interface ModLinksManifestData {
 export class ModLinksData {
     public constructor(public mods: ModCollection, public offline = false) { }
     public lastGet: number = 0;
+    private latestMod: Record<string, ModLinksManifestData> = {};
     public getModVersions(name: string): ModVersionCollection | undefined {
         return this.mods.mods[name];
     }
@@ -69,13 +70,14 @@ export class ModLinksData {
         const ver = this.getModVersions(name);
         if (!ver) return undefined;
         if (version) return ver[version];
+        if(this.latestMod[name]) return this.latestMod[name];
         let latest = "0.0.0.0";
         for (const v in ver) {
             if (isLaterVersion(v, latest)) {
                 latest = v;
             }
         }
-        return ver[latest];
+        return this.latestMod[name] = ver[latest];
     }
 }
 
