@@ -138,7 +138,7 @@ body,
 
 .app-nav {
   background-color: var(--bs-body-bg);
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-right: var(--bs-border-width) solid var(--bs-border-color);
   overflow: auto;
 }
 

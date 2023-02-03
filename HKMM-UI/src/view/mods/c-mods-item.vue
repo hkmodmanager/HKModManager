@@ -90,7 +90,7 @@
 
         </h2>
         <div class="accordion-collapse collapse" ref="body">
-            <div class="accordion-body">
+            <div class="accordion-body" v-if="isInitBody">
                 <!--accordion body-->
                 <div>
                     <div class="d-flex w-100">
@@ -297,7 +297,11 @@ const licenseCache: Record<string, string | null> = {};
 export default defineComponent({
     methods: {
         toggleCollapse(name: string) {
-            this.getCollapse(name).toggle();
+            this.isInitBody = true;
+            setTimeout(() => {
+                this.getCollapse(name).toggle();
+            }, 1);
+            
         },
         getCollapse(name: string) {
             return this.collapses[name] ??= new Collapse(this.$refs[name] as Element);
@@ -581,7 +585,8 @@ export default defineComponent({
             modSize: undefined as (undefined | number),
             modSizeGet: false,
             collapses: {} as Record<string, Collapse>,
-            licenseName: null as (string | null)
+            licenseName: null as (string | null),
+            isInitBody: false
         };
     },
     beforeUpdate() {
