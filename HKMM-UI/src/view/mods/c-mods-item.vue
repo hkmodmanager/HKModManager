@@ -117,7 +117,8 @@
                                         @click="openFolder(localmod?.info.path ?? '')"></a>
                                     <a class="btn btn-primary bi bi-patch-check" :title="$t('mods.verifyMod')"
                                         @click="vaildMod()"></a>
-                                    <button class="btn btn-primary bi bi-wrench-adjustable" :title="$t('mods.repairMod')"
+                                    <button class="btn btn-primary bi bi-wrench-adjustable"
+                                        :title="$t('mods.repairMod')"
                                         v-if="localmod?.info.modVerify && localmod.info.modVerify.fulllevel < 2"
                                         :disabled="isDisbaleRepairModBtn()" @click="repairMod()"></button>
                                 </template>
@@ -301,7 +302,7 @@ export default defineComponent({
             setTimeout(() => {
                 this.getCollapse(name).toggle();
             }, 1);
-            
+
         },
         getCollapse(name: string) {
             return this.collapses[name] ??= new Collapse(this.$refs[name] as Element);
@@ -590,6 +591,7 @@ export default defineComponent({
         };
     },
     beforeUpdate() {
+        if(!this.isInitBody) return;
         this.depOnThis = this.isLocal ? getSubMods(this.mod?.name ?? "") : getSubMods_ModLinks(this.mod?.name ?? "");
         this.integrateWithThis = this.isLocal ? getIntegrationsMods(this.mod?.name ?? "") : getIntegrationsMods_ModLinks(this.mod?.name ?? "")
         this.isDownload = isDownloadingMod(this.mod?.name as string);
@@ -598,9 +600,9 @@ export default defineComponent({
         getModLinks().then((val) => {
             this.modlinkCache = val;
             this.$forceUpdate();
-            this.modSizeGet = true;
-            this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         });
+        this.modSizeGet = true;
+        this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         if (this.mod.repository && hasOption('SHOW_LICENCE') && navigator.onLine) {
             const repo = this.mod.repository;
             if (licenseCache[repo] != undefined) {

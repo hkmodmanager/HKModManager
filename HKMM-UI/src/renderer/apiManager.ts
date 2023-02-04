@@ -70,9 +70,6 @@ export function checkGameFile(root: string): boolean | string {
         if (!existsSync(root)) {
             return "invaild_path";
         }
-        if (!existsSync(join(root, "hollow_knight.exe"))) {
-            return "no_hk";
-        }
         const apipath = getAPIPath(root);
         if (!existsSync(apipath)) {
             return "broken";
