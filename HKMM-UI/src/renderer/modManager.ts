@@ -467,7 +467,7 @@ export function refreshLocalMods(force: boolean = false) {
     localModsArray = [];
     for (const dir of dirs) {
         const dp = join(localpath, dir)
-        const d = opendirSync(dp).readSync();
+        const d = statSync(dp);
         if (!d) continue;
         if (!d.isDirectory()) continue;
         const inst = LocalModsVersionGroup.loadForm(dp);
