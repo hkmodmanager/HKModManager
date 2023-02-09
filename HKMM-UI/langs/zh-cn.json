@@ -248,7 +248,9 @@
         "isLatestVer": "最新版本",
         "hasLatestVer": "有更新",
         "update": "更新API",
-        "uninstallMsg": "你确定要卸载API吗？"
+        "uninstallMsg": "你确定要卸载API吗？",
+        "notsupport": "不支持",
+        "notsupport_d": "该API版本不受支持，无法使用HKMM。请更新至{gamever}-{apiver}及以上版本"
     },
     "tasks": {
         "failed": "失败",

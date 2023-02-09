@@ -227,7 +227,9 @@
         "isLatestVer": "Latest",
         "hasLatestVer": "Updatable",
         "update": "Update",
-        "uninstallMsg": "Are you sure you want to uninstall the API?"
+        "uninstallMsg": "Are you sure you want to uninstall the API?",
+        "notsupport": "Not Support",
+        "notsupport_d": "This API version is not supported and cannot be used with HKMM. Please update to {gamever}-{apiver} and above"
     },
     "tasks": {
         "failed": "Failed",

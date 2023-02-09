@@ -1,17 +1,21 @@
 <template>
     <div>
         <div>
-            <img src="@/assets/apilogo.png" class="mx-auto d-block" v-if="getAPIVersion() > 0" @click="openLink('https://github.com/hk-modding/api')"/>
+            <img src="@/assets/apilogo.png" class="mx-auto d-block" v-if="getAPIVersion() > 0"
+                @click="openLink('https://github.com/hk-modding/api')" />
             <img src="@/assets/hklogo.png" class="mx-auto d-block" v-if="getAPIVersion() <= 0" />
         </div>
         <div class="text-center">
             <div v-if="getAPIVersion() > 0">
                 <h3><span copyable>{{ getGameVersion() }}-{{ getAPIVersion() }}</span>
                     <span class="badge bg-success p-1 m-1">{{ $t("api.found") }}</span>
+                    
                     <span v-if="apigf">
                         <span class="badge bg-success p-1 m-1" v-if="!hasUpdate()">{{ $t("api.isLatestVer") }}</span>
                         <span class="badge bg-warning p-1 m-1" v-else>{{ $t("api.hasLatestVer") }}</span>
                     </span>
+                    
+                    <span v-if="getAPIVersion() < 72" class="badge bg-danger p-1 m-1">{{ $t("api.notsupport") }}</span>
                 </h3>
             </div>
             <div v-else>
@@ -23,18 +27,27 @@
         </div>
         <hr />
         <div>
+            <div v-if="getAPIVersion() < 72" class="alert alert-danger">{{
+                $t("api.notsupport_d", {
+                    gamever: getGameVersion(),
+                apiver: getAPIVersion()
+            }) }}</div>
             <div class="d-flex" v-if="getAPIVersion() > 0 || !nofitapi">
-                <button class="btn btn-primary flex-grow-1" v-if="!isInstallAPI()" :disabled="apiDownloading" @click="updateAPI()">{{ $t("api.install") }}</button>
-                <button class="btn btn-primary flex-grow-1" v-if="hasUpdate()" :disabled="apiDownloading" @click="updateAPI()">{{ $t("api.update") }}</button>
-                <button class="btn btn-primary flex-grow-1" v-if="isInstallAPI() && hasBackupFile()" @click="showUnistallAPI()">{{
+                <button class="btn btn-primary flex-grow-1" v-if="!isInstallAPI()" :disabled="apiDownloading"
+                    @click="updateAPI()">{{ $t("api.install") }}</button>
+                <button class="btn btn-primary flex-grow-1" v-if="hasUpdate()" :disabled="apiDownloading"
+                    @click="updateAPI()">{{ $t("api.update") }}</button>
+                <button class="btn btn-primary flex-grow-1" v-if="isInstallAPI() && hasBackupFile()"
+                    @click="showUnistallAPI()">{{
                         $t("api.uninstall")
-                }}</button>
+                    }}</button>
 
             </div>
             <div class="alert alert-danger" v-if="isInstallAPI() && !hasBackupFile()">{{ $t("api.noBackup") }}</div>
             <div class="alert alert-danger" v-if="nofitapi">
                 {{ $t("api.notfit") }}
             </div>
+
         </div>
     </div>
     <ModalBox ref="uninstallModal">
@@ -75,7 +88,7 @@ export default defineComponent({
         },
         uninstallAPI() {
             (this.$refs.uninstallModal as any).getModal().hide();
-            if(!isVaildBackup()) {
+            if (!isVaildBackup()) {
                 this.$forceUpdate();
                 return;
             }

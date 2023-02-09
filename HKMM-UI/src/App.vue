@@ -55,7 +55,7 @@
 
         <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
         <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i
-            class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledAPI()"></i></navitem>
+            class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledVaildAPI()"></i></navitem>
       </ul>
 
       <hr />
@@ -222,8 +222,8 @@ export default defineComponent({
       const modal = this.$refs.modal_language as any;
       modal.getModal().hide();
     },
-    isInstalledAPI() {
-      return getAPIVersion() > 0;
+    isInstalledVaildAPI() {
+      return getAPIVersion() >= 72;
     },
     isRequireUpdateMods() {
       if (modlinksCache?.offline) return false;
