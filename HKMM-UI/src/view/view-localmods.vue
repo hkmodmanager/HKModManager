@@ -63,7 +63,7 @@ export default defineComponent({
     methods: {
         getMods() {
             if(!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
-            let search = this.search;
+            let search = this.search ?? "";
             const src = refreshLocalMods();
             const ru = getRequireUpdateModsSync();
             if(this.filter == 'recently') {
