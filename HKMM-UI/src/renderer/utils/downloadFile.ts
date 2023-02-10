@@ -61,7 +61,7 @@ export async function downloadFile<T = any>(url: string
     , config?: AxiosRequestConfig<any>,
     canUseFast?: Boolean,
     taskinfo?: TaskInfo,
-    allowChangeProgress: boolean = false,
+    allowChangeProgress: boolean = (taskinfo == undefined),
     taskName?: string,
     taskCategory?: TaskCategory, fallback?: string,
     useGhProxy = hasOption('USE_GH_PROXY'), mirrors: string[] = store.store.mirror_github): Promise<AxiosResponse<T, any> | Buffer> {
@@ -141,14 +141,14 @@ export async function getFileSize(url: string) {
 }
 
 export async function downloadText(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo,
-    allowChangeProgress: boolean = false, taskName?: string, taskCategory?: TaskCategory, fallback?: string) {
+    allowChangeProgress: boolean = (taskinfo == undefined), taskName?: string, taskCategory?: TaskCategory, fallback?: string) {
     config ??= {};
     config.responseType = 'text';
     const r = await downloadFile<string>(url, config, false, taskinfo, allowChangeProgress, taskName, taskCategory, fallback) as AxiosResponse<string>;
     return r.data;
 }
 
-export async function downloadRaw(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo, allowChangeProgress: boolean = false,
+export async function downloadRaw(url: string, config?: AxiosRequestConfig<any>, taskinfo?: TaskInfo, allowChangeProgress: boolean = (taskinfo == undefined),
     taskName?: string, taskCategory?: TaskCategory, fallback?: string) {
     if (config) config = { ...config };
     else config = {};

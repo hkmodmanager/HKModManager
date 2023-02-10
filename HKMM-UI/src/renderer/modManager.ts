@@ -268,7 +268,7 @@ export class LocalModsVersionGroup {
         mod = { ...mod };
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
         mod.link = mod.link as string;
-        const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task);
+        const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task, true);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });

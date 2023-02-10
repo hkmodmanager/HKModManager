@@ -27,11 +27,11 @@
                 <div v-if="task?.progress != undefined" class="progress">
                     <div class="progress-bar" :style="'width: ' + task.progress + '%;'"></div>
                 </div>
-                <div class="fs-6 p-1 d-flex">
+                <div class="fs-6 p-1 d-flex link-auto">
                     <div class="flex-grow-1">
                         Guid: <i copyable> {{ task?.taskGuid }}</i>
                     </div>
-                    <a class="btn" v-if="(task?.isFailed || task?.isSuccess)" @click="hideTask()">
+                    <a class="btn btn-danger" v-if="(task?.isFailed || task?.isSuccess)" @click="hideTask()">
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>

@@ -2,13 +2,13 @@
     <div class="spinner spinner-border text-primary mx-auto d-block" v-if="showSpinner()">
     </div>
     <CModsSearch v-if="!showSpinner()" @update="updateSearch" @update-tag="updateTag" :custom-tags="filter !== 'requireUpdate' ? {
-    'ScarabImported': 'ScarabImported',
-    'LocalImported': 'LocalImported',
-    'NonExclusiveImported': 'NonExclusiveImported',
-    'Recently': 'Recently'
+        'ScarabImported': 'ScarabImported',
+        'LocalImported': 'LocalImported',
+        'NonExclusiveImported': 'NonExclusiveImported',
+        'Recently': 'Recently'
     } : {}" />
     <div class="accordion" v-if="!showSpinner()">
-        <button class="btn btn-primary w-100" v-if="filter == 'requireUpdate'">
+        <button class="btn btn-primary w-100" v-if="filter == 'requireUpdate'" @click="updateAll()">
             {{ $t('mods.updateAll') }}
         </button>
         <div v-for="(mod) in getMods()" :key="mod.name">
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance } from '@/renderer/modManager';
+import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance, getOrAddLocalMod } from '@/renderer/modManager';
 import { defineComponent } from 'vue';
 import { getModLinkMod, getModLinks, hasModLink_ei_files, modlinksCache } from '@/renderer/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
@@ -62,14 +62,14 @@ import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
 export default defineComponent({
     methods: {
         getMods() {
-            if(!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
+            if (!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
             let search = this.search ?? "";
             const src = refreshLocalMods();
             const ru = getRequireUpdateModsSync();
-            if(this.filter == 'recently') {
+            if (this.filter == 'recently') {
                 search += ':recently'
             }
-            if(this.filter == 'requireUpdate') {
+            if (this.filter == 'requireUpdate') {
                 search += ':requireUpdate'
             }
             const filter = prepareFilter(search, {
@@ -110,11 +110,18 @@ export default defineComponent({
             const modal = this.$refs.modal_import_local as any;
             modal.showModal();
         },
-        async updateAll() {
-            for(const mod of this.getMods()) {
-                const ml = await getModLinkMod(mod.name);
-                if(!ml) continue;
-                mod.installNew(ml);
+        updateAll() {
+            for (const mod of this.getMods()) {
+                (async function () {
+                    const ml = await getModLinkMod(mod.name);
+                    if (!ml) return;
+                    const group = getOrAddLocalMod(mod.name);
+                    const oa = group?.isActived() ?? false;
+                    group.disableAll();
+                    await group.installNew(ml);
+                    if (!oa)
+                        group.getLatest()?.uninstall();
+                })();
             }
         },
         showESConfirm(mod: LocalModInstance) {

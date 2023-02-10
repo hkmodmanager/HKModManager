@@ -1,5 +1,6 @@
 
 import { LogSkipStackFrame } from '@/common';
+import { getCurrentWindow } from '@electron/remote';
 import { Guid } from 'guid-typescript'
 
 export type TaskCategory = "Download" | "Build" | "Auto";
@@ -26,7 +27,7 @@ export class TaskInfo {
         this.setDirty();
     }
     public setDirty() {
-        if(this.updateHandler) this.updateHandler();
+        if (this.updateHandler) this.updateHandler();
     }
     public setState(state: string) {
         if (this.taskState.length == 0) {
@@ -36,7 +37,7 @@ export class TaskInfo {
         this.setDirty();
     }
     public exitState() {
-        if((this.taskState[0]?.trim() ?? "") === "") return; 
+        if ((this.taskState[0]?.trim() ?? "") === "") return;
         this.taskState = ["", ...this.taskState];
     }
     public pushState(state: string) {
@@ -46,7 +47,7 @@ export class TaskInfo {
         this.exitState();
     }
     public finish(failed: boolean) {
-        if(failed) {
+        if (failed) {
             this.isFailed = true;
         } else {
             this.isSuccess = true;
@@ -55,6 +56,9 @@ export class TaskInfo {
         console.log(
             `[Task finish (${this.name})-{${this.taskGuid}}] (${failed ? 'Failed' : 'Complate'}) - ${new Date(this.startTime).toLocaleString()} to ${new Date().toLocaleString()} = ${this.stopTime - this.startTime}ms`
             , new LogSkipStackFrame(1));
+    }
+    public isStop() {
+        return this.isFailed || this.isSuccess;
     }
 }
 
@@ -80,7 +84,7 @@ export function startTask(taskName: string, taskDisplayName: string | undefined,
         const p = task(t);
         p.catch(r => {
             t.pushState(r?.toString());
-        t.finish(true);
+            t.finish(true);
         });
         p.then(r => {
             t.pushState("Task finished");
@@ -98,3 +102,25 @@ export function startTask(taskName: string, taskDisplayName: string | undefined,
 export function getTask(taskGuid: String) {
     return allTasks.find((val) => val.taskGuid === taskGuid);
 }
+
+//Set Progress Bar
+(function () {
+    setInterval(() => {
+        let total = 0;
+        let finished = 0;
+        for (const task of allTasks) {
+            if(task.isStop()) continue;
+            if(!task.progress || task.progress < 0) continue;
+            total += 100;
+            finished += task.progress;
+        }
+        if(total == 0) {
+            getCurrentWindow().setProgressBar(-1);
+            return;
+        } else {
+            getCurrentWindow().setProgressBar(finished / total);
+        }
+        
+    }, 500);
+})();
+

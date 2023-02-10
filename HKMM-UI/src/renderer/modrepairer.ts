@@ -90,7 +90,7 @@ export async function repairMod(mod: LocalModInstance, taskinfo?: TaskInfo) {
                         const fp = join(root, file);
                         taskinfo?.pushState(`Download file: ${file}`);
                         const r = await downloadRaw(`https://raw.githubusercontent.com/HKLab/modlinks-archive/modfiles/files/${mod.name}/${mod.info.version}/${file}`,
-                            undefined, undefined, undefined, `[${taskinfo?.taskGuid}]Download Mod File: ${file}`, 'Download');
+                            undefined, undefined, true, `[${taskinfo?.taskGuid}]Download Mod File: ${file}`, 'Download');
                         if(!existsSync(dirname(fp))) mkdirSync(dirname(fp), { recursive: true });
                         await writeFile(fp, r);
                         skips.add(file);

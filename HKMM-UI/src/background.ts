@@ -180,23 +180,17 @@ The program will start automatically after the Electron update is complete, plea
     }
   }
 
-
-
-
-
   registerAppScheme()
-  ipcMain.once("renderer-init", () => {
-    parseCmd(process.argv);
-  });
+  
   ipcMain.on("uncagught-exception", (ev, ee) => {
     dialog.showErrorBox("Uncaught Excpetion", ee);
     console.log(ee)
   });
-  ipcMain.on('update-setup-done', (ev, path) => {
-    startAfterQuit.add(path);
-  });
   if (app.isPackaged) Menu.setApplicationMenu(null);
   createWindow();
+  ipcMain.once("renderer-init", () => {
+    parseCmd(process.argv);
+  });
 });
 
 
