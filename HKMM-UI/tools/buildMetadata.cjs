@@ -35,9 +35,3 @@ writeJSONSync("public/build-metadata.json", {
 }, {
     spaces: 4
 });
-
-const mp = readJSONSync("../gameinject/modProject.json");
-mp.modVersion = version;
-writeJSONSync("../gameinject/modProject.json", mp, {
-    spaces: 4
-});

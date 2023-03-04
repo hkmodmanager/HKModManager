@@ -99,21 +99,13 @@ static partial class Main
     }
     static void M0()
     {
-        var mlt = typeof(Mod).Assembly.GetType("Modding.ModLoader");
-        var tam = mlt.GetMethod("TryAddModInstance", BindingFlags.NonPublic | BindingFlags.Static);
-        if (tam != null)
+        ModLoaderR.TryAddModInstance(typeof(HKMMLoader), new()
         {
-            var mit = mlt.GetNestedType("ModInstance", BindingFlags.NonPublic | BindingFlags.Public);
-            if (mit != null)
-            {
-                var mi = Activator.CreateInstance(mit);
-                var mod = new HKMMLoader();
-                mit.GetField("Mod").SetValue(mi, mod);
-                mit.GetField("Name").SetValue(mi, mod.GetName());
-                mit.GetField("Enabled").SetValue(mi, true);
-                tam.Invoke(null, new object[] { typeof(HKMMLoader), mi });
-            }
-        }
+            Mod = (ModR)(object)new HKMMLoader(),
+            Enabled = true,
+            Error = null,
+            Name = "Hollow Knight Mod Manager"
+        });
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
     public static void Init()

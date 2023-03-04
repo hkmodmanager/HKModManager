@@ -39,31 +39,19 @@ jobs:
           node-version: 16.x
           cache: 'npm'
           cache-dependency-path: HKMM-UI/package-lock.json
-      - name: Setup .NET 6
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
-      - name: Setup .NET 5
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 5.0.x
-      - name: Build NetUtils
+          dotnet-version: 7
+      - name: Build Game Inject
         run: |
-          dotnet build
-      - name: npm install
+          cd gameinject
+          dotnet build -c=Release
+      - name: Build
         run: |
           cd HKMM-UI
           npm ci
           npm run build:metadata
-      - name: Build Game Inject
-        run: |
-          cd gameinject
-          npm install
-          npm run build
-      
-      - name: Build
-        run: |
-          cd HKMM-UI
           npm run build:offlineModLinks
           npm run electron:build
           npm run build:update
