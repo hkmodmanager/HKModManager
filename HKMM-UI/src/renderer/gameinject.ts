@@ -1,5 +1,5 @@
 import { copyFileSync } from "fs";
-import { existsSync, mkdirSync, rmSync, readJSONSync, outputJSONSync } from "fs-extra";
+import { existsSync, rmSync, readJSONSync, outputJSONSync } from "fs-extra";
 import { dirname, join } from "path";
 import { getAPIPath } from "./apiManager";
 import { getCacheModsPath } from "./modManager";

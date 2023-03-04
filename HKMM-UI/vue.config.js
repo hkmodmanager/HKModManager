@@ -1,3 +1,4 @@
+
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
     transpileDependencies: true,
@@ -6,6 +7,7 @@ module.exports = defineConfig({
         config.target = "electron-renderer";
         config.plugins = config.plugins.filter(x => x.constructor.name != 'CaseSensitivePathsPlugin');
     },
+    
     pluginOptions: {
         electronBuilder: {
             builderOptions: {

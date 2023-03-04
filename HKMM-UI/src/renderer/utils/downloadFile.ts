@@ -1,8 +1,6 @@
 
 import { default as axios, AxiosRequestConfig, AxiosResponse, AxiosHeaders, AxiosResponseHeaders } from 'axios'
 import { startTask, TaskInfo, TaskCategory } from '@/renderer/taskManager';
-import { ipcRenderer } from 'electron';
-import { Guid } from 'guid-typescript';
 import { DownloadFileSeg } from '../nethelper';
 import { hasOption, store } from '../settings';
 import asyncPool from 'tiny-async-pool'

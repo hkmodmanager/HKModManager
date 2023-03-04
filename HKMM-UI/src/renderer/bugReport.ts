@@ -25,7 +25,6 @@ export function br_loadLogs() {
         for (; ;) {
             let sessionId: number | undefined = undefined;
             let i = 0;
-            let firstLine: string | undefined = undefined;
             for (const line of lines) {
                 i++;
                 const match = line.match(/Hollow Knight Mod Manager App stared\(v([0-9.]+)\) = ([0-9]+)/);
@@ -33,7 +32,7 @@ export function br_loadLogs() {
                 if (match[1] != appVersion) continue;
                 sessionId = Number.parseInt(match[2]);
                 lines = lines.slice(i);
-                firstLine = line;
+
                 break;
             }
             if (!sessionId) break;

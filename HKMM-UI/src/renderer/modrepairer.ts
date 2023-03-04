@@ -1,10 +1,10 @@
 /* eslint-disable no-inner-declarations */
 import { createHash } from "crypto";
-import { existsSync, mkdirSync, renameSync, rmSync } from "fs";
+import { existsSync, mkdirSync, rmSync } from "fs";
 import { copyFile, readdir, readFile, rename, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path/win32";
 import { localModFilesCache } from "./exportGlobal";
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
+import { getModLinks } from "./modlinks/modlinks";
 import { getOrAddLocalMod, getRealModPath, isDownloadingMod, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "./modManager";
 import { TaskInfo } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";

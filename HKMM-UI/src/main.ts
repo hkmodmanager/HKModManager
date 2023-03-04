@@ -2,8 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
-import { log, error, warn, transports } from 'electron-log'
-import * as trace from 'stack-trace';
+import { log, error } from 'electron-log'
 
 //import "@/css/bootstrap.dark.css"
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -17,11 +16,8 @@ import { importGroup } from './renderer/modgroup'
 import { store } from './renderer/settings';
 import { appVersion } from './renderer/remoteCache'
 import { LogSkipStackFrame } from './common'
-import { join } from 'path'
 
-const olog = console.log;
 const oerror = console.error;
-const owarn = console.warn;
 
 //transports.console = null as any;
 

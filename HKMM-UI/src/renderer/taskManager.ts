@@ -86,7 +86,7 @@ export function startTask(taskName: string, taskDisplayName: string | undefined,
             t.pushState(r?.toString());
             t.finish(true);
         });
-        p.then(r => {
+        p.then(() => {
             t.pushState("Task finished");
             t.finish(false);
         });

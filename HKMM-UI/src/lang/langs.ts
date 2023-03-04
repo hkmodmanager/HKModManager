@@ -1,8 +1,7 @@
 
-import { appDir, exePath, isPackaged, srcRoot } from '@/renderer/remoteCache';
-import * as remote from "@electron/remote";
+import { appDir, isPackaged, srcRoot } from '@/renderer/remoteCache';
 import { existsSync, readdirSync, readFileSync } from 'fs';
-import { dirname, extname, join, parse } from 'path';
+import { join, parse } from 'path';
 
 export const I18nLanguages: Record<string, any> = {};
 

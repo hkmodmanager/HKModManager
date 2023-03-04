@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "fs";
+import { readdirSync, readFileSync, statSync } from "fs";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
 import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
-import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, isLaterVersion, LocalMod_FullLevel, refreshLocalMods, verifyModFiles } from "../modManager";
+import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, isLaterVersion, refreshLocalMods, verifyModFiles } from "../modManager";
 import { scanScarabMods } from "./Scarab/RScarab";
 
 

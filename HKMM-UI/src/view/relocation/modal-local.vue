@@ -83,7 +83,7 @@ export default defineComponent({
             if(this.forceImportMod) {
                 this.mods = [this.forceImportMod];
             } else {
-                this.mods = RL_ScanLocalMods(true);
+                this.mods = RL_ScanLocalMods(false, false, false);
             }
             const modal = this.$refs.modal as any;
             modal.getModal().show();

@@ -1,15 +1,16 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, crashReporter, dialog, ipcMain, Menu, net } from 'electron'
+import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
 import { copyFileSync, existsSync, writeFileSync } from 'fs';
-import { readdir, readFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { spawn } from 'child_process';
-import { dirname, join, resolve } from 'path';
+import { dirname, join } from 'path';
 import * as semver from 'semver';
 import * as remote from '@electron/remote/main';
+import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
@@ -180,6 +181,8 @@ The program will start automatically after the Electron update is complete, plea
     }
   }
 
+  installExtension(VUEJS3_DEVTOOLS);
+
   registerAppScheme()
   
   ipcMain.on("uncagught-exception", (ev, ee) => {
@@ -206,7 +209,7 @@ app.on('window-all-closed', () => {
 })
 
 
-app.on("second-instance", (ev, argv, wd) => {
+app.on("second-instance", (ev, argv) => {
   parseCmd(argv);
 });
 

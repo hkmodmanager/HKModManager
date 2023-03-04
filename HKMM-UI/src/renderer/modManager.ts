@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, opendirSync, readdirSync, readFileSync, rename, renameSync, rmSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, extname, join, parse, basename } from "path";
 import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
@@ -100,8 +100,8 @@ export class LocalModInstance {
                 shouldSave = true;
                 delete (this.info as any)['importFromScarab'];
             }
-            if ((!this.info.modVerify || !this.info.modVerify.verifyDate 
-                    || (hasOption('VERIFY_MODS_ON_AUTO') && Date.now() - this.info.modVerify.verifyDate > 1000 * 60)) && this.info.modinfo.ei_files?.files) {
+            if ((!this.info.modVerify || !this.info.modVerify.verifyDate
+                || (hasOption('VERIFY_MODS_ON_AUTO') && Date.now() - this.info.modVerify.verifyDate > 1000 * 60)) && this.info.modinfo.ei_files?.files) {
                 const missingFiles: string[] = [];
                 this.info.modVerify = {
                     fulllevel: verifyModFiles(this.info.path, this.info.modinfo.ei_files.files, missingFiles),
@@ -309,7 +309,7 @@ export class LocalModsVersionGroup {
     }
     public async installNew(mod: ModLinksManifestData, justCheckDep = false, ignoreDep = false) {
         const l = LocalModsVersionGroup.downloadingMods.get(mod.name);
-        if(l) return await l;
+        if (l) return await l;
         const task = createTask(mod.name);
         task.category = "Download";
         const promise = (async () => {
@@ -360,11 +360,13 @@ export class LocalModsVersionGroup {
         }
         return false;
     }
-    public disableAll() {
+    public disableAll(disableSubMods = true) {
         if (this.versionsArray.length == 0) return;
         this.versionsArray[0].uninstall(true);
-        for (const v of getSubMods(this.name, false)) {
-            v.uninstall();
+        if (disableSubMods) {
+            for (const v of getSubMods(this.name, false)) {
+                v.uninstall();
+            }
         }
     }
     public canEnable() {
@@ -443,7 +445,7 @@ export class LocalModsVersionGroup {
         this.versionsArray.push(inst);
         this.versions[mod.name] = inst;
         const rroot = getRealModPath(info.name);
-        if(moveToCorrectDir && root != rroot) {
+        if (moveToCorrectDir && root != rroot) {
             for (const file of readdirSync(rroot)) {
                 renameSync(join(rroot, file), join(root, file));
             }
@@ -579,9 +581,9 @@ export function getRequireUpdateModsSync() {
 }
 
 export function verifyModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
-    if(ignoreVerifyMods.has(root)) return LocalMod_FullLevel.None;
+    if (ignoreVerifyMods.has(root)) return LocalMod_FullLevel.None;
     const optionFileExt = ['.md', '.pdb'];
-    const optionFileName = [ 'readme', 'readme.txt', 'license', 'license.txt' ];
+    const optionFileName = ['readme', 'readme.txt', 'license', 'license.txt'];
     let fulllevel = LocalMod_FullLevel.Full;
     for (const fn in files) {
         const sha = files[fn];

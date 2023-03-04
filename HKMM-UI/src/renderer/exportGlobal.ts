@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+
 import { readJSONSync } from "fs-extra";
 import { join } from "path";
 import { modfilesOffline } from "./offlineFileCache";

@@ -1,7 +1,7 @@
 
 import { getFileSize, downloadRaw } from '@/renderer/utils/downloadFile'
 import { ICustomDownloader, downloaders } from '@/renderer/mods/customDownloader'
-import { IHKMMPlugin, PluginContext, PluginStatus } from '@/renderer/plugins'
+import { IHKMMPlugin, PluginContext, } from '@/renderer/plugins'
 import { ModLinksManifestData } from '@/renderer/modlinks/modlinks'
 import { TaskInfo } from '@/renderer/taskManager'
 import { join } from 'path';

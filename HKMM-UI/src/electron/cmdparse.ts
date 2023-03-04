@@ -1,5 +1,4 @@
-import { mainWindow } from "@/background";
-import { app, ipcMain } from "electron";
+import { mainWindow } from "../background";
 
 function parseUrl(uri: URL) {
     console.log(uri);

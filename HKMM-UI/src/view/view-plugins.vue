@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <template>
     <div class="accordion">
         <div v-for="(plugin) in allPlugins" :key="plugin.name">

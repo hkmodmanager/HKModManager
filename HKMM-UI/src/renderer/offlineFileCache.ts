@@ -1,7 +1,5 @@
 import { closeSync, existsSync, openSync, readFileSync, readSync, writeFileSync } from "fs";
-import { open } from "fs/promises";
 import { join } from "path";
-import { buildMetadata, gl } from "./exportGlobal";
 import { publicDir, userData } from "./remoteCache";
 
 

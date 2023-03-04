@@ -1,12 +1,10 @@
 
-import { existsSync } from 'fs';
-import { readJSONSync, writeJSONSync } from 'fs-extra';
 import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
 import { isLaterVersion, refreshLocalMods } from '../modManager';
 import { modlinksOffline } from '../offlineFileCache';
-import { publicDir, userData } from '../remoteCache';
+import { userData } from '../remoteCache';
 import { store } from '../settings';
 import { downloadText } from '../utils/downloadFile';
 import { PromiseTimeout } from '../utils/utils';

@@ -117,7 +117,7 @@ export default defineComponent({
                     if (!ml) return;
                     const group = getOrAddLocalMod(mod.name);
                     const oa = group?.isActived() ?? false;
-                    group.disableAll();
+                    group.disableAll(false);
                     await group.installNew(ml);
                     if (!oa)
                         group.getLatest()?.uninstall();

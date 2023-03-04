@@ -1,13 +1,12 @@
 import { zip } from "compressing";
-import * as remote from "@electron/remote";
-import { fstat, readdirSync, readJSONSync, outputJSONSync, statSync, existsSync, rm, rmSync, copySync } from "fs-extra";
+import { readdirSync, readJSONSync, outputJSONSync, statSync, existsSync, rmSync, copySync } from "fs-extra";
 import { Guid } from "guid-typescript";
 import { tmpdir } from "os";
 import { dirname, join, parse } from "path";
 import { URL } from "url";
 import { copyBackup, getAPIPath, getAPIVersion } from "./apiManager";
-import { apiInfoCache, getModLinkMod, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localMods, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { apiInfoCache, ModdingAPIData } from "./modlinks/modlinks";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 import { userData } from "./remoteCache";
 import { store } from "./settings";
 
