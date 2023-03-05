@@ -45,7 +45,8 @@ module.exports = defineConfig({
                         from: "../gameinject/Output",
                         to: "../managed",
                         filter: [
-                            "**/*.dll"
+                            "**/*.dll",
+							"**/*.pdb"
                         ]
                     },
                     {
