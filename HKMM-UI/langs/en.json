@@ -170,7 +170,10 @@
             "Enabled": "Enabled",
             "Disabled": "Disabled",
             "Recently": "Recently installed"
-        }
+        },
+        "uninstall_BeDepended": "Are you sure you want to uninstall {modname}? \nThe following mods depend on this mod",
+        "uninstall_0": "Are you sure you want to uninstall {modname}?",
+        "uninstall_title": "Uninstall"
     },
     "settings": {
         "mirror": {

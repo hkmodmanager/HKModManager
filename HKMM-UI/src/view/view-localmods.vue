@@ -14,7 +14,9 @@
         <div v-for="(mod) in getMods()" :key="mod.name">
             <CModsItem v-if="mod.isInstalled()" :inmod="mod.versions[mod.getLatestVersion() ?? ''].info.modinfo"
                 :localmod="mod.versions[mod.getLatestVersion() ?? '']" :is-local="true"
-                @show-export-to-scarab-confirm="showESConfirm" :disable-update="shouldDisableUpdate()"></CModsItem>
+                @show-export-to-scarab-confirm="showESConfirm" :disable-update="shouldDisableUpdate()"
+                @show-uninstall-confirm="show_deleteMod"
+                ></CModsItem>
         </div>
     </div>
     <div v-if="filter !== 'requireUpdate'" class="sticky-bottom">
@@ -43,6 +45,10 @@
             <button class="btn btn-primary" @click="hideESConfirm()">{{ $t('mods.exportScarab.cancelBtn') }}</button>
         </template>
     </ModalBox>
+    <CModUninstallModal :mod-name="uninstall_modName" 
+                        :depend-mods="uninstall_modDep"
+                        @ondelete="impl_deleteMod"
+                        ref="modal_uninstall"></CModUninstallModal>
 </template>
 
 <script lang="ts">
@@ -58,6 +64,7 @@ import { exportMods } from '@/renderer/relocation/Scarab/RScarab';
 import { store } from '@/renderer/settings';
 import ModalLocal from './relocation/modal-local.vue';
 import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
+import CModUninstallModal from './mods/c-mod-uninstall-modal.vue';
 
 export default defineComponent({
     methods: {
@@ -171,6 +178,19 @@ export default defineComponent({
                 return modlinksCache.offline;
             }
             return false;
+        },
+        impl_deleteMod(name: string)
+        {
+            const group = getOrAddLocalMod(name);
+            group.uninstall(undefined);
+            this.$forceUpdate();
+            this.$parent?.$forceUpdate();
+        },
+        show_deleteMod(name: string, dep: string[])
+        {
+            this.uninstall_modName = name;
+            this.uninstall_modDep = dep;
+            (this.$refs["modal_uninstall"] as any).show();
         }
     },
     props: {
@@ -189,7 +209,9 @@ export default defineComponent({
             search: undefined as any as string,
             tag: 'None',
             ets_mod: undefined as any as LocalModInstance,
-            options: store.get('options')
+            options: store.get('options'),
+            uninstall_modName: "",
+            uninstall_modDep: [] as string[]
         };
     },
     beforeUpdate() {
@@ -198,6 +220,6 @@ export default defineComponent({
     mounted() {
         this.refresh();
     },
-    components: { CModsItem, CModsSearch, ModalScarab, ModalBox, ModalLocal }
+    components: { CModsItem, CModsSearch, ModalScarab, ModalBox, ModalLocal, CModUninstallModal }
 });
 </script>

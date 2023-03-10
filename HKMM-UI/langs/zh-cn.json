@@ -184,7 +184,10 @@
             "Enabled": "已启用",
             "Disabled": "未启用",
             "Recently": "最近安装"
-        }
+        },
+        "uninstall_BeDepended": "确定要卸载{modname}吗？\n以下mods依赖于该mod",
+        "uninstall_0": "确定要卸载{modname}吗？",
+        "uninstall_title": "卸载{modname}"
     },
     "settings": {
         "checkupdate": "检查更新",

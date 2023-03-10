@@ -441,10 +441,9 @@ export default defineComponent({
         uninstallMod() {
             if (this.mod === undefined)
                 return;
-            const group = getOrAddLocalMod(this.mod.name);
-            group.uninstall(undefined);
-            this.$forceUpdate();
-            this.$parent?.$forceUpdate();
+            const depOnThis = getSubMods(this.mod.name);
+            this.$emit("showUninstallConfirm", this.mod.name,
+                depOnThis.map(x => x.name));
         },
         isUsed(name: string) {
             if (this.mod === undefined)
@@ -629,7 +628,8 @@ export default defineComponent({
     emits: {
         showExportToScarabConfirm: null,
         importFromScarab: null,
-        importFromLocal: null
+        importFromLocal: null,
+        showUninstallConfirm: null
     },
     components: { CModsDiList }
 });

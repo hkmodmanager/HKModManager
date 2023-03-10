@@ -9,11 +9,16 @@
     <div class="accordion">
         <CModsItem v-for="(mod) in getMods()" :key="mod.name" :inmod="mod" :scarab-installed="scarabInstalled(mod)"
             :local-installed="localInstalled(mod)" @import-from-scarab="importFromScarab"
-            @import-from-local="importFromLocal" :disable-update="isUseModlinksBackup()"></CModsItem>
+            @import-from-local="importFromLocal" :disable-update="isUseModlinksBackup()"
+            @show-uninstall-confirm="show_deleteMod"></CModsItem>
     </div>
     <ModalScarab ref="modal_import_scarab" :force-import="hopeImportFromScarab">
     </ModalScarab>
     <ModalLocal ref="modal_import_local" :force-import="hopeImportFromLocal"></ModalLocal>
+    <CModUninstallModal :mod-name="uninstall_modName" 
+                        :depend-mods="uninstall_modDep"
+                        @ondelete="impl_deleteMod"
+                        ref="modal_uninstall"></CModUninstallModal>
 </template>
 
 <script lang="ts">
@@ -28,6 +33,8 @@ import ModalScarab from './relocation/modal-scarab.vue';
 import ModalLocal from './relocation/modal-local.vue';
 import { IRLocalMod, RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
 import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
+import CModUninstallModal from './mods/c-mod-uninstall-modal.vue';
+import { getOrAddLocalMod } from '@/renderer/modManager';
 
 export default defineComponent({
     methods: {
@@ -94,6 +101,19 @@ export default defineComponent({
                 this.$forceUpdate();
                 this.localMods = RL_ScanLocalMods(true, true);
             });
+        },
+        impl_deleteMod(name: string)
+        {
+            const group = getOrAddLocalMod(name);
+            group.uninstall(undefined);
+            this.$forceUpdate();
+            this.$parent?.$forceUpdate();
+        },
+        show_deleteMod(name: string, dep: string[])
+        {
+            this.uninstall_modName = name;
+            this.uninstall_modDep = dep;
+            (this.$refs["modal_uninstall"] as any).show();
         }
     },
     data() {
@@ -102,7 +122,9 @@ export default defineComponent({
             hopeImportFromScarab: undefined as any as ModInfo,
             hopeImportFromLocal: undefined as any as IRLocalMod,
             scarabMods: scanScarabMods(),
-            localMods: RL_ScanLocalMods(true, true)
+            localMods: RL_ScanLocalMods(true, true),
+            uninstall_modName: "",
+            uninstall_modDep: [] as string[]
         };
     },
     beforeUpdate() {
@@ -116,7 +138,7 @@ export default defineComponent({
     unmounted() {
         window.removeEventListener('online', this.onlineRefresh);
     },
-    components: { CModsItem, CModsSearch, ModalScarab, ModalLocal }
+    components: { CModsItem, CModsSearch, ModalScarab, ModalLocal, CModUninstallModal }
 })
 </script>
 
