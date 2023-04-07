@@ -27,10 +27,10 @@
         </div>
         <hr />
         <div>
-            <div v-if="getAPIVersion() < 72" class="alert alert-danger">{{
+            <div v-if="getAPIVersion() < 72 && getAPIVersion() > 0" class="alert alert-danger">{{
                 $t("api.notsupport_d", {
                     gamever: getGameVersion(),
-                apiver: getAPIVersion()
+                    apiver: 72
             }) }}</div>
             <div class="d-flex" v-if="getAPIVersion() > 0 || !nofitapi">
                 <button class="btn btn-primary flex-grow-1" v-if="!isInstallAPI()" :disabled="apiDownloading"
