@@ -62,7 +62,7 @@ export default defineComponent({
         isUsed(name: string) {
             const lm = getLocalMod(name);
             if (!lm) return false;
-            return lm.isActived();
+            return lm.isEnabled();
         },
         isInstallMod(name: string) {
             return getLocalMod(name)?.isInstalled() ?? false;

@@ -123,11 +123,11 @@ export default defineComponent({
                     const ml = await getModLinkMod(mod.name);
                     if (!ml) return;
                     const group = getOrAddLocalMod(mod.name);
-                    const oa = group?.isActived() ?? false;
+                    const oa = group?.isEnabled() ?? false;
                     group.disableAll(false);
                     await group.installNew(ml);
                     if (!oa)
-                        group.getLatest()?.uninstall();
+                        group.getLatest()?.disable();
                 })();
             }
         },

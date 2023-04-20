@@ -235,7 +235,7 @@ export function changeCurrentGroup(guid: string) {
         mod.disableAll();
     }
     for (const mod of group.getLocalMods()) {
-        mod.install();
+        mod.enable();
     }
     store.set('current_modgroup', useGroupCache);
 }

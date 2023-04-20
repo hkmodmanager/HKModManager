@@ -123,7 +123,7 @@ export class LocalModInstance {
     }
 
 
-    public install(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
+    public enable(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
         loadConfig();
         const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
         const str = `${this.info.name}|${this.info.version}|${this.info.path}`;
@@ -148,12 +148,12 @@ export class LocalModInstance {
             if (installedSet.has(element)) continue;
             const group = getLocalMod(element);
             if (!group) continue;
-            if (group.isActived()) continue;
-            group.getLatest()?.install(false, installedSet);
+            if (group.isEnabled()) continue;
+            group.getLatest()?.enable(false, installedSet);
         }
     }
 
-    public uninstall(force: boolean = false) {
+    public disable(force: boolean = false) {
         loadConfig();
         const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
         if (id != -1) {
@@ -163,7 +163,7 @@ export class LocalModInstance {
         }
     }
 
-    public canInstall() {
+    public canEnable() {
         const depmods = getLowestDep(this.info.modinfo);
         if (depmods) {
             for (const mod of depmods) {
@@ -180,7 +180,7 @@ export class LocalModInstance {
     }
 
     public async checkDependencies() {
-        if (this.canInstall()) return;
+        if (this.canEnable()) return;
         const g = getLocalMod(this.info.name);
         if (!g) return;
         await g.installNew(this.info.modinfo, true);
@@ -303,7 +303,7 @@ export class LocalModsVersionGroup {
         const inst = this.versions[mod.version] = new LocalModInstance(info);
         this.versionsArray.push(inst);
         inst.save();
-        inst.install(false);
+        inst.enable(false);
         RL_ClearCache();
         return inst;
     }
@@ -340,7 +340,7 @@ export class LocalModsVersionGroup {
                 }
                 await Promise.all(req);
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
-                this.getLatest()?.install(false);
+                this.getLatest()?.enable(false);
                 task.finish(false);
                 return wp as LocalModInstance;
             } catch (e: any) {
@@ -353,7 +353,7 @@ export class LocalModsVersionGroup {
         LocalModsVersionGroup.downloadingMods.set(mod.name, promise);
         return await promise;
     }
-    public isActived() {
+    public isEnabled() {
         for (let index = 0; index < this.versionsArray.length; index++) {
             const element = this.versionsArray[index];
             if (element.isActived()) return true;
@@ -362,16 +362,16 @@ export class LocalModsVersionGroup {
     }
     public disableAll(disableSubMods = true) {
         if (this.versionsArray.length == 0) return;
-        this.versionsArray[0].uninstall(true);
+        this.versionsArray[0].disable(true);
         if (disableSubMods) {
             for (const v of getSubMods(this.name, false)) {
-                v.uninstall();
+                v.disable();
             }
         }
     }
     public canEnable() {
         if (!this.isInstalled()) return false;
-        return this.getLatest()?.canInstall() ?? false;
+        return this.getLatest()?.canEnable() ?? false;
     }
     public uninstall(versions?: string[]) {
         const requireUninstall: LocalModInstance[] = [];
@@ -384,7 +384,7 @@ export class LocalModsVersionGroup {
         console.log(requireUninstall);
         for (let i = 0; i < requireUninstall.length; i++) {
             const element = requireUninstall[i];
-            element.uninstall(false);
+            element.disable(false);
 
             rmSync(element.info.path, {
                 force: true,

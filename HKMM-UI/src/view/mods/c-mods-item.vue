@@ -451,7 +451,7 @@ export default defineComponent({
             const lm = getLocalMod(name);
             if (!lm)
                 return false;
-            return lm.isActived();
+            return lm.isEnabled();
         },
         toggleMod(actived: boolean) {
             if (this.mod === undefined)
@@ -465,7 +465,7 @@ export default defineComponent({
                 group.removeMod(this.mod.name);
             }
             else {
-                lm.getLatest()?.install();
+                lm.getLatest()?.enable();
                 group.addMod(this.mod.name, this.mod.version);
             }
             this.$forceUpdate();
@@ -492,11 +492,11 @@ export default defineComponent({
             if (!ml)
                 return;
             const group = getOrAddLocalMod(this.mod.name);
-            const oa = group.isActived();
+            const oa = group.isEnabled();
             group.disableAll(false);
             await group.installNew(ml);
             if (!oa)
-                group.getLatest()?.uninstall();
+                group.getLatest()?.disable();
             this.$forceUpdate();
             this.$parent?.$forceUpdate();
         },
