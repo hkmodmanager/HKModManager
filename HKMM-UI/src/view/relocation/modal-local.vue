@@ -68,9 +68,9 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
-import { ModLinksManifestData } from '@/renderer/modlinks/modlinks';
-import { isInstallMod, refreshLocalMods } from '@/renderer/modManager';
-import { IRLocalMod, RL_ImportLocalMods, RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
+import { ModLinksManifestData } from '@/core/modlinks/modlinks';
+import { isInstallMod, refreshLocalMods } from '@/core/modManager';
+import { IRLocalMod, RL_ImportLocalMods, RL_ScanLocalMods } from '@/core/relocation/RLocal';
 import { defineComponent } from 'vue';
 
 export default defineComponent({

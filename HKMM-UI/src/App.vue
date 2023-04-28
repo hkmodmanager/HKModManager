@@ -73,9 +73,7 @@
             <i class="bi bi-lightbulb"></i> {{ $t("c_theme_light") }}
           </a>
         </li>
-        <RequireExpmode>
-          <navitem viewpath="/plugins"><i class="bi bi-puzzle"></i> {{ $t("tabs.plugins") }}</navitem>
-        </RequireExpmode>
+
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" href="javascript:;" @click="exportDebugPackage"
             :title="$t('debugpack_desc')">
@@ -148,24 +146,30 @@ html {
 </style>
 
 <script lang="ts">
+import "@/view/view-allmods.vue";
+import "@/view/view-api.vue";
+import "@/view/view-error.vue";
+import "@/view/view-localmods.vue";
+import "@/view/view-modgroups.vue";
+import "@/view/view-settings.vue";
+import "@/view/view-tasks.vue";
+
 import { defineComponent } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
-import { getAPIVersion } from '@/renderer/apiManager'
-import { getRequireUpdateModsSync } from "./renderer/modManager";
-import { getModLinks, modlinksCache } from "./renderer/modlinks/modlinks";
+import { getAPIVersion } from '@/core/apiManager';
+import { getRequireUpdateModsSync } from "./core/modManager";
+import { getModLinks, modlinksCache } from "./core/modlinks/modlinks";
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
-import { store } from "./renderer/settings";
-//import { checkUpdate, installUpdate } from "./renderer/updater";
+import { store } from "./core/settings";
+//import { checkUpdate, installUpdate } from "./core/updater";
 import * as remote from "@electron/remote";
 
-import "./renderer/plugins"
-import RequireExpmode from "./components/require-expmode.vue";
-import { appVersion } from "./renderer/remoteCache";
+import { appVersion } from "./core/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
-import { br_build_zip } from "./renderer/bugReport";
-import { buildMetadata } from "./renderer/exportGlobal";
+import { br_build_zip } from "./core/bugReport";
+import { buildMetadata } from "./core/exportGlobal";
 
 export default defineComponent({
   data: function () {
@@ -177,7 +181,6 @@ export default defineComponent({
   components: {
     navitem,
     ModalBox,
-    RequireExpmode,
     ModalUpdate
   },
   methods: {

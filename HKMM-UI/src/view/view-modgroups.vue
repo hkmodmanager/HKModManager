@@ -89,16 +89,16 @@ import ModalBox from '@/components/modal-box.vue';
 import {
     saveGroups, getAllGroupGuids, ModGroupController, getGroup, getDefaultGroup,
     getCurrentGroup, getOrCreateGroup, removeGroup, importFromHKMG
-} from '@/renderer/modgroup';
+} from '@/core/modgroup';
 import { defineComponent } from 'vue';
 import * as remote from "@electron/remote";
 import CGroupsGroupItem from './groups/c-groups-groupItem.vue';
 import { zip } from 'compressing';
 import { createWriteStream } from 'fs';
-import { getAPIVersion } from '@/renderer/apiManager';
+import { getAPIVersion } from '@/core/apiManager';
 import { extname } from 'path';
-import { refreshLocalMods } from '@/renderer/modManager';
-import { gl } from '@/renderer/exportGlobal';
+import { refreshLocalMods } from '@/core/modManager';
+import { gl } from '@/core/exportGlobal';
 
 export default defineComponent({
     methods: {

@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { allTasks, TaskInfo } from '@/renderer/taskManager';
+import { allTasks, TaskInfo } from '@/core/taskManager';
 import { defineComponent } from 'vue';
 import CTasksItem from './tasks/c-tasks-item.vue';
 

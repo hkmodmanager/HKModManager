@@ -4,11 +4,25 @@ import { dirname, join } from "path";
 import { downloadRaw, downloadText, getFileSize } from "./utils/downloadFile";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { appDir, appVersion, isPackaged, srcRoot } from "./remoteCache";
-import { node_import } from "./plugins";
 import * as semver from "semver"
 import { hasOption } from "./settings";
 import { getModDate } from "./modlinks/modlinks";
 import { buildMetadata, IBuildMetadata } from "./exportGlobal";
+
+const w_any = window as any;
+const orig_any = w_any.node_require ?? eval('window.require');
+
+export const node_require = w_any.node_require = orig_any;
+export const webpack_require = w_any.webpack_require = __webpack_require__;
+
+export function node_import<T>(modulename: string, ep?: string) {
+    const module = node_require(modulename);
+    if(ep) {
+        return module[ep] as T;
+    }
+    return module as T;
+}
+
 
 export interface ReleaseInfo {
     name: string;

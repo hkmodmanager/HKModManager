@@ -1,5 +1,5 @@
 
-import { appDir, isPackaged, srcRoot } from '@/renderer/remoteCache';
+import { appDir, isPackaged, srcRoot } from '@/core/remoteCache';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, parse } from 'path';
 

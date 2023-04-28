@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts">
-import { cdn_modlinks } from '@/renderer/exportGlobal';
-import { CDN, store } from '@/renderer/settings';
+import { cdn_modlinks } from '@/core/exportGlobal';
+import { CDN, store } from '@/core/settings';
 import { Guid } from 'guid-typescript';
-import { downloadText } from '@/renderer/utils/downloadFile';
+import { downloadText } from '@/core/utils/downloadFile'
 import { defineComponent } from 'vue';
 
 const pr: Record<string, number> = {};

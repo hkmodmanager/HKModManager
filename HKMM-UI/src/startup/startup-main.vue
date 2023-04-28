@@ -9,8 +9,8 @@
 
 <script lang="ts">
 import HkpathChange from '@/components/hkpath-change.vue';
-import { checkGameFile, getAPIVersion } from '@/renderer/apiManager';
-import { store } from '@/renderer/settings';
+import { checkGameFile, getAPIVersion } from '@/core/apiManager';
+import { store } from '@/core/settings';
 import { Component, defineComponent } from 'vue';
 
 let appVue: Component | undefined;

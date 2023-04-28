@@ -67,11 +67,11 @@
 </template>
 
 <script lang="ts">
-import { getCurrentGroup, ModGroupController, changeCurrentGroup } from '@/renderer/modgroup';
+import { getCurrentGroup, ModGroupController, changeCurrentGroup } from '@/core/modgroup';
 import { defineComponent } from 'vue';
 import { Collapse } from 'bootstrap';
-import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/renderer/modManager';
-import { getModLinkMod } from '@/renderer/modlinks/modlinks';
+import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/core/modManager';
+import { getModLinkMod } from '@/core/modlinks/modlinks';
 import { clipboard } from 'electron';
 import { I18nLanguages } from '@/lang/langs';
 

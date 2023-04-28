@@ -44,8 +44,8 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
-import { refreshLocalMods } from '@/renderer/modManager';
-import { scanScarabMods, ModInfo, importMods } from '@/renderer/relocation/Scarab/RScarab';
+import { refreshLocalMods } from '@/core/modManager';
+import { scanScarabMods, ModInfo, importMods } from '@/core/relocation/Scarab/RScarab';
 import { defineComponent } from 'vue';
 
 export default defineComponent({

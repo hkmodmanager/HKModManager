@@ -4,7 +4,7 @@ import { Guid } from "guid-typescript";
 import { tmpdir } from "os";
 import { dirname, join, parse } from "path";
 import { URL } from "url";
-import { copyBackup, getAPIPath, getAPIVersion } from "./apiManager";
+import { copyBackup, getAPIPath, getAPIVersion } from "../core/apiManager";
 import { apiInfoCache, ModdingAPIData } from "./modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 import { userData } from "./remoteCache";

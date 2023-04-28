@@ -7,7 +7,7 @@ import { downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
 
-import "./apiManager";
+import "../core/apiManager";
 import { copySync } from "fs-extra";
 import { config, installGameInject, loadConfig, saveConfig } from "./gameinject";
 import { getDownloader } from "./mods/customDownloader";

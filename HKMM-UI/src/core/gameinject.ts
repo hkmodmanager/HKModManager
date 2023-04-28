@@ -1,7 +1,7 @@
 import { copyFileSync } from "fs";
 import { existsSync, rmSync, readJSONSync, outputJSONSync } from "fs-extra";
 import { dirname, join } from "path";
-import { getAPIPath } from "./apiManager";
+import { getAPIPath } from "../core/apiManager";
 import { getCacheModsPath } from "./modManager";
 import { appDir, isPackaged, srcRoot } from "./remoteCache";
 

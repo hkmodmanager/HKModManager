@@ -1,6 +1,6 @@
-import { modlinksCache } from "@/renderer/modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "@/renderer/modManager";
-import { isVaildModDir } from "@/renderer/utils/utils";
+import { modlinksCache } from "../../modlinks/modlinks";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "@/core/modManager";
+import { isVaildModDir } from "@/core/utils/utils";
 import * as remote from "@electron/remote";
 import { existsSync } from "fs";
 import { copySync, readJSONSync, writeJSONSync } from "fs-extra";

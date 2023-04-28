@@ -60,8 +60,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/renderer/apiManager'
-import { apiInfoCache, getAPIInfo } from '@/renderer/modlinks/modlinks';
+import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/core/apiManager';
+import { apiInfoCache, getAPIInfo } from '@/core/modlinks/modlinks';
 import ModalBox from '@/components/modal-box.vue';
 import * as remote from "@electron/remote";
 

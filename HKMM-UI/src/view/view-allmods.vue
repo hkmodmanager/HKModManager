@@ -23,18 +23,18 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { getModLinks, modlinksCache, ModLinksManifestData } from '@/renderer/modlinks/modlinks'
+import { getModLinks, modlinksCache, ModLinksManifestData } from '@/core/modlinks/modlinks'
 import CModsItem from './mods/c-mods-item.vue';
-import { hasOption } from '@/renderer/settings';
+import { hasOption } from '@/core/settings';
 import CModsSearch from './mods/c-mods-search.vue';
 import { I18nLanguages } from '@/lang/langs';
-import { ModInfo, scanScarabMods } from '@/renderer/relocation/Scarab/RScarab';
+import { ModInfo, scanScarabMods } from '@/core/relocation/Scarab/RScarab';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalLocal from './relocation/modal-local.vue';
-import { IRLocalMod, RL_ScanLocalMods } from '@/renderer/relocation/RLocal';
-import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
+import { IRLocalMod, RL_ScanLocalMods } from '@/core/relocation/RLocal';
+import { filterMods, prepareFilter } from '@/core/utils/modfilter';
 import CModUninstallModal from './mods/c-mod-uninstall-modal.vue';
-import { getOrAddLocalMod } from '@/renderer/modManager';
+import { getOrAddLocalMod } from '@/core/modManager';
 
 export default defineComponent({
     methods: {

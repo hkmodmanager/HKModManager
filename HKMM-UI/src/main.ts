@@ -12,9 +12,9 @@ import "@/css/common.scss"
 import viewErrorVue from './view/view-error.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
-import { importGroup } from './renderer/modgroup'
-import { store } from './renderer/settings';
-import { appVersion } from './renderer/remoteCache'
+import { importGroup } from './core/modgroup'
+import { store } from './core/settings'
+import { appVersion } from './core/remoteCache'
 import { LogSkipStackFrame } from './common'
 
 const oerror = console.error;
@@ -101,11 +101,6 @@ const routes: RouteRecordRaw[] = [
         name: 'api',
         path: '/api',
         component: () => import('./view/view-api.vue')
-    },
-    {
-        name: 'plugins',
-        path: '/plugins',
-        component: () => import('./view/view-plugins.vue')
     },
     {
         path: '/:pathMatch(.*)*',

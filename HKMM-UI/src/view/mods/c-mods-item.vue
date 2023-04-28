@@ -274,24 +274,24 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/renderer/modManager';
-import { getCurrentGroup } from '@/renderer/modgroup'
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/core/modlinks/modlinks';
+import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
+import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
 import * as remote from "@electron/remote";
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
-import { ConvertSize, getShortName } from '@/renderer/utils/utils';
-import { hasOption } from '@/renderer/settings';
-import { getScarabModConfig, ModInfo } from '@/renderer/relocation/Scarab/RScarab';
+import { ConvertSize, getShortName } from '@/core/utils/utils';
+import { hasOption } from '@/core/settings';
+import { getScarabModConfig, ModInfo } from '@/core/relocation/Scarab/RScarab';
 import { existsSync } from 'fs';
 import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
-import { IRLocalMod } from '@/renderer/relocation/RLocal';
+import { IRLocalMod } from '@/core/relocation/RLocal';
 import { getSearchText, setSearchText } from './c-mods-search.vue';
 import { shell } from 'electron';
-import { ignoreVerifyMods, repairMod } from '@/renderer/modrepairer';
-import { startTask } from '@/renderer/taskManager';
+import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
+import { startTask } from '@/core/taskManager';
 
 const licenseCache: Record<string, string | null> = {};
 

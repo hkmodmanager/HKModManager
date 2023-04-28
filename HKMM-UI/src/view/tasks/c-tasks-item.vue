@@ -65,7 +65,7 @@
 </style>
 
 <script lang="ts">
-import { getTask, TaskInfo } from '@/renderer/taskManager';
+import { getTask, TaskInfo } from '@/core/taskManager';
 import { Collapse } from 'bootstrap';
 import { defineComponent } from 'vue';
 

@@ -23,10 +23,10 @@
 
 <script lang="ts">
 import ModalBox from '@/components/modal-box.vue';
-import { buildMetadata } from '@/renderer/exportGlobal';
-import { appVersion } from '@/renderer/remoteCache';
-import { checkUpdate, installUpdate, UpdateInfo } from '@/renderer/updater';
-import { ConvertSize } from '@/renderer/utils/utils';
+import { buildMetadata } from '@/core/exportGlobal';
+import { appVersion } from '@/core/remoteCache';
+import { checkUpdate, installUpdate, UpdateInfo } from '@/core/updater';
+import { ConvertSize } from '@/core/utils/utils';
 import { Collapse, Modal } from 'bootstrap';
 import { defineComponent } from 'vue';
 

@@ -41,8 +41,8 @@
 </template>
 
 <script lang="ts">
-import { ModLinksManifestData } from '@/renderer/modlinks/modlinks';
-import { getLocalMod, LocalModInstance } from '@/renderer/modManager';
+import { ModLinksManifestData } from '@/core/modlinks/modlinks';
+import { getLocalMod, LocalModInstance } from '@/core/modManager';
 import { Collapse } from 'bootstrap';
 import { defineComponent } from 'vue';
 

@@ -52,18 +52,18 @@
 </template>
 
 <script lang="ts">
-import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance, getOrAddLocalMod } from '@/renderer/modManager';
+import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance, getOrAddLocalMod } from '@/core/modManager';
 import { defineComponent } from 'vue';
-import { getModLinkMod, getModLinks, hasModLink_ei_files, modlinksCache } from '@/renderer/modlinks/modlinks';
+import { getModLinkMod, getModLinks, hasModLink_ei_files, modlinksCache } from '@/core/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
 import ModalScarab from './relocation/modal-scarab.vue';
 import ModalBox from '@/components/modal-box.vue';
-import { exportMods } from '@/renderer/relocation/Scarab/RScarab';
-import { store } from '@/renderer/settings';
+import { exportMods } from '@/core/relocation/Scarab/RScarab';
+import { store } from '@/core/settings';
 import ModalLocal from './relocation/modal-local.vue';
-import { filterMods, prepareFilter } from '@/renderer/utils/modfilter';
+import { filterMods, prepareFilter } from '@/core/utils/modfilter';
 import CModUninstallModal from './mods/c-mod-uninstall-modal.vue';
 
 export default defineComponent({

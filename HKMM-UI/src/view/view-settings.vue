@@ -103,14 +103,14 @@
 
 <script lang="ts">
 import RequireExpmode from "@/components/require-expmode.vue";
-import { store, ModSavePathMode, hasOption, SettingOptions } from "@/renderer/settings";
+import { store, ModSavePathMode, hasOption, SettingOptions } from "@/core/settings";
 import { defineComponent, InputHTMLAttributes, SelectHTMLAttributes } from "vue";
 
 import mirrorlist from "./settings/c-mirror-list.vue"
 import * as remote from "@electron/remote";
 import HkpathChange from "@/components/hkpath-change.vue";
 import { join } from "path";
-import { userData } from "@/renderer/remoteCache";
+import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
 

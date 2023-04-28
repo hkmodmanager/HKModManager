@@ -32,7 +32,7 @@
 </style>
 
 <script lang="ts">
-import { store } from '@/renderer/settings';
+import { store } from '@/core/settings';
 import { defineComponent } from 'vue';
 
 
