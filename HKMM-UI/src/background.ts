@@ -39,8 +39,7 @@ protocol.registerSchemesAsPrivileged([
       secure: true,
       standard: true,
       supportFetchAPI: true,
-      bypassCSP: true,
-
+      bypassCSP: true
     }
   }
 ]);
@@ -184,7 +183,7 @@ The program will start automatically after the Electron update is complete, plea
   installExtension(VUEJS3_DEVTOOLS);
 
   registerAppScheme()
-  
+
   ipcMain.on("uncagught-exception", (ev, ee) => {
     dialog.showErrorBox("Uncaught Excpetion", ee);
     console.log(ee)
@@ -215,17 +214,11 @@ app.on("second-instance", (ev, argv) => {
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
-  if (process.platform === 'win32') {
-    process.on('message', (data) => {
-      if (data === 'graceful-exit') {
-        app.quit();
-      }
-    });
-  } else {
-    process.on('SIGTERM', () => {
+  process.on('message', (data) => {
+    if (data === 'graceful-exit') {
       app.quit();
-    });
-  }
+    }
+  });
 }
 
 

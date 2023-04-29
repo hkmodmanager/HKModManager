@@ -1,6 +1,7 @@
 
 import { join } from 'path';
 import { Parser, ast } from 'tsxml'
+import { IModMetadata } from '../data/IModMetadata';
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
 import { isLaterVersion, refreshLocalMods } from '../modManager';
 import { modlinksOffline } from '../offlineFileCache';
@@ -34,10 +35,8 @@ export interface ModCollection {
 
 export type ModVersionCollection = Record<string, ModLinksManifestData>;
 
-export interface ModLinksManifestData {
-    name: string;
+export interface ModLinksManifestData extends IModMetadata {
     desc: string;
-    version: string;
     link?: string;
     dependencies: string[];
     repository: string | undefined;

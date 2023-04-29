@@ -10,11 +10,11 @@ import { getCurrentGroup } from "./modgroup";
 import "../core/apiManager";
 import { copySync } from "fs-extra";
 import { config, installGameInject, loadConfig, saveConfig } from "./gameinject";
-import { getDownloader } from "./mods/customDownloader";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
 import { RL_ClearCache } from "./relocation/RLocal";
 import { ignoreVerifyMods } from "./modrepairer";
+import { IModMetadata } from "./data/IModMetadata";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
@@ -54,7 +54,7 @@ export interface IImportedLocalModVerify {
     verifyDate: number;
 }
 
-export interface LocalModInfo {
+export interface LocalModInfo extends IModMetadata {
     name: string;
     version: string;
     install: number;
@@ -268,7 +268,7 @@ export class LocalModsVersionGroup {
         mod = { ...mod };
         task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
         mod.link = mod.link as string;
-        const result: Buffer = await (await getDownloader(mod))?.do(mod, task) ?? await downloadRaw(mod.link, undefined, task, true);
+        const result: Buffer = await downloadRaw(mod.link, undefined, task, true);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
         task.pushState(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });
