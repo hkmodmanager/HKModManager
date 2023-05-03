@@ -13,6 +13,9 @@
                             ({{ getModAliasName(mod.name) }})
                         </strong>
                     </div>
+                    <span v-if="licenseName != null" class="badge bg-success mt-2">
+                        {{ licenseName }}
+                    </span>
                     <span v-if="isUsed(mod?.name ?? '')" class="badge bg-success mt-2">
                         {{ $t("mods.enabled") }}
                     </span>
@@ -171,20 +174,20 @@
                     </div>
                     <div v-if="mod.owner">
                         <span>{{ $t("mods.owner") }}:</span>
-                        <a :style="{ 'textDecoration': 'none' }" href='javascript:;'
-                            @click="openLink(`https://github.com/${mod.owner}`)" copyable>{{ mod.owner }}</a>
+                        <a :style="{ 'textDecoration': 'none' }" :href='`https://github.com/${mod.owner}`'
+                            copyable>{{ mod.owner }}</a>
                         <a :style="{ 'textDecoration': 'none' }" href="javascript:;"
                             @click="lookAtAuthor(mod.owner ?? '')"> ({{ $t('mods.ownerOtherMods') }})</a>
                     </div>
                     <div>
                         <span>{{ $t("mods.repo") }}:</span>
-                        <a copyable href="javascript:;" @click="openLink(mod?.repository ?? '')">{{
+                        <a copyable :href="mod?.repository">{{
                             mod?.repository
                         }}</a>
                     </div>
                     <div v-if="releasePath">
                         <span>{{ $t("mods.releasePath") }}:</span>
-                        <a copyable href="javascript:;" @click="openLink(releasePath ?? '')">{{ releasePath }}</a>
+                        <a copyable :href="releasePath">{{ releasePath }}</a>
                     </div>
                     <div v-if="mod.date && mod.date != '1970-12-22T04:50:23Z'">
                         <span>{{ $t("mods.publishTime") }}:</span>
@@ -197,8 +200,7 @@
                     <div>
                         <hr />
                         <h5>{{ $t("mods.desc") }}</h5>
-                        <div copyable>
-                            {{ mod?.desc }}
+                        <div copyable v-html="getMarkdownDesc(mod)">
                         </div>
                         <!--<div v-if="getModDesc()" copyable>
                             <hr />
@@ -278,7 +280,6 @@ import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getMod
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
 import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
-import * as remote from "@electron/remote";
 import { defineComponent } from 'vue';
 import { I18nLanguages } from '@/lang/langs';
 import { ConvertSize, getShortName } from '@/core/utils/utils';
@@ -292,8 +293,18 @@ import { getSearchText, setSearchText } from './c-mods-search.vue';
 import { shell } from 'electron';
 import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
 import { startTask } from '@/core/taskManager';
+import MarkdownIt from 'markdown-it';
 
 const licenseCache: Record<string, string | null> = {};
+
+const md = new MarkdownIt({
+    typographer: true
+});
+md.enable([
+    'autolink'
+], false);
+
+console.warn(md);
 
 export default defineComponent({
     methods: {
@@ -312,9 +323,6 @@ export default defineComponent({
             if (!el)
                 return false;
             return el.classList.contains("collapse") && !el.classList.contains("collapsing") && !el.classList.contains("show");
-        },
-        openLink(link: string) {
-            remote.shell.openExternal(link);
         },
         isInstallMod(name: string) {
             return getLocalMod(name)?.isInstalled() ?? false;
@@ -547,6 +555,12 @@ export default defineComponent({
             if (search.includes(':author=' + author)) return;
             search = search.replace(/:author=([-A-Za-z0-9_]+)/g, " :author=" + author);
             setSearchText(search);
+        },
+        getMarkdownDesc(mod?: ModLinksManifestData)
+        {
+            if(mod == null) return '';
+            return md.render(mod.desc
+                .replace(/\b(?:https?:\/\/|www\.)\S+\b/ig, ($0) => `<${$0}>`));
         }
     },
     props: {
@@ -600,6 +614,7 @@ export default defineComponent({
             this.modlinkCache = val;
             this.$forceUpdate();
         });
+        
         this.modSizeGet = true;
         this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
         if (this.mod.repository && hasOption('SHOW_LICENCE') && navigator.onLine) {
@@ -614,7 +629,8 @@ export default defineComponent({
                         const le = text.lastIndexOf('</text>');
                         const ls = text.lastIndexOf('>', le);
                         let l: string | null = text.substring(ls + 1, le);
-                        if (l == 'NOT SPECIFIED' || l == 'NOT IDENTIFIABLE BY GITHUB') l = null;
+                        if (l == 'NOT SPECIFIED' || l == 'NOT IDENTIFIABLE BY GITHUB'
+                            || l == 'REPO NOT FOUND') l = null;
                         this.licenseName = licenseCache[repo] = l;
                     }).catch();
                 }

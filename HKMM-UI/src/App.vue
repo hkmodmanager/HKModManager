@@ -14,15 +14,13 @@
         <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
 
       </h3>
-      <span v-if="!isRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()"
-        @click="openLink(`https://github.com/HKLab/HKModManager/commit/${getCommitSHA()}`)">Alpha-{{
+      <a v-if="!isRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()"
+        :href="`https://github.com/HKLab/HKModManager/commit/${getCommitSHA()}`">Alpha-{{
           getShortCommitSHA()
-        }}</span>
+        }}</a>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
-        <a class="bi bi-github p-2 link-auto" title="Github" @click="openLink('https://github.com/HKLab/HKModManager')"
-          href="javascript:;"></a>
-        <a class="bi bi-discord p-2 link-auto" title="HK Modding" @click="openLink('https://discord.gg/4Zhdg7QyPS')"
-          href="javascript:;"></a>
+        <a class="bi bi-github p-2 link-auto" title="Github" href='https://github.com/HKLab/HKModManager'></a>
+        <a class="bi bi-discord p-2 link-auto" title="HK Modding" href="https://discord.gg/4Zhdg7QyPS"></a>
         <a class="bi bi-code-slash p-2 link-auto" title="Dev Tools" @click="openDevTools()" href="javascript:;"></a>
       </div>
 
@@ -188,9 +186,6 @@ export default defineComponent({
       const group = this.$refs.tasksNavGroup as Element;
       const col = new Collapse(group);
       col.toggle();
-    },
-    openLink(link: string) {
-      remote.shell.openExternal(link);
     },
     getAllNamedLanguage() {
       return AllNamedLanaguages;

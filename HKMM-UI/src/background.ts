@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net } from 'electron'
+import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -116,6 +116,16 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html');
   }
+
+  win.webContents.on('will-navigate', (ev, url) =>
+  {
+    const purl = new URL(url);
+    if(!url.startsWith("app://") && purl.hostname != "localhost")
+    {
+      ev.preventDefault();
+      shell.openExternal(url);
+    }
+  });
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));

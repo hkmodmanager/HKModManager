@@ -50,8 +50,8 @@
           <div class="form-group">
             <label class="form-label">{{
               $t("settings.mirror.githubmirror")
-            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="javascript:;"
-                @click="openLink(`https://github.com/hunshcn/gh-proxy`)"></a></label>
+            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="https://github.com/hunshcn/gh-proxy"
+                ></a></label>
             <mirrorlist key-name="mirror_github"></mirrorlist>
           </div>
         </div>
@@ -158,9 +158,6 @@ export default defineComponent({
       sessionStorage.setItem("exp_query_restart", "1");
       this.$forceUpdate();
       this.$root?.$forceUpdate();
-    },
-    openLink(link: string) {
-      remote.shell.openExternal(link);
     },
     shouldShowCustomModSavePath() {
       return store.get("modsavepathMode") == ModSavePathMode.Custom;
