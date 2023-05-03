@@ -1,5 +1,5 @@
-import { getModDate, getModRepo, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
-import { getLocalMod } from "../modManager";
+import { getModDate, getModRepo, modlinksCache, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
+import { getLocalMod, getOldestVersion, getOrAddLocalMod } from "../modManager";
 import { getShortName } from "./utils";
 
 function processingModName(name: string) {
@@ -7,19 +7,80 @@ function processingModName(name: string) {
 }
 
 export type ModFilterInfo = [string, ((mod: ModLinksManifestData) => [boolean, number])][];
+export type ModFilter = (parts: string[], mod: ModLinksManifestData) => [boolean, number];
+const defaultFilters: Record<string, ModFilter> = {
+    tag(fparts, mod) {
+        return [mod.tags.includes(fparts[1] as ModTag), 0];
+    },
+    author(fparts, mod){
+        const authorName = fparts[1]?.toLowerCase();
+        if (!authorName) return [true, 0];
+        if (mod.authors) {
+            if (mod.authors.map(x => x.toLowerCase()).includes(authorName)) return [true, 0];
+        }
+        if (!mod.repository) return [false, 0];
+        const repo = getModRepo(mod.repository);
+        if (!repo) return [false, 0];
+        return [repo[0]?.toLowerCase() == authorName, 0];
+    },
+    enabled(fparts, mod){
+        const lg = getLocalMod(mod.name);
+        if (!lg) return [false, 0];
+        return [lg.isEnabled(), 0];
+    },
+    disabled(fparts, mod){
+        const lg = getLocalMod(mod.name);
+        if (!lg) return [false, 0];
+        return [!lg.isEnabled(), 0];
+    },
+    "update-in-days": (fparts, mod) => {
+        const day = Number.parseInt(fparts[1]);
+        if(!Number.isInteger(day)) return [false, 0];
+        const date = getModDate(mod.date);
+        const span = (Date.now() - date.valueOf()) / 1000 / 60 / 60 / 24;
+        return [span <= day, 0];
+    },
+    "new-in-days": (fparts, mod) =>
+    {
+        const day = Number.parseInt(fparts[1]);
+        if(!Number.isInteger(day)) return [false, 0];
+        let firstPublish: Date | undefined;
+        if(modlinksCache) {
+            const mg = modlinksCache.mods.mods[mod.name];
+            if(mg) {
+                const oldest = mg[getOldestVersion(Object.keys(mg)) ?? ''];
+                if(oldest) {
+                    firstPublish = getModDate(oldest.date);
+                }
+            }
+        }
+        if(!firstPublish) {
+            const lg = getOrAddLocalMod(mod.name);
+            const oldest = lg.versions[getOldestVersion(Object.keys(lg.versions)) ?? ''];
+            if(oldest) {
+                firstPublish = getModDate(oldest.info.modinfo.date);
+            }
+        }
+
+        if(!firstPublish) return [false, 0];
+        const span = (Date.now() - firstPublish.valueOf()) / 1000 / 60 / 60 / 24;
+        return [span <= day, -Date.now() + firstPublish.valueOf()];
+    }
+};
 
 export function prepareFilter(input?: string,
-    customFilter?: Record<string, (parts: string[], mod: ModLinksManifestData) => [boolean, number]>,
+    customFilter?: Record<string, ModFilter>,
     aliasGetter?: (mod: ModLinksManifestData) => string) {
     if (!input) return [];
     const filters: ModFilterInfo = [];
+    const mix = {...defaultFilters, ...customFilter};
     for (const part of input.split(/(?=[:])/)) {
         const p = part.trim();
         if (p == '') continue;
         const fparts = p.split('=');
         const filterName = fparts[0].toLowerCase().substring(1);
-        if (customFilter) {
-            const filter = customFilter[filterName];
+        if (mix) {
+            const filter = mix[filterName];
             if (filter) {
                 filters.push([filterName, (mod) => filter(fparts, mod)]);
                 continue;
@@ -42,52 +103,22 @@ export function prepareFilter(input?: string,
                 }
                 return [pass, order]
             }]);
-        } else if (filterName == 'tag') {
-            //Tag
-            filters.push(['tag', (mod) => {
-                return [mod.tags.includes(fparts[1] as ModTag), 0];
-            }]);
-        } else if (filterName == 'author') {
-            //Author
-            const authorName = fparts[1]?.toLowerCase();
-            filters.push(['author', (mod) => {
-                if (!authorName) return [true, 0];
-                if (mod.authors) {
-                    if (mod.authors.map(x => x.toLowerCase()).includes(authorName)) return [true, 0];
-                }
-                if (!mod.repository) return [false, 0];
-                const repo = getModRepo(mod.repository);
-                if (!repo) return [false, 0];
-                return [repo[0]?.toLowerCase() == authorName, 0];
-            }]);
-        } else if(filterName == 'enabled') {
-            filters.push(['enabled', (mod) => {
-                const lg = getLocalMod(mod.name);
-                if(!lg) return [false, 0];
-                return [lg.isEnabled(), 0];
-            }]);
-        } else if(filterName == 'disabled') {
-            filters.push(['disabled', (mod) => {
-                const lg = getLocalMod(mod.name);
-                if(!lg) return [false, 0];
-                return [!lg.isEnabled(), 0];
-            }]);
-        } else if(filterName == 'sort') {
+        } else if (filterName == 'sort') {
             const sortMode = fparts[1]?.toLowerCase();
-            if(sortMode) {
-                if(sortMode == 'lastupdate') {
+            if (sortMode) {
+                if (sortMode == 'lastupdate') {
                     filters.push(['sort-lastUpdate', (mod) => {
                         return [true, mod.date ? (getModDate(mod.date).valueOf()) : 0];
                     }]);
-                } else if(sortMode == 'lastupdate-reverse') {
+                } else if (sortMode == 'lastupdate-reverse') {
                     filters.push(['sort-lastUpdate', (mod) => {
                         return [true, mod.date ? (-getModDate(mod.date).valueOf()) : 0];
                     }]);
-                } else if(sortMode == 'size') {
+                } else if (sortMode == 'size') {
                     filters.push(['sort-size', (mod) => {
                         return [true, mod.ei_files?.size ?? 0];
                     }]);
-                } else if(sortMode == 'size-reverse') {
+                } else if (sortMode == 'size-reverse') {
                     filters.push(['sort-size', (mod) => {
                         return [true, -(mod.ei_files?.size ?? 0)];
                     }]);

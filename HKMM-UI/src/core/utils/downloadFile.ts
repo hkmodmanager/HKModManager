@@ -75,8 +75,10 @@ export async function downloadFile<T = any>(url: string
     //config.httpAgent = config.httpsAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) hkmm/2.2.0 Chrome/108.0.5359.179 Electron/22.0.2 Safari/537.36 HKMM/fetch-pass";
     const origURL = url;
 
+
     try {
-        if (canUseFast && hasOption('FAST_DOWNLOAD')) {
+        if (canUseFast && hasOption('FAST_DOWNLOAD')) 
+        {
             let acceptRanges = false;
             let size: number | undefined = undefined;
             try {

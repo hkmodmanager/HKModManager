@@ -33,6 +33,12 @@
             "aff": "Game files cannot be found automatically"
         }
     },
+    "whatsnew": {
+        "new_week": "New mods from last week",
+        "new_month": "New mods from last month",
+        "update_week": "Mods updated last week",
+        "update_month": "Mods updated last month"
+    },
     "tabs": {
         "allmods": "New Mods",
         "localmods": "Local Mods",
@@ -41,6 +47,7 @@
         "modgroups": "Mods Group",
         "api": "MAPI",
         "plugins": "Plugins",
+        "whatsnew": "What's new",
         "tasks": {
             "title": "Tasks",
             "all": "All",

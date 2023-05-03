@@ -389,7 +389,8 @@ export function getModLinkModSync(name: string) {
     return modlinksCache.getMod(name);
 }
 
-export function getModDate(date: string) {
+export function getModDate(date?: string) {
+    if(!date) return new Date(1970, 1, 1, 0, 0, 0);
     const parts = date.split('T');
     const day = parts[0].split('-');
     const time = parts[1].replaceAll('Z', '').split(':');

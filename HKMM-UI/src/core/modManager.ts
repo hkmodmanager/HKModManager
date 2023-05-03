@@ -314,7 +314,6 @@ export class LocalModsVersionGroup {
         task.category = "Download";
         const promise = (async () => {
             try {
-                const wp = justCheckDep ? undefined : await this.installWithoutNewTask(mod, task);
                 const req: Promise<LocalModInstance>[] = [];
                 const deps = ignoreDep ? [] : getLowestDep(mod);
                 if (deps) {
@@ -338,6 +337,7 @@ export class LocalModsVersionGroup {
                         req.push(group.installNew(dep, false));
                     }
                 }
+                const wp = justCheckDep ? undefined : await this.installWithoutNewTask(mod, task);
                 await Promise.all(req);
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
                 this.getLatest()?.enable(false);
@@ -516,6 +516,34 @@ export function isLaterVersion(a: string, b: string) {
         else if (va < vb) return false;
     }
     return false;
+}
+
+export function getLatestVersion(versions: string[]) {
+    let l: string | undefined;
+    for (const key of versions) {
+        if (!l) {
+            l = key;
+        } else {
+            if (isLaterVersion(key, l)) {
+                l = key;
+            }
+        }
+    }
+    return l;
+}
+
+export function getOldestVersion(versions: string[]) {
+    let l: string | undefined;
+    for (const key of versions) {
+        if (!l) {
+            l = key;
+        } else {
+            if (!isLaterVersion(key, l) || !versions.includes(l)) {
+                l = key;
+            }
+        }
+    }
+    return l;
 }
 
 export function getSubMods(name: string, onlyLatest: boolean = true) {

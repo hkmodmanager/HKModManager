@@ -31,8 +31,9 @@
           <navitem viewpath="/localmods/requireUpdate" textcolor="warning" compare-path v-if="isRequireUpdateMods()">
             &nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
         </div>
-
+        
         <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
+        <navitem viewpath="/new"><i class="bi bi-cloud-plus"></i> {{ $t("tabs.whatsnew") }}</navitem>
 
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" @click="toggleNavTasks()" href="javascript:;">
@@ -50,7 +51,7 @@
 
           </div>
         </li>
-
+        
         <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
         <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i
             class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledVaildAPI()"></i></navitem>
