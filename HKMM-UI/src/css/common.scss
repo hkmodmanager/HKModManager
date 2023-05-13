@@ -40,3 +40,10 @@ hr {
 .form-control, .form-select {
     border-radius: 0px;
 }
+
+.accordion-button, .accordion-item {
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+}
