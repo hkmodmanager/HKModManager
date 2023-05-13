@@ -45,10 +45,7 @@ export interface ModLinksManifestData extends IModMetadata {
     authors: string[];
     date?: string;
     isDeleted?: boolean;
-
     ei_files?: ModFileRecord;
-
-
     owner?: string;
 }
 

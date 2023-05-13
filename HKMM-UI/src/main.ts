@@ -16,6 +16,8 @@ import { importGroup } from './core/modgroup'
 import { store } from './core/settings'
 import { appVersion } from './core/remoteCache'
 import { LogSkipStackFrame } from './common'
+import { getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
+import { getOrAddLocalMod } from './core/modManager'
 
 const oerror = console.error;
 
@@ -40,17 +42,17 @@ console.log = (...data: any[]) => {
     //olog(...data);
     const last = data[data.length - 1];
     let skip = 0;
-    if(last instanceof LogSkipStackFrame) {
+    if (last instanceof LogSkipStackFrame) {
         skip = last.count;
         data.pop();
     }
     log(`[${getStack(skip + 1)}] ` + data[0], ...data.slice(1));
 };
 console.error = (...data: any[]) => {
-    if(data[0] instanceof Error) oerror(...data);
+    if (data[0] instanceof Error) oerror(...data);
     const last = data[data.length - 1];
     let skip = 0;
-    if(last instanceof LogSkipStackFrame) {
+    if (last instanceof LogSkipStackFrame) {
         skip = last.count;
         data.pop();
     }
@@ -121,17 +123,17 @@ const route = createRouter({
 searchLanguages();
 
 let lang = store.get('language')?.toLowerCase();
-if(!lang || lang == '#') {
+if (!lang || lang == '#') {
     lang = navigator.language.toLowerCase();
 }
 store.set('language', lang);
 let clang: string;
 console.log(`[I18n]Current language is ${lang}`);
-if(!(clang = SupportedLanguages[lang])) {
+if (!(clang = SupportedLanguages[lang])) {
     clang = SupportedLanguages['en-us'];
     store.set('language', 'en-us');
-    
-    if(!clang) {
+
+    if (!clang) {
         const l = Object.keys(SupportedLanguages)[0];
         clang = SupportedLanguages[l];
         store.set('language', l);
@@ -162,6 +164,27 @@ ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     console.dir(url);
     if (url.hostname == 'import.group') {
         importGroup(url);
+    }
+    else if (url.hostname == 'install.mod') {
+        getModLinks().then((data) => {
+            const mds = url.searchParams.get('metadata');
+            const skipDep = url.searchParams.get('skipDep') === 'true';
+            let md: ModLinksManifestData | null = null;
+            if (mds) {
+                md = JSON.parse(mds);
+            }
+            if (!md) {
+                const name = url.searchParams.get('name');
+                const ver = url.searchParams.get('version');
+                md = data.getMod(name ?? '', ver ?? undefined) ?? null;
+            }
+            if(!md) {
+                return;
+            }
+            const mg = getOrAddLocalMod(md.name);
+            mg.installNew(md, false, skipDep);
+        });
+
     }
 });
 
