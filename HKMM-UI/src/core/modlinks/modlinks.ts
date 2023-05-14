@@ -514,6 +514,12 @@ export function fixModLinksManifestData(info: ModLinksManifestData) {
     return shouldSave;
 }
 
+export function generateInstallURL(info: ModLinksManifestData) {
+    const url = new URL("hkmm://install.mod");
+    url.searchParams.set("metadata64", Buffer.from(JSON.stringify(info)).toString('base64url'));
+    return url;
+}
+
 window.addEventListener('online', () => {
     if (!modlinksCache || modlinksCache.offline) {
         getModLinksFromRepo(true);

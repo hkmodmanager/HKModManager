@@ -167,7 +167,13 @@ ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     }
     else if (url.hostname == 'install.mod') {
         getModLinks().then((data) => {
-            const mds = url.searchParams.get('metadata');
+            let mds = url.searchParams.get('metadata');
+            if(!mds) {
+                const m2 = url.searchParams.get('metadata64');
+                if(m2) {
+                    mds = Buffer.from(m2, 'base64url').toString('utf-8');
+                }
+            }
             const skipDep = url.searchParams.get('skipDep') === 'true';
             let md: ModLinksManifestData | null = null;
 

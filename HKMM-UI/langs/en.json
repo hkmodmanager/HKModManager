@@ -120,6 +120,7 @@
         "openDataFolder": "Open the Mod folder",
         "openDllFolder": "Open the Dll folder\nThis is for developers, please do not easily change any of the files inside",
         "license": "License",
+        "shareUrl": "Copy install link",
         "importScarab": {
             "title": "Import mods from Scarab",
             "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",

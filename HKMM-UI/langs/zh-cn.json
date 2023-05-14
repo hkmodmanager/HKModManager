@@ -128,6 +128,7 @@
         "openDataFolder": "打开Mod文件夹",
         "openDllFolder": "打开Dll文件夹\n这是为开发者准备的，请不要轻易更改里面的任何一个文件",
         "license": "许可证",
+        "shareUrl": "复制安装链接",
         "importScarab": {
             "title": "从Scarab导入Mods",
             "alertMsg_exclusive": "注意：导入后的Mods将被Scarab视为未安装",

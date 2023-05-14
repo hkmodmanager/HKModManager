@@ -5,7 +5,7 @@ import { tmpdir } from "os";
 import { dirname, join, parse } from "path";
 import { URL } from "url";
 import { copyBackup, getAPIPath, getAPIVersion } from "../core/apiManager";
-import { apiInfoCache, ModdingAPIData } from "./modlinks/modlinks";
+import { apiInfoCache, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
 import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 import { userData } from "./remoteCache";
 import { store } from "./settings";
@@ -31,6 +31,7 @@ export class ModGroupInfo {
     public name: string = "";
     public guid: string = "";
     public mods: [string, string][] = [];
+    public fallbackModinfo: Record<string, ModLinksManifestData> = {};
 }
 
 export interface IExportModGroupZipOptions {
@@ -44,11 +45,14 @@ export class ModGroupController {
     public info: ModGroupInfo;
     public save() {
         if (!this.info) return;
+        this.info.fallbackModinfo ??= {};
         outputJSONSync(getGroupPath2(this.info.guid), this.info, 'utf-8');
     }
     public addMod(name: string, ver: string) {
         if (this.info.mods.findIndex(v => v && v[0] == name) != -1) return;
         this.info.mods.push([name, ver]);
+        this.info.fallbackModinfo ??= {};
+        this.info.fallbackModinfo[name] = (getOrAddLocalMod(name).versions[ver] ?? getOrAddLocalMod(name).getLatest())?.info.modinfo;
         this.save();
     }
     public removeMod(name: string) {
@@ -83,6 +87,8 @@ export class ModGroupController {
     }
     public constructor(info: ModGroupInfo) {
         this.info = info;
+
+        this.info.fallbackModinfo ??= {};
     }
     public static loadForm(path: string) {
         const info = readJSONSync(path, {
@@ -101,6 +107,7 @@ export class ModGroupController {
             mods.push(mod.join(':'));
         }
         url.searchParams.set("mods", mods.join(';'));
+        url.searchParams.set("groupMetadata", Buffer.from(JSON.stringify(this.info)).toString('base64url'));
         return url;
     }
     canUseGroup() {
@@ -326,8 +333,13 @@ export function getDefaultGroup() {
 
 export function importGroup(source: URL | ModGroupInfo) {
     if (source instanceof URL) {
-        const name = source.searchParams.get("name") ?? "Import Group";
-
+        const name = source.searchParams.get("name") ?? "Imported Group";
+        const md = source.searchParams.get("groupMetadata");
+        if(md) {
+            const info = JSON.parse(Buffer.from(md, 'base64url').toString('utf-8')) as ModGroupInfo;
+            importGroup(info);
+            return;
+        }
         const mods = source.searchParams.get("mods");
         if (!mods) return;
         const modsArray = mods.split(';');

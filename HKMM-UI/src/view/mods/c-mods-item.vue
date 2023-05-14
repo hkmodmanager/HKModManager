@@ -98,6 +98,8 @@
                 <div>
                     <div class="d-flex w-100">
                         <template v-if="!isInstallMod(mod?.name as string)">
+                            <a class="btn btn-primary bi bi-share" :title="$t('mods.shareUrl')"
+                                        @click="copyShareUrl(mod)"></a>
                             <button class="btn btn-primary flex-grow-1" @click="$emit('importFromScarab', scarab)"
                                 :disabled="isDownload" v-if="scarab">{{
                                 $t("mods.importScarab.title") }}</button>
@@ -111,6 +113,9 @@
                         <div class="flex-grow-1 d-flex" v-else>
 
                             <div class="flex-grow-1 d-flex">
+                                <a class="btn btn-primary bi bi-share" :title="$t('mods.shareUrl')"
+                                        @click="copyShareUrl(mod)"></a>
+
                                 <template v-if="localmod">
                                     <a class="btn btn-primary bi bi-box-arrow-up-right" v-if="canExportToScarab()"
                                         :title="$t('mods.exportToScarab')" @click="exportToScarab()"></a>
@@ -276,7 +281,7 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo } from '@/core/modlinks/modlinks';
+import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
 import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
@@ -290,7 +295,7 @@ import CModsDiList from './c-mods-di-list.vue';
 import { dirname, join, parse } from 'path';
 import { IRLocalMod } from '@/core/relocation/RLocal';
 import { getSearchText, setSearchText } from './c-mods-search.vue';
-import { shell } from 'electron';
+import { clipboard, shell } from 'electron';
 import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
 import { startTask } from '@/core/taskManager';
 import MarkdownIt from 'markdown-it';
@@ -434,7 +439,7 @@ export default defineComponent({
             if (this.mod === undefined)
                 return;
             const group = getOrAddLocalMod(this.mod.name);
-            (await group.installNew(this.mod)).install(true);
+            (await group.installNew(this.mod)).enable(true);
             this.$forceUpdate();
             this.$parent?.$forceUpdate();
         },
@@ -556,11 +561,16 @@ export default defineComponent({
             search = search.replace(/:author=([-A-Za-z0-9_]+)/g, " :author=" + author);
             setSearchText(search);
         },
-        getMarkdownDesc(mod?: ModLinksManifestData)
-        {
+        getMarkdownDesc(mod?: ModLinksManifestData) {
             if(mod == null) return '';
             return md.render(mod.desc
                 .replace(/\b(?:https?:\/\/|www\.)\S+\b/ig, ($0) => `<${$0}>`));
+        },
+        copyShareUrl(mod?: ModLinksManifestData) {
+            if(mod == null) return;
+            const url = generateInstallURL(mod);
+            if(!url) return;
+            clipboard.writeText(url.toString());
         }
     },
     props: {

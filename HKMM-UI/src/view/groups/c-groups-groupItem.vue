@@ -137,7 +137,7 @@ export default defineComponent({
             for (const mod of ctrl.getModNames()) {
                 if (this.isInstalled(mod) || isDownloadingMod(mod[0])) continue;
                 const mg = getOrAddLocalMod(mod[0]);
-                const m = await getModLinkMod(mod[0]);
+                const m = (await getModLinkMod(mod[0])) ?? ctrl.info.fallbackModinfo[mod[0]];
                 if (!m) continue;
                 w.push(mg.installNew(m));
             }
