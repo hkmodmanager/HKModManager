@@ -25,7 +25,7 @@ export const cdn_api: Record<CDN, string> = {
     "GITHUB_RAW": "https://raw.githubusercontent.com/hk-modding/modlinks/main/ApiLinks.xml",
     "JSDELIVR": "https://cdn.jsdelivr.net/gh/hk-modding/modlinks@latest/ApiLinks.xml",
     "SCARABCN": "https://hk-modlinks.clazex.net/ApiLinks.xml",
-    "GH_PROXY": "https://ghproxy.net/https://raw.githubusercontent.com/Clazex/hk-modlinks-cn/ghproxy/ApiLinks.xml"
+    "GH_PROXY": "https://raw.githubusercontent.com/hk-modding/modlinks/main/ApiLinks.xml"
 };
 
 export const localModFilesCache: string[] = modfilesOffline.getData()?.toString('utf-8').split('\n').map(x => x.trim()) ?? [];

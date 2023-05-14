@@ -77,8 +77,8 @@ function GetSettingsLocal() {
         store.set('cdn', 'GITHUB_RAW');
     }
     if(store.store.cdn == 'GH_PROXY') {
-        store.set('cdn', 'GITHUB_RAW');
-        store.set('options', [...store.store.options, 'USE_GH_PROXY']);
+        //store.set('cdn', 'GITHUB_RAW');
+        //store.set('options', [...store.store.options, 'USE_GH_PROXY']);
     }
     if((store.store.mirror_github as any).items != undefined) {
         store.set('mirror_github', []);
