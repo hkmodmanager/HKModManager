@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, extname, join, parse, basename } from "path";
-import { getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
+import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";
@@ -110,6 +110,8 @@ export class LocalModInstance {
                 };
                 shouldSave = true;
             }
+
+            shouldSave = shouldSave || fixModLinksManifestData(this.info.modinfo);
 
 
             const zipp = join(this.info.path, "mod.zip");
@@ -256,6 +258,7 @@ export class LocalModsVersionGroup {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
+        fixModLinksManifestData(mod);
         if (!mod.link) {
             task.pushState("Unable to download mod, try fallback to the latest version");
             const lv = await getModLinkMod(mod.name);

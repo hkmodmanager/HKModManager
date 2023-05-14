@@ -5,7 +5,7 @@
             <button class="accordion-button collapsed" @click="toggleCollapse('body')">
                 <div class="d-flex">
                     <div class="p-1">
-                        {{ mod?.name }}
+                        {{ mod?.displayName ?? mod?.name }}
                         <i v-if="getShortName(mod.name) != mod.name.toUpperCase()">
                             ({{ getShortName(mod.name) }})
                         </i>

@@ -1,4 +1,5 @@
 
+import { Guid } from 'guid-typescript';
 import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { IModMetadata } from '../data/IModMetadata';
@@ -37,6 +38,7 @@ export type ModVersionCollection = Record<string, ModLinksManifestData>;
 
 export interface ModLinksManifestData extends IModMetadata {
     desc: string;
+    displayName?: string;
     link?: string;
     dependencies: string[];
     repository: string | undefined;
@@ -64,7 +66,7 @@ export class ModLinksData {
         const ver = this.getModVersions(name);
         if (!ver) return undefined;
         if (version) return ver[version];
-        if(this.latestMod[name]) return this.latestMod[name];
+        if (this.latestMod[name]) return this.latestMod[name];
         let latest = "0.0.0.0";
         for (const v in ver) {
             if (isLaterVersion(v, latest)) {
@@ -119,7 +121,7 @@ function fixModLinks(modlinks: ModCollection) {
 
 function loadLocalModLinks() {
     const offline = modlinksOffline.getData();
-    if(!offline) throw new Error("loadLocalModLinks[0]");
+    if (!offline) throw new Error("loadLocalModLinks[0]");
     const result = JSON.parse(offline.toString('utf-8')) as ModCollection;
     fixModLinks(result);
     saveLocalModLinks(result);
@@ -387,7 +389,7 @@ export function getModLinkModSync(name: string) {
 }
 
 export function getModDate(date?: string) {
-    if(!date) return new Date(1970, 1, 1, 0, 0, 0);
+    if (!date) return new Date(1970, 1, 1, 0, 0, 0);
     const parts = date.split('T');
     const day = parts[0].split('-');
     const time = parts[1].replaceAll('Z', '').split(':');
@@ -489,6 +491,27 @@ export function getModRepo(repo: string): [string, string] | undefined {
     if (url.hostname != "github.com") return undefined;
     const parts = url.pathname.split('/');
     return [parts[1], parts[2]];
+}
+
+export function fixModLinksManifestData(info: ModLinksManifestData) {
+    const fillArrayName: (keyof ModLinksManifestData)[] = ['dependencies', 'authors', 'integrations', 'tags'];
+    let shouldSave = false;
+    for (let i = 0; i < fillArrayName.length; i++) {
+        const el = fillArrayName[i];
+        if(!info[el]) {
+            shouldSave = true;
+            (info[el] as any) = [];
+        }
+    }
+    if(!info.name) {
+        info.name = Guid.create().toString();
+        shouldSave = true;
+    }
+    if(!info.version) {
+        info.version = "0.0.0.0";
+        shouldSave = true;
+    }
+    return shouldSave;
 }
 
 window.addEventListener('online', () => {

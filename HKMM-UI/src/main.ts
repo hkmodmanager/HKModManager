@@ -16,7 +16,7 @@ import { importGroup } from './core/modgroup'
 import { store } from './core/settings'
 import { appVersion } from './core/remoteCache'
 import { LogSkipStackFrame } from './common'
-import { getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
+import { fixModLinksManifestData, getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
 import { getOrAddLocalMod } from './core/modManager'
 
 const oerror = console.error;
@@ -170,17 +170,26 @@ ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
             const mds = url.searchParams.get('metadata');
             const skipDep = url.searchParams.get('skipDep') === 'true';
             let md: ModLinksManifestData | null = null;
+
+            const name = url.searchParams.get('name');
+            const ver = url.searchParams.get('version');
+            md = data.getMod(name ?? '', ver ?? undefined) ?? null;
             if (mds) {
-                md = JSON.parse(mds);
+                const m: ModLinksManifestData = JSON.parse(mds);
+                if(!md) {
+                    md = m;
+                } else {
+                    for (const name of Object.keys(m)) {
+                        if((m as any)[name]) {
+                            (md as any)[name] = (m as any)[name];
+                        }
+                    }
+                }
             }
             if (!md) {
-                const name = url.searchParams.get('name');
-                const ver = url.searchParams.get('version');
-                md = data.getMod(name ?? '', ver ?? undefined) ?? null;
-            }
-            if(!md) {
                 return;
             }
+            fixModLinksManifestData(md);
             const mg = getOrAddLocalMod(md.name);
             mg.installNew(md, false, skipDep);
         });
