@@ -62,7 +62,7 @@ export async function downloadFile<T = any>(url: string
     allowChangeProgress: boolean = (taskinfo == undefined),
     taskName?: string,
     taskCategory?: TaskCategory, fallback?: string,
-    useGhProxy = hasOption('USE_GH_PROXY'), mirrors: string[] = store.store.mirror_github): Promise<AxiosResponse<T, any> | Buffer> {
+    useGhProxy = store.store.cdn == 'GH_PROXY', mirrors: string[] = store.store.mirror_github): Promise<AxiosResponse<T, any> | Buffer> {
     if (taskName) {
         return await startTask(taskName, undefined, async (info): Promise<AxiosResponse<T, any> | Buffer> => {
             info.category = taskCategory;

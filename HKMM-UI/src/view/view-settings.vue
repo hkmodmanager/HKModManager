@@ -41,20 +41,9 @@
         <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
       <div v-if="$i18n.locale == 'zh'">
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="USE_GH_PROXY" />
-          <label class="form-check-label">{{ $t("settings.options.use_gh_proxy") }}</label>
-        </div>
+        
         <hr />
-        <div v-if="hasOption('USE_GH_PROXY')">
-          <div class="form-group">
-            <label class="form-label">{{
-              $t("settings.mirror.githubmirror")
-            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="https://github.com/hunshcn/gh-proxy"
-                ></a></label>
-            <mirrorlist key-name="mirror_github"></mirrorlist>
-          </div>
-        </div>
+        
       </div>
       <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
@@ -68,6 +57,16 @@
     <div class="p-3">
       <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
       <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
+      <CCdnRadio v-if="$i18n.locale == 'zh'" value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")' v-model:cdnProp="cdn"></CCdnRadio>
+      <div v-if="cdn == 'GH_PROXY'">
+          <div class="form-group">
+            <label class="form-label">{{
+              $t("settings.mirror.githubmirror")
+            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="https://github.com/hunshcn/gh-proxy"
+                ></a></label>
+            <mirrorlist key-name="mirror_github"></mirrorlist>
+          </div>
+        </div>
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
