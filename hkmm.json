@@ -1,6 +1,6 @@
 {
-    "buildTime": 1684037440649,
-    "headCommit": "4ab67b47a91eae15c3fa69fd587f1bae62e5da39",
-    "isTag": false,
-    "version": "2.5.0"
+    "buildTime": 1684038674321,
+    "headCommit": "dec4d9e3fe742e479e4b5098264364e8e4e987bf",
+    "isTag": true,
+    "version": "2.6.0"
 }
