@@ -81,7 +81,7 @@
           </a>
         </li>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
-
+        <navitem viewpath="/about">&emsp; {{ $t("tabs.about") }}</navitem>
       </ul>
     </div>
     <!--Body-->

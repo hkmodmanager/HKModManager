@@ -110,6 +110,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./view/view-new.vue')
     },
     {
+        name: 'about',
+        path: '/about',
+        component: () => import('./view/view-about.vue')
+    },
+    {
         path: '/:pathMatch(.*)*',
         component: viewErrorVue
     }

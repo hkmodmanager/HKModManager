@@ -54,6 +54,7 @@
         "api": "MAPI管理",
         "plugins": "插件管理",
         "whatsnew": "Mods动态",
+        "about": "关于",
         "tasks": {
             "title": "任务",
             "all": "全部",

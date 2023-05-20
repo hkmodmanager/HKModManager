@@ -389,7 +389,7 @@ export function getModLinkModSync(name: string) {
 }
 
 export function getModDate(date?: string) {
-    if (!date) return new Date(1970, 1, 1, 0, 0, 0);
+    if (!date) return new Date(0);
     const parts = date.split('T');
     const day = parts[0].split('-');
     const time = parts[1].replaceAll('Z', '').split(':');
@@ -401,7 +401,10 @@ export function getModDate(date?: string) {
 
 export function getLowestDep(mod: ModLinksManifestData) {
     if (!modlinksCache || !mod.date) return undefined;
-    const moddate = getModDate(mod.date).valueOf();
+    let moddate = getModDate(mod.date).valueOf();
+    if(moddate == 0) {
+        moddate = Number.MAX_VALUE;
+    }
     const dep: ModLinksManifestData[] = [];
     for (const d of mod.dependencies) {
         const dm = modlinksCache.getModVersions(d);
