@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
-import { readdirSync, readFileSync, statSync } from "fs";
+import { readdirSync, statSync } from "fs";
+import { readFile } from "fs/promises";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
 import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
@@ -14,7 +15,7 @@ export interface IRLocalMod extends IImportedLocalModVerify {
     mod: ModLinksManifestData;
 }
 
-export function RL_CheckMod(root: string): IRLocalMod | undefined {
+export async function RL_CheckMod(root: string): Promise<IRLocalMod | undefined> {
     const ml = modlinksCache;
     if (!ml || !hasModLink_ei_files()) {
         return;
@@ -25,7 +26,7 @@ export function RL_CheckMod(root: string): IRLocalMod | undefined {
     for (const file of files) {
         if (extname(file)?.toLowerCase() == '.dll') {
             const dp = join(root, file);
-            const sha = createHash('sha256').update(readFileSync(dp)).digest('hex');
+            const sha = createHash('sha256').update(await readFile(dp)).digest('hex');
             dllns.push([file, sha]);
             console.log(`[RL]Found dll: ${dp} :::sha256=${sha}`);
         }
@@ -84,7 +85,7 @@ export function RL_CheckMod(root: string): IRLocalMod | undefined {
 }
 let localmodsCache: IRLocalMod[] | undefined = undefined;
 
-export function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM: boolean = true, force: boolean = false) {
+export async function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM: boolean = true, force: boolean = false) {
 
     const ignoreMods: [string, string][] = [];
     if (ignoreScarab) {
@@ -122,7 +123,7 @@ export function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM: boole
         const p = join(root, modname);
         const state = statSync(p);
         if (!state.isDirectory()) continue;
-        const mod = RL_CheckMod(p);
+        const mod = await RL_CheckMod(p);
         if (!mod) continue;
         localmodsCache.push(mod);
         if (ignoreMods.find(x => x[0] == mod.name && (isLaterVersion(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;

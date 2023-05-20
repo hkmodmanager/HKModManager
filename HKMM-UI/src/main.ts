@@ -203,4 +203,5 @@ ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     }
 });
 
-document.body.setAttribute("data-bs-theme", store.get('useDarkMode', false) ? "dark" : "light");
+//document.body.setAttribute("data-bs-theme", store.get('useDarkMode', false) ? "dark" : "light");
+document.body.setAttribute("data-bs-theme","dark");

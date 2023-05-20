@@ -64,6 +64,7 @@
             <i class="bi bi-globe"></i> {{ $t("c_languages") }}
           </a>
         </li>
+        <!--- 
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" href="javascript:;" @click="useDarkMode(true)" v-if="!isDarkMode()">
             <i class="bi bi-moon"></i> {{ $t("c_theme_dark") }}
@@ -71,7 +72,7 @@
           <a class="nav-link text-nav-item-auto" href="javascript:;" @click="useDarkMode(false)" v-else>
             <i class="bi bi-lightbulb"></i> {{ $t("c_theme_light") }}
           </a>
-        </li>
+        </li> -->
 
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" href="javascript:;" @click="exportDebugPackage"

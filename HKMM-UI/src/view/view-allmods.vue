@@ -97,9 +97,9 @@ export default defineComponent({
             this.refreshModLinks(true);
         },
         refreshModLinks(force = false) {
-            getModLinks(force).then(() => {
+            getModLinks(force).then(async () => {
                 this.$forceUpdate();
-                this.localMods = RL_ScanLocalMods(true, true);
+                this.localMods = await RL_ScanLocalMods(true, true);
             });
         },
         impl_deleteMod(name: string)
@@ -122,14 +122,13 @@ export default defineComponent({
             hopeImportFromScarab: undefined as any as ModInfo,
             hopeImportFromLocal: undefined as any as IRLocalMod,
             scarabMods: scanScarabMods(),
-            localMods: RL_ScanLocalMods(true, true),
+            localMods: [] as IRLocalMod[],
             uninstall_modName: "",
             uninstall_modDep: [] as string[]
         };
     },
     beforeUpdate() {
         this.scarabMods = scanScarabMods();
-        this.localMods = RL_ScanLocalMods(true, true);
     },
     mounted() {
         this.refreshModLinks();

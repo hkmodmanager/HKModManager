@@ -79,11 +79,11 @@ export default defineComponent({
 
     },
     methods: {
-        showModal() {
+        async showModal() {
             if(this.forceImportMod) {
                 this.mods = [this.forceImportMod];
             } else {
-                this.mods = RL_ScanLocalMods(false, false, false);
+                this.mods = await RL_ScanLocalMods(false, false, false);
             }
             const modal = this.$refs.modal as any;
             modal.getModal().show();
