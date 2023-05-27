@@ -67,10 +67,14 @@
             <mirrorlist key-name="mirror_github"></mirrorlist>
           </div>
         </div>
+        <div class="alert alert-warning" v-if="shouldShowAlertRestartCDN()">
+          {{ $t("settings.exp.applyOnRestart") }}
+        </div>
+        <!--
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
-      </CCdnRadio>
+      </CCdnRadio> -->
     </div>
     <!--Exp Mode-->
     <hr />
@@ -147,6 +151,8 @@ export default defineComponent({
     },
     cdn(n) {
       store.set('cdn', n);
+      sessionStorage.setItem("cdn_query_restart", "1");
+      this.$forceUpdate();
     }
   },
   methods: {
@@ -169,6 +175,9 @@ export default defineComponent({
     },
     shouldShowAlertRestart(): boolean {
       return sessionStorage.getItem("exp_query_restart") ? true : false;
+    },
+    shouldShowAlertRestartCDN(): boolean {
+      return sessionStorage.getItem("cdn_query_restart") ? true : false;
     },
     hasOption(option: SettingOptions) {
       return hasOption(option);

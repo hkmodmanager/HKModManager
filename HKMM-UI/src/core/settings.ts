@@ -76,9 +76,12 @@ function GetSettingsLocal() {
     if(!store.store.cdn || store.store.cdn == 'JSDELIVR') {
         store.set('cdn', 'GITHUB_RAW');
     }
-    if(store.store.cdn == 'GH_PROXY') {
-        //store.set('cdn', 'GITHUB_RAW');
+    if(store.store.cdn == 'SCARABCN') {
+        store.set('cdn', 'GH_PROXY');
         //store.set('options', [...store.store.options, 'USE_GH_PROXY']);
+    }
+    if(!store.store.mirror_github) {
+        store.set('mirror_github', []);
     }
     if((store.store.mirror_github as any).items != undefined) {
         store.set('mirror_github', []);
@@ -91,6 +94,9 @@ function GetSettingsLocal() {
     }
     if(store.store.useDarkMode == undefined) {
         store.set('useDarkMode', matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    if(store.store.mirror_github.length == 0) {
+        store.set('mirror_github', ["ghproxy.net"]);
     }
 })();
 
