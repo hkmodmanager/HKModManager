@@ -2,7 +2,7 @@
 
 <div align="center">
     <a href="https://github.com/HKLab/HKModManager">
-        <img src="../img/logo.png" width="200" height="200" />
+        <img src="../img/logo.svg" width="200" height="200" />
     </a>
 </div>
 

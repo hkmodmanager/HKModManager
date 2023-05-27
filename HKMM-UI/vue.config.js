@@ -16,11 +16,11 @@ module.exports = defineConfig({
                     {
                         ext: "hkmg",
                         name: "Hollow Knight Mods Group",
-                        icon: "./MZ_Death_Skull.ico"
+                        icon: "./logo.ico"
                     }
                 ],
                 win: {
-                    icon: "./MZ_Death_Skull.ico"
+                    icon: "./logo.ico"
                 },
                 extraResources: [
                     {
@@ -72,7 +72,7 @@ module.exports = defineConfig({
                         to: "../updater/rcedit.exe"
                     },
                     {
-                        from: "./public/MZ_Death_Skull.ico",
+                        from: "./public/logo.ico",
                         to: "../updater/appicon.ico"
                     }
                 ]

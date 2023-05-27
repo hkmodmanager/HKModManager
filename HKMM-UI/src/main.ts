@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
 import { log, error } from 'electron-log'
+import * as remote from '@electron/remote';
 
 //import "@/css/bootstrap.dark.css"
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -14,10 +15,11 @@ import { ipcRenderer } from 'electron'
 import { URL } from 'url'
 import { importGroup } from './core/modgroup'
 import { store } from './core/settings'
-import { appVersion } from './core/remoteCache'
+import { appVersion, publicDir } from './core/remoteCache'
 import { LogSkipStackFrame } from './common'
 import { fixModLinksManifestData, getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
 import { getOrAddLocalMod } from './core/modManager'
+import { join } from 'path'
 
 const oerror = console.error;
 
@@ -163,6 +165,8 @@ export const i18n = createI18n({
 
     ipcRenderer.send("renderer-init");
 })();
+
+remote.getCurrentWindow().setIcon(join(publicDir, "logo.ico"));
 
 ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     const url = new URL(urlStr);
