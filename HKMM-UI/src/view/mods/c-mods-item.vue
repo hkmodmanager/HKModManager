@@ -282,7 +282,7 @@
 
 <script lang="ts">
 import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isLaterVersion, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
+import { getLocalMod, getOrAddLocalMod, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
 import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
 import { defineComponent } from 'vue';
@@ -299,6 +299,7 @@ import { clipboard, shell } from 'electron';
 import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
 import { startTask } from '@/core/taskManager';
 import MarkdownIt from 'markdown-it';
+import { ver_lg } from '@/core/utils/version';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -339,7 +340,7 @@ export default defineComponent({
             const lv = mod.getLatestVersion();
             if (!lv)
                 return false;
-            if (isLaterVersion(lv, minver))
+            if (ver_lg(lv, minver))
                 return true;
             return lv == minver;
         },
@@ -359,7 +360,7 @@ export default defineComponent({
             if (name == "Benchwrap") console.log(lm);
             if (!lv)
                 return;
-            return isLaterVersion(this.modlinkCache.getMod(name)?.version ?? "0", lv);
+            return ver_lg(this.modlinkCache.getMod(name)?.version ?? "0", lv);
         },
         getLocalLatestModVer(name: string) {
             const lm = getLocalMod(name);

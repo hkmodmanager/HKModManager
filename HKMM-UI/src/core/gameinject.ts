@@ -55,6 +55,7 @@ export interface GameInjectConfig {
     modsPath: string;
     /**
      * e.g. 'HKTool|1.0.0.0|x:/xxx/xxx/xxx/HKTool/1.0.0.0'
+     * @deprecated
      * */
     loadedMods: string[];
 }

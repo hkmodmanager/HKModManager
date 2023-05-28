@@ -4,7 +4,8 @@ import { readFile } from "fs/promises";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
 import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
-import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, isLaterVersion, refreshLocalMods, verifyModFiles } from "../modManager";
+import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, refreshLocalMods, verifyModFiles } from "../modManager";
+import { ver_lg } from "../utils/version";
 import { scanScarabMods } from "./Scarab/RScarab";
 
 
@@ -104,7 +105,7 @@ export async function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM:
     const result: IRLocalMod[] = [];
     if (localmodsCache && !force) {
         for (const mod of localmodsCache) {
-            if (ignoreMods.find(x => x[0] == mod.name && (isLaterVersion(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
+            if (ignoreMods.find(x => x[0] == mod.name && (ver_lg(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
             result.push(mod);
         }
         return result;
@@ -126,7 +127,7 @@ export async function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM:
         const mod = await RL_CheckMod(p);
         if (!mod) continue;
         localmodsCache.push(mod);
-        if (ignoreMods.find(x => x[0] == mod.name && (isLaterVersion(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
+        if (ignoreMods.find(x => x[0] == mod.name && (ver_lg(x[1], mod.mod.version) || x[1] == mod.mod.version))) continue;
         result.push(mod);
     }
     return result;

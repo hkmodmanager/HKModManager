@@ -4,12 +4,13 @@ import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { IModMetadata } from '../data/IModMetadata';
 import { cdn_api, cdn_modlinks } from '../exportGlobal';
-import { isLaterVersion, refreshLocalMods } from '../modManager';
+import {  refreshLocalMods } from '../modManager';
 import { modlinksOffline } from '../offlineFileCache';
 import { userData } from '../remoteCache';
 import { store } from '../settings';
 import { downloadText } from '../utils/downloadFile';
 import { PromiseTimeout } from '../utils/utils';
+import { ver_lg } from '../utils/version';
 
 type ContainerNode = ast.ContainerNode<ast.Node>;
 type TextNode = ast.TextNode;
@@ -69,7 +70,7 @@ export class ModLinksData {
         if (this.latestMod[name]) return this.latestMod[name];
         let latest = "0.0.0.0";
         for (const v in ver) {
-            if (isLaterVersion(v, latest)) {
+            if (ver_lg(v, latest)) {
                 latest = v;
             }
         }
@@ -265,7 +266,7 @@ export async function getModLinksFromRepo(force = false) {
                         const cmod = mc.mods[key];
                         const lv = Object.keys(mod)[0];
                         for (const ver in cmod) {
-                            if (isLaterVersion(ver, lv)) continue;
+                            if (ver_lg(ver, lv)) continue;
                             const cver = cmod[ver];
                             const v = mod[ver];
 
