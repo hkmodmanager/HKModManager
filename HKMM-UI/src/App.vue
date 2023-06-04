@@ -34,7 +34,7 @@
         </div>
         
         <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
-        <navitem viewpath="/new"><i class="bi bi-cloud-plus"></i> {{ $t("tabs.whatsnew") }}</navitem>
+        <navitem viewpath="/new" v-if="!enableOption('CUSTOM_MODLINKS')"><i class="bi bi-cloud-plus"></i> {{ $t("tabs.whatsnew") }}</navitem>
 
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" @click="toggleNavTasks()" href="javascript:;">
@@ -162,7 +162,7 @@ import { getRequireUpdateModsSync } from "./core/modManager";
 import { getModLinks, provider } from "./core/modlinks/modlinks";
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
-import { store } from "./core/settings";
+import { hasOption, SettingOptions, store } from "./core/settings";
 //import { checkUpdate, installUpdate } from "./core/updater";
 import * as remote from "@electron/remote";
 
@@ -200,6 +200,9 @@ export default defineComponent({
     },
     getBuildMeta() {
       return buildMetadata;
+    },
+    enableOption(option: SettingOptions) {
+      return hasOption(option);
     },
     getCommitSHA() {
       return buildMetadata.headCommit;
