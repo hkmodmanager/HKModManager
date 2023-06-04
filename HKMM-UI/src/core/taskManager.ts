@@ -70,11 +70,19 @@ w.allTasks = allTasks;
 
 export function createTask(taskName: string, taskDisplayName?: string | undefined) {
     const result = new TaskInfo();
-    result.pushState("Start task");
+    
     result.name = taskName;
     result.taskGuid = Guid.create().toString();
     result.desc = taskDisplayName ?? taskName;
     allTasks.push(result);
+    
+    result.pushState("Start task");
+    try
+    {
+        throw new Error("Start Task Stack Trace");
+    } catch(e: any) {
+        result.pushState(e.stack ?? "");
+    }
     return result;
 }
 

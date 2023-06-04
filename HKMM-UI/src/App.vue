@@ -159,7 +159,7 @@ import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
 import { getAPIVersion } from '@/core/apiManager';
 import { getRequireUpdateModsSync } from "./core/modManager";
-import { getModLinks, modlinksCache } from "./core/modlinks/modlinks";
+import { getModLinks, provider } from "./core/modlinks/modlinks";
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
 import { store } from "./core/settings";
@@ -226,7 +226,7 @@ export default defineComponent({
       return getAPIVersion() >= 72;
     },
     isRequireUpdateMods() {
-      if (modlinksCache?.offline) return false;
+      if (provider?.isOffline()) return false;
       return getRequireUpdateModsSync().length > 0;
     },
     exportDebugPackage() {
@@ -248,14 +248,14 @@ export default defineComponent({
     }
   },
   updated() {
-    if (!modlinksCache) {
+    if (!provider.hasData()) {
       getModLinks().then(() => {
         this.$forceUpdate();
       });
     }
   },
   mounted() {
-    if (!modlinksCache) {
+    if (!provider.hasData()) {
       getModLinks().then(() => {
         this.$forceUpdate();
       });

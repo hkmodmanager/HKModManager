@@ -70,10 +70,11 @@
 import { getCurrentGroup, ModGroupController, changeCurrentGroup } from '@/core/modgroup';
 import { defineComponent } from 'vue';
 import { Collapse } from 'bootstrap';
-import { getLocalMod, getOrAddLocalMod, isDownloadingMod, isLaterVersion } from '@/core/modManager';
+import { getLocalMod, getOrAddLocalMod, isDownloadingMod } from '@/core/modManager';
 import { getModLinkMod } from '@/core/modlinks/modlinks';
 import { clipboard } from 'electron';
 import { I18nLanguages } from '@/lang/langs';
+import { ver_lg } from '@/core/utils/version';
 
 export default defineComponent({
     props: {
@@ -128,7 +129,7 @@ export default defineComponent({
         isInstalled(mod: [string, string]) {
             const mg = getLocalMod(mod[0]);
             if (!mg) return false;
-            return mg.canEnable() && (mg.getLatestVersion() == mod[1] || isLaterVersion(mg.getLatestVersion() ?? "0.0", mod[1]));
+            return mg.canEnable() && (mg.getLatestVersion() == mod[1] || ver_lg(mg.getLatestVersion() ?? "0.0", mod[1]));
         },
         async downloadMissingMods(ctrl: ModGroupController) {
             this.isDownloading = true;

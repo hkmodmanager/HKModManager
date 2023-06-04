@@ -34,3 +34,6 @@ export const buildMetadata: IBuildMetadata = readJSONSync(join(publicDir, "build
 
 //@ts-ignore
 gl.exportGlobal = __webpack_exports__;
+
+
+export const currentPlatform: string = "Windows";

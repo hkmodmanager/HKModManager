@@ -1,10 +1,12 @@
-import { modlinksCache } from "../../modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "@/core/modManager";
+
+import { getLocalMod, getOrAddLocalMod, getRealModPath, LocalModInstance, LocalMod_FullLevel, verifyModFiles } from "@/core/modManager";
 import { isVaildModDir } from "@/core/utils/utils";
 import * as remote from "@electron/remote";
 import { existsSync } from "fs";
 import { copySync, readJSONSync, writeJSONSync } from "fs-extra";
 import { dirname, join } from "path";
+import { ver_lg } from "@/core/utils/version";
+import { provider } from "@/core/modlinks/modlinks";
 
 export interface ModState {
     Version: string;
@@ -34,7 +36,7 @@ export function exportMods(mods: LocalModInstance[]) {
     for (const mod of mods) {
         //const files = mod.info.modinfo.ei_files?.files;
         //if(!files) continue;
-        const realroot = getRealModPath(mod.info.name, !mod.isActived());
+        const realroot = getRealModPath(mod.info.name, !mod.isEnabled());
         const root = mod.info.path;
         console.log(realroot);
         copySync(root, realroot, {
@@ -43,7 +45,7 @@ export function exportMods(mods: LocalModInstance[]) {
         });
         const ms: ModState = {
             Version: mod.info.version,
-            Enabled: mod.isActived()
+            Enabled: mod.isEnabled()
         };
         mc.Mods[mod.info.name] = ms;
     }
@@ -59,7 +61,7 @@ export function importMods(mods: ModInfo[], exclusive = true) {
     if (!mc.Mods) return;
     for (const mod of mods) {
         const lm = getOrAddLocalMod(mod.name);
-        let mlm = modlinksCache?.getMod(mod.name, mod.mod.Version);
+        let mlm = provider?.getMod(mod.name, mod.mod.Version);
         if (!mlm) continue;
         mlm = { ...mlm };
         mlm.version = mod.mod.Version;
@@ -121,10 +123,10 @@ export function scanScarabMods() {
         if (lm) {
             const lv = lm.getLatestVersion();
             if (lv) {
-                if (isLaterVersion(lv, mod.Version) || lv == mod.Version) continue;
+                if (ver_lg(lv, mod.Version) || lv == mod.Version) continue;
             }
         }
-        const mm = modlinksCache?.getMod(name, mod.Version);
+        const mm = provider?.getMod(name, mod.Version);
         if (!mm) continue;
         if (!mm.ei_files) continue;
         result.push({

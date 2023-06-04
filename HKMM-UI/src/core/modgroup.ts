@@ -6,9 +6,10 @@ import { dirname, join, parse } from "path";
 import { URL } from "url";
 import { copyBackup, getAPIPath, getAPIVersion } from "../core/apiManager";
 import { apiInfoCache, ModdingAPIData, ModLinksManifestData } from "./modlinks/modlinks";
-import { getLocalMod, getOrAddLocalMod, getRealModPath, isLaterVersion, LocalModInfo, LocalModInstance, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
+import { getLocalMod, getOrAddLocalMod, getRealModPath, LocalModInfo, LocalModInstance, localModsArray, modversionFileName, refreshLocalMods } from "./modManager";
 import { userData } from "./remoteCache";
 import { store } from "./settings";
+import { ver_lg } from "./utils/version";
 
 export const metadata_name = '[hkmm-metadata].json';
 
@@ -69,7 +70,7 @@ export class ModGroupController {
             const name = element[0];
             const local = getLocalMod(name)?.getLatest();
             if (local) {
-                if (isLaterVersion(local.info.version, element[1]) || local.info.version == element[1]) {
+                if (ver_lg(local.info.version, element[1]) || local.info.version == element[1]) {
                     result.push(local);
                 }
             }
@@ -224,7 +225,7 @@ export class ModGroupController {
 export function isInstalled(mod: [string, string]) {
     const mg = getLocalMod(mod[0]);
     if (!mg) return false;
-    return mg.canEnable() && (mg.getLatestVersion() == mod[1] || isLaterVersion(mg.getLatestVersion() ?? "0.0", mod[1]));
+    return mg.canEnable() && (mg.getLatestVersion() == mod[1] || ver_lg(mg.getLatestVersion() ?? "0.0", mod[1]));
 }
 
 export const groupCache: Record<string, ModGroupController> = {};

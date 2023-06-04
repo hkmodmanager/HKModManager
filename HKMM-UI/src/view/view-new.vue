@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { modlinksCache, ModLinksManifestData } from '@/core/modlinks/modlinks';
+import { ModLinksManifestData, provider } from '@/core/modlinks/modlinks';
 import { getOrAddLocalMod } from '@/core/modManager';
 import { filterMods, prepareFilter } from '@/core/utils/modfilter';
 import { ref, SelectHTMLAttributes } from 'vue';
@@ -35,12 +35,12 @@ const modal_uninstall = ref<any>(null);
 const ref_type = ref<SelectHTMLAttributes>();
 
 function getMods() {
-    const names = modlinksCache?.getAllModNames();
-    if (!names || !modlinksCache) return [];
+    const names = provider.getAllModNames();
+    if (!names) return [];
 
     const filter = prepareFilter(filter_str.value);
     const result = filterMods<ModLinksManifestData>(names.map(x => {
-        const mod = modlinksCache?.getMod(x);
+        const mod = provider.getMod(x);
         if (!mod) return;
         return mod;
     }), filter);

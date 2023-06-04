@@ -1,3 +1,4 @@
+const { execSync } = require("child_process");
 const { readFileSync, readdirSync, existsSync } = require("fs");
 const { writeJSONSync, readJSONSync } = require("fs-extra");
 const { dirname, join } = require("path");
@@ -11,7 +12,10 @@ for (const tagName of readdirSync(tagRoot)) {
     console.log(`Tag ${tagName} -> ${tag}`)
     tags.push(tag);
 }
-const masterPath = join(gitdir, "refs", "heads", "master");
+const curBranch = execSync("git branch --show-current", {
+    encoding: 'utf8'
+}).trim();
+const masterPath = join(gitdir, "refs", "heads", curBranch);
 let headcommit = "";
 let isTag = false;
 if (existsSync(masterPath)) {
@@ -25,6 +29,7 @@ const version = readJSONSync("package.json").version;
 
 console.log(`Git: ${gitdir}`);
 console.log(`Commit: ${headcommit}`);
+console.log(`Branch: ${curBranch}`);
 console.log(`Is tag: ${isTag}`);
 
 writeJSONSync("public/build-metadata.json", {

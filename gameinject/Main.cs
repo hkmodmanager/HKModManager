@@ -59,13 +59,19 @@ static partial class Main
     }
     public static void ScanMods()
     {
-        foreach (var vp in config.loadedMods)
+        List<string> mods = new();
+        foreach (var p in Directory.EnumerateDirectories(ModPath))
         {
-            if (vp is null) continue;
-            var parts = vp.Split('|');
-            if (parts.Length != 3) continue;
-            var v = parts[2];
-            if (!Directory.Exists(v) || !v.StartsWith(config.modsPath, StringComparison.OrdinalIgnoreCase)) continue;
+            var statusPath = Path.Combine(p, "HKMM-MODENABLE");
+            if (!File.Exists(statusPath)) continue;
+            mods.Add(File.ReadAllText(statusPath, Encoding.UTF8));
+            Debug.Log($"Found enabled mod: {p}");
+        }
+        foreach (var v in mods)
+        {
+
+            if (!Directory.Exists(v) || 
+                !v.StartsWith(config.modsPath, StringComparison.OrdinalIgnoreCase)) continue;
             var mmp = Path.Combine(v, "modversion.json");
             if (!File.Exists(mmp)) continue;
             var md = JsonConvert.DeserializeObject<ModMetadata>(File.ReadAllText(mmp))!;
@@ -73,6 +79,7 @@ static partial class Main
             Debug.Log($"Redirect path: {mp} to {v}");
             Directory.CreateDirectory(mp);
             redirectPath.Add(mp.ToLower(), v);
+
             void FED(string realRoot, string modRoot)
             {
                 redirectDir[modRoot] = realRoot;

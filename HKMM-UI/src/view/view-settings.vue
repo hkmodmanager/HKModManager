@@ -41,9 +41,9 @@
         <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
       <div v-if="$i18n.locale == 'zh'">
-        
+
         <hr />
-        
+
       </div>
       <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
@@ -57,24 +57,40 @@
     <div class="p-3">
       <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
       <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
-      <CCdnRadio v-if="$i18n.locale == 'zh'" value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")' v-model:cdnProp="cdn"></CCdnRadio>
+      <CCdnRadio v-if="$i18n.locale == 'zh'" value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")'
+        v-model:cdnProp="cdn"></CCdnRadio>
       <div v-if="cdn == 'GH_PROXY'">
-          <div class="form-group">
-            <label class="form-label">{{
-              $t("settings.mirror.githubmirror")
-            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="https://github.com/hunshcn/gh-proxy"
-                ></a></label>
-            <mirrorlist key-name="mirror_github"></mirrorlist>
-          </div>
+        <div class="form-group">
+          <label class="form-label">{{
+            $t("settings.mirror.githubmirror")
+          }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建"
+              href="https://github.com/hunshcn/gh-proxy"></a></label>
+          <mirrorlist key-name="mirror_github"></mirrorlist>
         </div>
-        <div class="alert alert-warning" v-if="shouldShowAlertRestartCDN()">
-          {{ $t("settings.exp.applyOnRestart") }}
-        </div>
-        <!--
+      </div>
+      <div class="alert alert-warning" v-if="shouldShowAlertRestartCDN()">
+        {{ $t("settings.exp.applyOnRestart") }}
+      </div>
+      <!--
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
       </CCdnRadio> -->
+    </div>
+    <!--Advanced settings-->
+    <div class="p-3">
+      <h3 class="form-label">{{ $t("settings.advanced.title") }}</h3>
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.advanced.warning") }}
+      </div>
+
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" v-model="options" value="CUSTOM_MODLINKS" />
+        <label class="form-check-label">{{ $t("settings.advanced.custom_modlinks") }}</label>
+      </div>
+      <div class="input-group p-1" v-if="enableOption('CUSTOM_MODLINKS')">
+        <input class="form-control" type="url" v-model="customModLinksUrl"/>
+      </div>
     </div>
     <!--Exp Mode-->
     <hr />
@@ -88,10 +104,10 @@
           <label class="form-check-label">{{ $t("settings.exp.enable") }}</label>
         </div>
         <div class="alert alert-warning" v-if="isEnableExpMode()">
-          {{ $t("settings.exp.warning") }}
+          <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.exp.warning") }}
         </div>
         <div class="alert alert-warning" v-if="shouldShowAlertRestart()">
-          {{ $t("settings.exp.applyOnRestart") }}
+          <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.exp.applyOnRestart") }}
         </div>
       </div>
       <RequireExpmode>
@@ -116,6 +132,7 @@ import { join } from "path";
 import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
+import { getModLinks, refreshModLinksProvider } from "@/core/modlinks/modlinks";
 
 export default defineComponent({
   components: {
@@ -139,10 +156,18 @@ export default defineComponent({
       return new Popover(popoverTriggerEl)
     })
   },
+  unmounted() {
+    if (store.store.customModLinks !== this.customModLinksUrl) {
+      store.set('customModLinks', this.customModLinksUrl);
+      refreshModLinksProvider();
+      getModLinks();
+    }
+  },
   data() {
     return {
       options: store.get('options', []),
-      cdn: store.get('cdn', 'JSDELIVR')
+      cdn: store.get('cdn', 'JSDELIVR'),
+      customModLinksUrl: store.store.customModLinks
     }
   },
   watch: {
@@ -163,6 +188,9 @@ export default defineComponent({
       sessionStorage.setItem("exp_query_restart", "1");
       this.$forceUpdate();
       this.$root?.$forceUpdate();
+    },
+    enableOption(option: SettingOptions) {
+      return hasOption(option);
     },
     shouldShowCustomModSavePath() {
       return store.get("modsavepathMode") == ModSavePathMode.Custom;

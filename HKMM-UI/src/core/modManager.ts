@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
-import { dirname, extname, join, parse, basename } from "path";
-import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
+import { dirname, extname, join, parse, basename, normalize } from "path";
+import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, ModLinksManifestData, provider } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";
@@ -9,15 +9,17 @@ import { getCurrentGroup } from "./modgroup";
 
 import "../core/apiManager";
 import { copySync } from "fs-extra";
-import { config, installGameInject, loadConfig, saveConfig } from "./gameinject";
+import { installGameInject, saveConfig } from "./gameinject";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
 import { RL_ClearCache } from "./relocation/RLocal";
 import { ignoreVerifyMods } from "./modrepairer";
 import { IModMetadata } from "./data/IModMetadata";
+import { ver_lg } from "./utils/version";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
+export const hkmmEnableFile = "HKMM-MODENABLE";
 
 export function getRealModPath(name: string = '', disabled = false) {
     const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
@@ -73,13 +75,17 @@ export interface LocalModInfo extends IModMetadata {
 export class LocalModInstance {
     public info: LocalModInfo;
     public name: string;
-    public isActived() {
-        loadConfig();
-        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
-        if (id == -1) return false;
-        const parts = config.loadedMods[id].split('|');
-        if (parts[1] !== this.info.version) return false;
-        const modPath = parts[2];
+    private getEnableFilePath() {
+        return join(getRealModPath(this.name), hkmmEnableFile);
+    }
+    public isEnabled() {
+        const path = this.getEnableFilePath();
+        if(!existsSync(path)) return false;
+        const text = readFileSync(path, "utf8");
+        if(text == '') return false;
+        if(normalize(text) == this.info.path) return true;
+
+        const modPath = text;
         if (!existsSync(modPath)) return false;
         const inst = LocalModInstance.loadForm(modPath);
         if (inst) {
@@ -126,15 +132,10 @@ export class LocalModInstance {
 
 
     public enable(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
-        loadConfig();
-        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
-        const str = `${this.info.name}|${this.info.version}|${this.info.path}`;
-        if (id == -1) {
-            config.loadedMods.push(str);
-        } else {
-            config.loadedMods[id] = str;
-        }
+        const mep = this.getEnableFilePath();
+        writeFileSync(mep, normalize(this.info.path), 'utf-8');
         this.writeMetadataPath();
+        
         saveConfig();
         if (addToCurrentGroup) {
             getCurrentGroup().addMod(this.info.name, this.info.version);
@@ -156,12 +157,10 @@ export class LocalModInstance {
     }
 
     public disable(force: boolean = false) {
-        loadConfig();
-        const id = config.loadedMods.findIndex(v => v && v.split('|')[0] === this.info.name);
-        if (id != -1) {
-            if (!force && !this.isActived()) return;
-            delete config.loadedMods[id];
-            saveConfig();
+        const mep = this.getEnableFilePath();
+        if(existsSync(mep)) {
+            if(!force && this.isEnabled()) return false;
+            rmSync(mep);
         }
     }
 
@@ -197,7 +196,7 @@ export class LocalModInstance {
         const infopath = join(path, modversionFileName);
         if (!existsSync(infopath)) return undefined;
         const info = JSON.parse(readFileSync(infopath, "utf-8")) as LocalModInfo;
-        info.path = path;
+        info.path = normalize(path);
         const inst = new LocalModInstance(info);
         inst.fixOld();
         return inst;
@@ -229,7 +228,7 @@ export class LocalModsVersionGroup {
             if (!l) {
                 l = key;
             } else {
-                if (isLaterVersion(key, l)) {
+                if (ver_lg(key, l)) {
                     l = key;
                 }
             }
@@ -359,7 +358,7 @@ export class LocalModsVersionGroup {
     public isEnabled() {
         for (let index = 0; index < this.versionsArray.length; index++) {
             const element = this.versionsArray[index];
-            if (element.isActived()) return true;
+            if (element.isEnabled()) return true;
         }
         return false;
     }
@@ -494,7 +493,7 @@ export function isInstallMod(mod: ModLinksManifestData, fullMatch = false) {
     if (fullMatch) return lmod.versions[mod.version] != undefined;
     const lv = lmod.getLatestVersion();
     if (!lv) return false;
-    if (isLaterVersion(lv, mod.version)) return true;
+    if (ver_lg(lv, mod.version)) return true;
     return lv == mod.version;
 }
 
@@ -508,26 +507,13 @@ export function getOrAddLocalMod(name: string) {
     return r;
 }
 
-export function isLaterVersion(a: string, b: string) {
-    const apart = a.split('.');
-    const bpart = b.split('.');
-    for (let i = 0; i < apart.length; i++) {
-        if (i >= bpart.length) return true;
-        const va = Number.parseInt(apart[i]);
-        const vb = Number.parseInt(bpart[i]);
-        if (va > vb) return true;
-        else if (va < vb) return false;
-    }
-    return false;
-}
-
 export function getLatestVersion(versions: string[]) {
     let l: string | undefined;
     for (const key of versions) {
         if (!l) {
             l = key;
         } else {
-            if (isLaterVersion(key, l)) {
+            if (ver_lg(key, l)) {
                 l = key;
             }
         }
@@ -541,7 +527,7 @@ export function getOldestVersion(versions: string[]) {
         if (!l) {
             l = key;
         } else {
-            if (!isLaterVersion(key, l) || !versions.includes(l)) {
+            if (!ver_lg(key, l) || !versions.includes(l)) {
                 l = key;
             }
         }
@@ -597,13 +583,13 @@ export function isDownloadingMod(name: string) {
 }
 
 export function getRequireUpdateModsSync() {
-    if (!modlinksCache) return [];
+    if (!provider.hasData()) return [];
     const result: string[] = [];
     for (const key in refreshLocalMods()) {
         const mod = getLocalMod(key);
         const lv = mod.getLatestVersion();
         if (!lv) continue;
-        if (isLaterVersion(getModLinkModSync(key)?.version ?? '', lv)) {
+        if (ver_lg(getModLinkModSync(key)?.version ?? '', lv)) {
             result.push(key);
         }
     }

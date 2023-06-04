@@ -1,4 +1,6 @@
-import { existsSync, readdirSync } from "fs";
+import { existsSync, mkdirSync, readdirSync } from "fs";
+import { join } from "path";
+import { store } from "../settings";
 
 export function ConvertSize(bytes: number) {
     if (!bytes) return "0 KB";
@@ -36,4 +38,10 @@ export function getShortName(name: string) {
         return name.toUpperCase();
     }
     return abbr;
+}
+
+export function getRealModPath(name: string = '', disabled = false) {
+    const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
+    if (!existsSync(p)) mkdirSync(p, { recursive: true });
+    return p;
 }
