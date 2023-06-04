@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "fs";
 import { dirname, extname, join, parse, basename, normalize } from "path";
-import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, modlinksCache, ModLinksManifestData } from "./modlinks/modlinks";
+import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, ModLinksManifestData, provider } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
 import { createTask, TaskInfo } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";
@@ -583,7 +583,7 @@ export function isDownloadingMod(name: string) {
 }
 
 export function getRequireUpdateModsSync() {
-    if (!modlinksCache) return [];
+    if (!provider.hasData()) return [];
     const result: string[] = [];
     for (const key in refreshLocalMods()) {
         const mod = getLocalMod(key);

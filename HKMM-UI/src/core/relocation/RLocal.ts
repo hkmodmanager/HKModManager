@@ -3,7 +3,7 @@ import { readdirSync, statSync } from "fs";
 import { readFile } from "fs/promises";
 import { extname, join } from "path";
 import { gl } from "../exportGlobal";
-import { hasModLink_ei_files, modlinksCache, ModLinksManifestData } from "../modlinks/modlinks";
+import { hasModLink_ei_files, ModLinksManifestData, provider } from "../modlinks/modlinks";
 import { getOrAddLocalMod, getRealModPath, IImportedLocalModVerify, refreshLocalMods, verifyModFiles } from "../modManager";
 import { ver_lg } from "../utils/version";
 import { scanScarabMods } from "./Scarab/RScarab";
@@ -17,7 +17,7 @@ export interface IRLocalMod extends IImportedLocalModVerify {
 }
 
 export async function RL_CheckMod(root: string): Promise<IRLocalMod | undefined> {
-    const ml = modlinksCache;
+    const ml = provider;
     if (!ml || !hasModLink_ei_files()) {
         return;
     }
@@ -37,10 +37,10 @@ export async function RL_CheckMod(root: string): Promise<IRLocalMod | undefined>
         return;
     }
     const matchmods: [ModLinksManifestData, number][] = [];
-    for (const modname in ml.mods.mods) {
-        const modvers = ml.mods.mods[modname];
-        for (const ver in modvers) {
-            const mod = modvers[ver];
+    for (const modname in provider.getAllModNames()) {
+        const modvers = provider.getModAllVersions(modname);
+        if(!modvers) continue;
+        for (const mod of modvers) {
             const files = mod.ei_files?.files;
             if (!files) continue;
             let count = 0;
@@ -110,7 +110,7 @@ export async function RL_ScanLocalMods(ignoreScarab: boolean = true, ignoreHKMM:
         }
         return result;
     }
-    const ml = modlinksCache;
+    const ml = provider;
     if (!ml || !hasModLink_ei_files()) {
         console.log(`No ModLinks`);
         return [];

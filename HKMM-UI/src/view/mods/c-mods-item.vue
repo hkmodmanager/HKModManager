@@ -281,7 +281,7 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, modlinksCache, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
+import { getModLinkMod, getModLinks, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
 import { getLocalMod, getOrAddLocalMod, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
 import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
@@ -300,6 +300,7 @@ import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
 import { startTask } from '@/core/taskManager';
 import MarkdownIt from 'markdown-it';
 import { ver_lg } from '@/core/utils/version';
+import { ModLinksProvider } from '@/core/modlinks/ModLinksProvider';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -351,7 +352,7 @@ export default defineComponent({
             return mg.canEnable();
         },
         isRequireUpdate(name: string) {
-            if (this.disableUpdate || !this.modlinkCache)
+            if (this.disableUpdate || !this.modlinksProvider)
                 return false;
             const lm = getLocalMod(name);
             if (!lm)
@@ -360,7 +361,7 @@ export default defineComponent({
             if (name == "Benchwrap") console.log(lm);
             if (!lv)
                 return;
-            return ver_lg(this.modlinkCache.getMod(name)?.version ?? "0", lv);
+            return ver_lg(this.modlinksProvider.getMod(name)?.version ?? "0", lv);
         },
         getLocalLatestModVer(name: string) {
             const lm = getLocalMod(name);
@@ -421,9 +422,9 @@ export default defineComponent({
             return desc[this.mod?.name?.toLowerCase()?.replaceAll(" ", "")];
         },
         getLatestVersion(name: string) {
-            if (this.disableUpdate || !this.modlinkCache)
+            if (this.disableUpdate || !this.modlinksProvider)
                 return undefined;
-            return this.modlinkCache.getMod(name)?.version;
+            return this.modlinksProvider.getMod(name)?.version;
         },
         exportToScarab() {
             if (!this.localmod)
@@ -546,8 +547,8 @@ export default defineComponent({
         },
         isOnline() {
             if (!navigator.onLine) return false;
-            if (modlinksCache) {
-                return !modlinksCache.offline;
+            if (this.modlinksProvider) {
+                return !this.modlinksProvider.isOffline();
             }
             return true;
         },
@@ -606,7 +607,7 @@ export default defineComponent({
             depOnThis: this.isLocal ? getSubMods(this.mod?.name ?? "") : getSubMods_ModLinks(this.mod?.name ?? ""),
             integrateWithThis: this.isLocal ? getIntegrationsMods(this.mod?.name ?? "") : getIntegrationsMods_ModLinks(this.mod?.name ?? ""),
             isDownload: false,
-            modlinkCache: modlinksCache,
+            modlinksProvider: undefined as any as ModLinksProvider,
             modSize: undefined as (undefined | number),
             modSizeGet: false,
             collapses: {} as Record<string, Collapse>,
@@ -622,7 +623,7 @@ export default defineComponent({
     },
     mounted() {
         getModLinks().then((val) => {
-            this.modlinkCache = val;
+            this.modlinksProvider = val;
             this.$forceUpdate();
         });
         

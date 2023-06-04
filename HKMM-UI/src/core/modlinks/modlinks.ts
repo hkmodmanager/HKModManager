@@ -3,20 +3,17 @@ import { Guid } from 'guid-typescript';
 import { join } from 'path';
 import { Parser, ast } from 'tsxml'
 import { IModMetadata } from '../data/IModMetadata';
-import { cdn_api, cdn_modlinks } from '../exportGlobal';
+import { cdn_api, currentPlatform } from '../exportGlobal';
 import {  refreshLocalMods } from '../modManager';
-import { modlinksOffline } from '../offlineFileCache';
 import { userData } from '../remoteCache';
 import { store } from '../settings';
 import { downloadText } from '../utils/downloadFile';
-import { PromiseTimeout } from '../utils/utils';
-import { ver_lg } from '../utils/version';
+import { ContainerNode, findXmlNode, getCDATANodeText, getXmlNodeText, TextNode } from '../utils/xml';
+import { GithubModLinksProvider } from './GithubModLinksProvider';
+import { ModLinksArchiveProvider } from './ModLinksArchiveProvider';
+import { ModLinksProvider } from './ModLinksProvider';
+import { OfflineModLinksArchiveProvider } from './OfflineModLinksArchiveProvider';
 
-type ContainerNode = ast.ContainerNode<ast.Node>;
-type TextNode = ast.TextNode;
-type CDataNode = ast.CDataSectionNode;
-
-export const currentPlatform: string = "Windows";
 
 export interface ModFileRecord {
     files?: Record<string, string>;
@@ -53,31 +50,6 @@ export interface ModLinksManifestData extends IModMetadata {
 }
 
 
-export class ModLinksData {
-    public constructor(public mods: ModCollection, public offline = false) { }
-    public lastGet: number = 0;
-    private latestMod: Record<string, ModLinksManifestData> = {};
-    public getModVersions(name: string): ModVersionCollection | undefined {
-        return this.mods.mods[name];
-    }
-    public getAllModNames() {
-        return Object.keys(this.mods.mods);
-    }
-    public getMod(name: string, version?: string) {
-        const ver = this.getModVersions(name);
-        if (!ver) return undefined;
-        if (version) return ver[version];
-        if (this.latestMod[name]) return this.latestMod[name];
-        let latest = "0.0.0.0";
-        for (const v in ver) {
-            if (ver_lg(v, latest)) {
-                latest = v;
-            }
-        }
-        return this.latestMod[name] = ver[latest];
-    }
-}
-
 export class ModdingAPIData {
     public link: string = "";
     public version: number = 0;
@@ -85,26 +57,13 @@ export class ModdingAPIData {
     public files: string[] = [];
 }
 
-function findXmlNode<T = Node>(parent: ContainerNode, tagName: string): T | undefined {
-    return (parent.childNodes.find(x => x.tagName === tagName) as (T | undefined));
-}
-
-function getXmlNodeText(parent: ContainerNode, tagName: string): string | undefined {
-    return (findXmlNode<ContainerNode>(parent, tagName)?.childNodes[0] as (TextNode | undefined))?.content;
-}
-
-function getCDATANodeText(parent: ContainerNode, tagName: string): string | undefined {
-    return (findXmlNode<ContainerNode>(parent, tagName)?.childNodes[0] as (CDataNode | undefined))?.content;
-}
-
-let promise_get_modlinks: Promise<ModLinksData> | undefined;
-export let modlinksCache: ModLinksData | undefined;
-
 export function getLocalModLinksPath() {
     return join(userData, 'offline_modlinks.json');
 }
 
-function fixModLinks(modlinks: ModCollection) {
+export let provider: ModLinksProvider = new ModLinksArchiveProvider();
+
+export function fixModLinks(modlinks: ModCollection) {
     const mods = modlinks.mods;
     for (const name in mods) {
         const mod = mods[name];
@@ -120,209 +79,29 @@ function fixModLinks(modlinks: ModCollection) {
     }
 }
 
-function loadLocalModLinks() {
-    const offline = modlinksOffline.getData();
-    if (!offline) throw new Error("loadLocalModLinks[0]");
-    const result = JSON.parse(offline.toString('utf-8')) as ModCollection;
-    fixModLinks(result);
-    saveLocalModLinks(result);
-    return result;
-}
 
-function saveLocalModLinks(data: ModCollection) {
-    data = { ...data };
-    data.saveDate = Date.now();
-    const d = JSON.stringify(data, undefined, 4);
-    modlinksOffline.saveLocal(Buffer.from(d, 'utf8'), data.saveDate);
-}
-
-export async function parseModLinks(content: string): Promise<ModCollection> {
-    const result: ModCollection = {
-        mods: {}
-    };
-    const xml = await Parser.parseString(content);
-    const root = xml.getAst().childNodes[1] as ContainerNode;
-    if (!root) throw 0;
-    for (let i = 0; i < root.childNodes.length; i++) {
-        const node = root.childNodes[i];
-        if (node instanceof ast.CommentNode) continue;
-        const manifest = node as ContainerNode;
-        const mod: ModLinksManifestData = {
-            name: "",
-            desc: "",
-            version: "",
-            dependencies: [],
-            repository: "",
-            integrations: [],
-            tags: [],
-            authors: [],
-            date: "1970-12-22T04:50:23Z"
-        };
-
-        mod.name = getXmlNodeText(manifest, "Name") ?? "";
-        mod.desc = getXmlNodeText(manifest, "Description") ?? "";
-        mod.version = getXmlNodeText(manifest, "Version") ?? "";
-        let tlink = getCDATANodeText(manifest, "Link");
-        if (!tlink) {
-            const nlinks = findXmlNode<ContainerNode>(manifest, "Links");
-            tlink = nlinks ? getCDATANodeText(nlinks, currentPlatform) : undefined;
-            if (!tlink) continue;
-        }
-        mod.link = tlink;
-
-        const depNode = findXmlNode<ContainerNode>(manifest, "Dependencies");
-        if (depNode && !(depNode instanceof ast.SelfClosingNode)) {
-            for (let i2 = 0; i2 < depNode.childNodes.length; i2++) {
-                const dep = (depNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.dependencies.push(dep.content);
-            }
-        }
-
-        mod.repository = getCDATANodeText(manifest, "Repository");
-        if (!mod.repository) {
-            const url = new URL(tlink);
-            if (url.hostname == 'github.com') {
-                url.pathname = url.pathname.substring(0, url.pathname.indexOf('/releases/download/'));
-                mod.repository = url.toString();
-            }
-
-        }
-
-        const integrationsNode = findXmlNode<ContainerNode>(manifest, "Integrations");
-        if (integrationsNode) {
-            for (let i2 = 0; i2 < integrationsNode.childNodes.length; i2++) {
-                const integration = (integrationsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.integrations.push(integration.content);
-            }
-        }
-
-        const tagsNode = findXmlNode<ContainerNode>(manifest, "Tags");
-        if (tagsNode) {
-            for (let i2 = 0; i2 < tagsNode.childNodes.length; i2++) {
-                const tag = (tagsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.tags.push(tag.content as ModTag);
-            }
-        }
-
-        const authorsNode = findXmlNode<ContainerNode>(manifest, "Authors");
-        if (authorsNode) {
-            for (let i2 = 0; i2 < authorsNode.childNodes.length; i2++) {
-                const author = (authorsNode.childNodes[i2] as ContainerNode).childNodes[0] as TextNode;
-                mod.authors.push(author.content as ModTag);
-            }
-        }
-
-        result.mods[mod.name] = {
-            [mod.version]: mod
-        };
-    }
-    return result;
-}
-
-export async function getModLinksFromRepo(force = false) {
-    if (promise_get_modlinks) {
-        return await promise_get_modlinks;
-    }
-
-    if (modlinksCache && !force) {
-        if (!navigator.onLine && modlinksCache.offline) return modlinksCache;
-        if (!modlinksCache.offline) {
-            const ts = new Date().valueOf() - modlinksCache.lastGet;
-            if (ts < 3600000) {
-                promise_get_modlinks = undefined;
-                return modlinksCache;
-            }
-        }
-    }
+export async function getModLinksFromRepo() {
     if (!navigator.onLine) {
-        return modlinksCache = new ModLinksData(loadLocalModLinks(), true);
+        if(!(provider instanceof OfflineModLinksArchiveProvider)) {
+            provider = new OfflineModLinksArchiveProvider();
+        }
+    }
+    else
+    {
+        if(provider instanceof OfflineModLinksArchiveProvider) {
+            provider = new ModLinksArchiveProvider();
+        }
     }
     try {
-        //const url = "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json";
-        //const url =  "https://cdn.jsdelivr.net/gh/HKLab/modlinks-archive@latest/modlinks.json";
-        const url = cdn_modlinks[store.get('cdn', 'JSDELIVR')];
-        let content: ModCollection = undefined as any;
-        if (store.get('cdn') == 'SCARABCN') {
-            content = await parseModLinks((await downloadText(url, undefined, undefined, false, "ModLinks", "Download")));
-            try {
-                let mcontent = await Promise.race([
-                    downloadText(cdn_modlinks['GITHUB_RAW']),
-                    PromiseTimeout<false>(4000, false)
-                ]);
-                if (mcontent == false) {
-                    console.log(`Try load cdn`);
-                    mcontent = await Promise.race([
-                        downloadText(cdn_modlinks['JSDELIVR'], undefined, undefined, undefined),
-                        PromiseTimeout<false>(40000, false)
-                    ]);
-                } else {
-                    saveLocalModLinks(JSON.parse(mcontent));
-                }
-                if (mcontent != false) {
-                    const mc = JSON.parse(mcontent) as ModCollection;
-                    const mods = content.mods;
-                    for (const key in mods) {
-                        const mod = mods[key];
-                        const cmod = mc.mods[key];
-                        const lv = Object.keys(mod)[0];
-                        for (const ver in cmod) {
-                            if (ver_lg(ver, lv)) continue;
-                            const cver = cmod[ver];
-                            const v = mod[ver];
-
-                            if (v) {
-                                cver.link = v.link;
-                            } else {
-                                cver.link = undefined;
-                            }
-                            mod[ver] = cver;
-                        }
-                    }
-                } else {
-                    console.log("[ModLink] GITHUB_RAW Timeout");
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        else {
-            content = JSON.parse(await downloadText(url, undefined, undefined, false, "ModLinks", "Download"));
-            saveLocalModLinks(content);
-        }
-        fixModLinks(content);
-        modlinksCache = new ModLinksData(content);
-        modlinksCache.lastGet = new Date().valueOf();
-        for (const key in content.mods) {
-            const mv = content.mods[key];
-            for (const ver in mv) {
-                const v = mv[ver];
-                if (!v.repository && v.link) {
-                    const url = new URL(v.link);
-                    if (url.hostname == 'github.com') {
-                        url.pathname = url.pathname.substring(0, url.pathname.indexOf('/releases/download/'));
-                        v.repository = url.toString();
-                    }
-                }
-            }
-        }
-        promise_get_modlinks = undefined;
-        try {
-            tryRefreshOldLocalMods();
-        } catch (e) {
-            console.error(e);
-        }
-        return modlinksCache;
+        await provider.tryFetchData();
     } catch (e) {
         console.error(e);
-        return modlinksCache = new ModLinksData(loadLocalModLinks(), true);
     }
+    return provider;
 }
 
-export async function getModLinks(force = false) {
-    const p = promise_get_modlinks ?? getModLinksFromRepo(force);
-    promise_get_modlinks = p;
-    if (!modlinksCache) return await p;
-    return p;
+export async function getModLinks() {
+    return getModLinksFromRepo();
 }
 
 let promise_get_api: Promise<ModdingAPIData> | undefined;
@@ -377,7 +156,7 @@ export async function getAPIInfo() {
 }
 
 getAPIInfoFromRepo();
-getModLinksFromRepo();
+//getModLinksFromRepo();
 
 export async function getModLinkMod(name: string) {
     const modlinks = await getModLinks();
@@ -385,8 +164,8 @@ export async function getModLinkMod(name: string) {
 }
 
 export function getModLinkModSync(name: string) {
-    if (!modlinksCache) return undefined;
-    return modlinksCache.getMod(name);
+    if (!provider) return undefined;
+    return provider.getMod(name);
 }
 
 export function getModDate(date?: string) {
@@ -401,48 +180,19 @@ export function getModDate(date?: string) {
 }
 
 export function getLowestDep(mod: ModLinksManifestData) {
-    if (!modlinksCache || !mod.date) return undefined;
-    let moddate = getModDate(mod.date).valueOf();
-    if(moddate == 0) {
-        moddate = Number.MAX_VALUE;
-    }
-    const dep: ModLinksManifestData[] = [];
-    for (const d of mod.dependencies) {
-        const dm = modlinksCache.getModVersions(d);
-        if (!dm) continue;
-        let lowestDate: number = undefined as any;
-        let lowestMod: ModLinksManifestData = undefined as any;
-        for (const key in dm) {
-            const ver = dm[key];
-            const vd = getModDate(ver.date ?? '');
-            const ss = moddate - vd.valueOf();
-            if (!lowestDate || !lowestMod) {
-                lowestDate = ss;
-                lowestMod = ver;
-                if (ss < 0 && Math.abs(ss) < 1000 * 60 * 60) break;
-                continue;
-            }
-            if (ss < 0) continue;
-            if (lowestDate > ss || lowestDate < 0) {
-                lowestDate = ss;
-                lowestMod = ver;
-            }
-        }
-        dep.push(lowestMod);
-    }
-    return dep;
+    return provider.getLowestDependencies(mod);
 }
 
 export function tryRefreshOldLocalMods() {
-    if (!modlinksCache) return;
+    if (!provider) return;
     const mods = refreshLocalMods();
     for (const modname in mods) {
         const lmod = mods[modname];
-        const mlmod = modlinksCache.mods.mods[modname];
+        const mlmod = provider.getMod(modname);
         if (!mlmod) continue;
         for (const ver in lmod.versions) {
             const lver = lmod.versions[ver];
-            const mlver = mlmod[ver];
+            const mlver = provider.getMod(modname, ver);
             if (!mlver) continue;
             const linfo = lver.info.modinfo;
             if (!linfo.ei_files) {
@@ -458,14 +208,14 @@ export function tryRefreshOldLocalMods() {
 }
 
 export function hasModLink_ei_files() {
-    if (!modlinksCache) return false;
+    if (!provider) return false;
     return (getModLinkModSync("HKTool")?.ei_files || getModLinkModSync("Satchel")?.ei_files || getModLinkModSync("Vasi")?.ei_files) != undefined;
 }
 
 export function getSubMods_ModLinks(name: string) {
-    if (!modlinksCache) return [];
+    if (!provider) return [];
     const result: ModLinksManifestData[] = [];
-    for (const key in modlinksCache.mods.mods) {
+    for (const key in provider.getAllModNames()) {
         const mod = getModLinkModSync(key);
         if (!mod || mod.isDeleted) continue;
         if (mod.dependencies.includes(name)) result.push(mod);
@@ -474,13 +224,13 @@ export function getSubMods_ModLinks(name: string) {
 }
 
 export function getIntegrationsMods_ModLinks(name: string) {
-    if (!modlinksCache) return [];
+    if (!provider) return [];
 
     const self = getModLinkModSync(name);
     if (!self) return [];
     const result: ModLinksManifestData[] = [];
     const names: string[] = [];
-    for (const key in modlinksCache.mods.mods) {
+    for (const key in provider.getAllModNames()) {
         const mod = getModLinkModSync(key);
         if (!mod || names.includes(key) || mod.isDeleted) continue;
         names.push(key);
@@ -525,7 +275,5 @@ export function generateInstallURL(info: ModLinksManifestData) {
 }
 
 window.addEventListener('online', () => {
-    if (!modlinksCache || modlinksCache.offline) {
-        getModLinksFromRepo(true);
-    }
+    getModLinksFromRepo();
 });

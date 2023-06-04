@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { getModLinks, modlinksCache, ModLinksManifestData } from '@/core/modlinks/modlinks'
+import { getModLinks, ModLinksManifestData, provider } from '@/core/modlinks/modlinks'
 import CModsItem from './mods/c-mods-item.vue';
 import { hasOption } from '@/core/settings';
 import CModsSearch from './mods/c-mods-search.vue';
@@ -39,14 +39,14 @@ import { getOrAddLocalMod } from '@/core/modManager';
 export default defineComponent({
     methods: {
         getMods() {
-            const names = modlinksCache?.getAllModNames();
-            if (!names || !modlinksCache) return [];
+            const names = provider?.getAllModNames();
+            if (!names || !provider) return [];
             const filter = prepareFilter(this.filter, {
                 'localinstalled': (_parts, mod) => [this.localInstalled(mod) != undefined, 0],
                 'scarabinstalled': (_parts, mod) => [this.scarabInstalled(mod) != undefined, 0]
             }, (mod) => this.getModAliasName(mod.name));
             return filterMods<ModLinksManifestData>(names.map(x => {
-                const mod = modlinksCache?.getMod(x);
+                const mod = provider?.getMod(x);
                 if(!mod) return;
                 if(mod.isDeleted && !hasOption('SHOW_DELETED_MODS')) return;
                 return mod;
@@ -79,14 +79,14 @@ export default defineComponent({
             modal.showModal();
         },
         isUseModlinksBackup() {
-            if (modlinksCache) {
-                return modlinksCache.offline;
+            if (provider) {
+                return provider.isOffline();
             }
             return false;
         },
         getModlinksBackupDate() {
-            if (modlinksCache) {
-                const sdate = modlinksCache.mods.lastUpdate ?? modlinksCache.mods.saveDate;
+            if (provider) {
+                const sdate = provider.getOfflineUpdateDate();
                 if (sdate) {
                     return new Date(sdate);
                 }
@@ -94,10 +94,10 @@ export default defineComponent({
             return new Date();
         },
         onlineRefresh() {
-            this.refreshModLinks(true);
+            this.refreshModLinks();
         },
-        refreshModLinks(force = false) {
-            getModLinks(force).then(async () => {
+        refreshModLinks() {
+            getModLinks().then(async () => {
                 this.$forceUpdate();
                 this.localMods = await RL_ScanLocalMods(true, true);
             });

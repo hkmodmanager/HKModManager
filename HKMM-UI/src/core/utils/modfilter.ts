@@ -1,4 +1,4 @@
-import { getModDate, getModRepo, modlinksCache, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
+import { getModDate, getModRepo, ModLinksManifestData, ModTag, provider } from "../modlinks/modlinks";
 import { getLocalMod, getOldestVersion, getOrAddLocalMod } from "../modManager";
 import { getShortName } from "./utils";
 
@@ -45,10 +45,10 @@ const defaultFilters: Record<string, ModFilter> = {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];
         let firstPublish: Date | undefined;
-        if(modlinksCache) {
-            const mg = modlinksCache.mods.mods[mod.name];
+        if(provider.hasData()) {
+            const mg = provider.getModAllVersions(mod.name);
             if(mg) {
-                const oldest = mg[getOldestVersion(Object.keys(mg)) ?? ''];
+                const oldest = provider.getMod(mod.name, getOldestVersion(mg.map(x => x.version)));
                 if(oldest) {
                     firstPublish = getModDate(oldest.date);
                 }

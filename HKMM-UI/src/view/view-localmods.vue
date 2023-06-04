@@ -54,7 +54,7 @@
 <script lang="ts">
 import { refreshLocalMods, getRequireUpdateModsSync, getLocalMod, LocalModInstance, getOrAddLocalMod } from '@/core/modManager';
 import { defineComponent } from 'vue';
-import { getModLinkMod, getModLinks, hasModLink_ei_files, modlinksCache } from '@/core/modlinks/modlinks';
+import { getModLinkMod, getModLinks, hasModLink_ei_files, provider } from '@/core/modlinks/modlinks';
 import CModsItem from './mods/c-mods-item.vue';
 import { I18nLanguages } from '@/lang/langs';
 import CModsSearch from './mods/c-mods-search.vue';
@@ -69,7 +69,7 @@ import CModUninstallModal from './mods/c-mod-uninstall-modal.vue';
 export default defineComponent({
     methods: {
         getMods() {
-            if (!modlinksCache) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
+            if (!provider.hasData()) return Object.keys(refreshLocalMods()).map(x => getLocalMod(x));
             let search = this.search ?? "";
             const src = refreshLocalMods();
             const ru = getRequireUpdateModsSync();
@@ -103,7 +103,7 @@ export default defineComponent({
             return result;
         },
         refresh() {
-            if (!modlinksCache) {
+            if (!provider.hasData()) {
                 getModLinks().then(() => {
                     this.$forceUpdate();
                 });
@@ -154,7 +154,7 @@ export default defineComponent({
             this.ets_mod = undefined as any;
         },
         showSpinner() {
-            return this.filter === 'requireUpdate' && !modlinksCache;
+            return this.filter === 'requireUpdate' && !provider.hasData();
         },
         updateSearch(f: string) {
             this.search = f;
@@ -170,14 +170,8 @@ export default defineComponent({
             if (!alias) return undefined;
             return alias[name?.toLowerCase()?.replaceAll(' ', '')];
         },
-        getModLinks() {
-            return modlinksCache;
-        },
         shouldDisableUpdate() {
-            if (modlinksCache) {
-                return modlinksCache.offline;
-            }
-            return false;
+            return provider.isOffline();
         },
         impl_deleteMod(name: string)
         {

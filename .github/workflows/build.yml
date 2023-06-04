@@ -55,7 +55,7 @@ jobs:
           npm run build:offlineModLinks
           npm run electron:build
           npm run build:update
-          copy ./HKMM-UI/dist_electron/update.zip ./HKMM-UI/dist_electron/update-v3.zip
+          copy ./dist_electron/update.zip ./dist_electron/update-v3.zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: release
