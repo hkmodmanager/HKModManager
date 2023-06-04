@@ -10,7 +10,7 @@ export enum ModSavePathMode {
 
 export type SettingOptions = 'SHOW_DELETED_MODS' | 'CMODAL_REL_SCARAB' | 'SHOW_MOD_SHORT_NAME' | 
     'HIDE_MOD_ALIAS' | 'HIDE_ALERT_EXPORT_TO_SCARAB' | 'FAST_DOWNLOAD' | 'SHOW_LICENCE' | 'ACCEPT_PRE_RELEASE' 
-    | 'ACCEPT_APLHA_RELEASE' | 'VERIFY_MODS_ON_AUTO';
+    | 'ACCEPT_APLHA_RELEASE' | 'VERIFY_MODS_ON_AUTO' | 'CUSTOM_MODLINKS';
 export type CDN = 'GITHUB_RAW' | 'JSDELIVR' | 'SCARABCN' | 'GH_PROXY';
 
 export class HKMMSettings {
@@ -29,6 +29,7 @@ export class HKMMSettings {
     public maxConnection: number = 16;
     public downloadRetry: number = 3;
     public useDarkMode: boolean = matchMedia('(prefers-color-scheme: dark)').matches;
+    public customModLinks: string = "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml";
 }
 
 
@@ -94,6 +95,9 @@ function GetSettingsLocal() {
     }
     if(store.store.useDarkMode == undefined) {
         store.set('useDarkMode', matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    if(!store.store.customModLinks || store.store.customModLinks == '') {
+        store.set('customModLinks', "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml");
     }
     if(store.store.mirror_github.length == 0) {
         store.set('mirror_github', ["ghproxy.net"]);

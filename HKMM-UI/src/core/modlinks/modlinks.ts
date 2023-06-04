@@ -6,7 +6,7 @@ import { IModMetadata } from '../data/IModMetadata';
 import { cdn_api, currentPlatform } from '../exportGlobal';
 import {  refreshLocalMods } from '../modManager';
 import { userData } from '../remoteCache';
-import { store } from '../settings';
+import { hasOption, store } from '../settings';
 import { downloadText } from '../utils/downloadFile';
 import { ContainerNode, findXmlNode, getCDATANodeText, getXmlNodeText, TextNode } from '../utils/xml';
 import { GithubModLinksProvider } from './GithubModLinksProvider';
@@ -79,8 +79,7 @@ export function fixModLinks(modlinks: ModCollection) {
     }
 }
 
-
-export async function getModLinksFromRepo() {
+export function refreshModLinksProvider() {
     if (!navigator.onLine) {
         if(!(provider instanceof OfflineModLinksArchiveProvider)) {
             provider = new OfflineModLinksArchiveProvider();
@@ -88,10 +87,23 @@ export async function getModLinksFromRepo() {
     }
     else
     {
-        if(provider instanceof OfflineModLinksArchiveProvider) {
-            provider = new ModLinksArchiveProvider();
+        if(hasOption('CUSTOM_MODLINKS')) {
+            if(!(provider instanceof GithubModLinksProvider)) {
+                provider = new GithubModLinksProvider(store.store.customModLinks);
+            }
+        }
+        else
+        {
+            if(!(provider instanceof ModLinksArchiveProvider)
+                || provider.isOffline()) {
+                provider = new ModLinksArchiveProvider();
+            }
         }
     }
+}
+
+export async function getModLinksFromRepo() {
+    refreshModLinksProvider();
     try {
         await provider.tryFetchData();
     } catch (e) {
@@ -156,7 +168,7 @@ export async function getAPIInfo() {
 }
 
 getAPIInfoFromRepo();
-//getModLinksFromRepo();
+getModLinksFromRepo();
 
 export async function getModLinkMod(name: string) {
     const modlinks = await getModLinks();

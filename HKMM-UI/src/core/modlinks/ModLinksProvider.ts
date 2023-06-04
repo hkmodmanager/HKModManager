@@ -9,6 +9,7 @@ export abstract class ModLinksProvider {
     public abstract hasData(): boolean;
 
     private fetchDataPromise?: Promise<any>;
+    private canFetch: boolean = true;
 
     public isOffline() {
         return false;
@@ -16,9 +17,12 @@ export abstract class ModLinksProvider {
     public getOfflineUpdateDate() {
         return Date.now();
     }
+    public fetchFault() {
+        return !this.canFetch;
+    }
 
     public async tryFetchData() {
-        if(this.hasData()) return;
+        if(this.hasData() || !this.canFetch) return;
         try {
             if (this.fetchDataPromise) {
                 await this.fetchDataPromise;
@@ -27,6 +31,13 @@ export abstract class ModLinksProvider {
                 this.fetchDataPromise = this.fetchData();
                 await this.fetchDataPromise;
             }
+        } catch(e) {
+            this.canFetch = false;
+            setTimeout(() => {
+                this.canFetch = true;
+            }, 10 * 1000);
+            console.error(e);
+            //throw e;
         } finally {
             this.fetchDataPromise = undefined;
         }

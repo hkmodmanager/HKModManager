@@ -126,11 +126,6 @@ async function createWindow() {
       shell.openExternal(url);
     }
   });
-
-  setTimeout(() => {
-    console.log("Stop");
-    win.webContents.stop();
-  }, 4000);
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));

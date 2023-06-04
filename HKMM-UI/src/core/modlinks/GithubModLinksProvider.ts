@@ -85,10 +85,14 @@ async function parseModLinks(content: string): Promise<Record<string, ModLinksMa
 }
 
 export class GithubModLinksProvider extends ModLinksProvider {
+    public constructor(public modlinksURL: string = "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml") {
+        super();
+    }
+
     private mods: Record<string, ModLinksManifestData> | undefined;
     
     protected async fetchData(): Promise<any> {
-        const modlinks = await downloadText("https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml", 
+        const modlinks = await downloadText(this.modlinksURL, 
             undefined, undefined, false, "ModLinks", "Download");
         this.mods = await parseModLinks(modlinks);
     }

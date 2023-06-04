@@ -193,6 +193,11 @@
         "uninstall_title": "卸载{modname}"
     },
     "settings": {
+        "advanced": {
+            "title": "高级",
+            "warning": "注意： 更改这些选项可能会导致程序出错",
+            "custom_modlinks": "自定义 ModLinks"
+        },
         "checkupdate": "检查更新",
         "mirror": {
             "githubmirror": "gh-proxy服务器地址"

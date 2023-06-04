@@ -185,6 +185,11 @@
         "uninstall_title": "Uninstall"
     },
     "settings": {
+        "advanced": {
+            "title": "Advanced",
+            "warning": "Warning: Changing these options may cause program errors",
+            "custom_modlinks": "Custom ModLinks"
+        },
         "mirror": {
             "githubmirror": "Github 镜像"
         },
