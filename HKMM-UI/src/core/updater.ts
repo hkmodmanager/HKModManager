@@ -81,7 +81,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
             const pre = semver.prerelease(sver);
             if ((pre?.length ?? 0) > 0 && !hasOption('ACCEPT_PRE_RELEASE')) continue;
             if (semver.gt(sver, cver)) {
-                const durl = release.assets.find(x => x.name == 'update.zip')?.browser_download_url;
+                const durl = release.assets.find(x => x.name == 'update-v3.zip')?.browser_download_url;
                 if (!durl) continue;
                 const tags: TagInfo[]= JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/tags'));
                 const tag = tags.find(x => x.name == release.tag_name);
