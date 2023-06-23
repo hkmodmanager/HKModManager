@@ -15,12 +15,16 @@
         <span :style="{ 'font-size': '1rem' }">v{{ getAppVersion() }}</span>
       </h3>
       </RouterLink>
-      <a v-if="!isRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getCommitSHA()"
-        :href="`https://github.com/HKLab/HKModManager/commit/${getCommitSHA()}`">Alpha-{{
+      <a v-if="!isRelease() && !isPreRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-warning" :title="getCommitSHA()"
+        :href="`https://github.com/hkmodmanager/HKModManager/commit/${getCommitSHA()}`">Alpha-{{
           getShortCommitSHA()
         }}</a>
+      <a v-else-if="isPreRelease()" :style="{ 'font-size': '0.6rem' }" class="badge bg-success" :title="getPreVersion()"
+        >{{
+          getPreVersion()
+        }}</a>
       <div class="d-flex" :style="{ 'fontSize': '1.5rem' }">
-        <a class="bi bi-github p-2 link-auto" title="Github" href='https://github.com/HKLab/HKModManager'></a>
+        <a class="bi bi-github p-2 link-auto" title="Github" href='https://github.com/hkmodmanager/HKModManager'></a>
         <a class="bi bi-discord p-2 link-auto" title="HK Modding" href="https://discord.gg/4Zhdg7QyPS"></a>
         <a class="bi bi-code-slash p-2 link-auto" title="Dev Tools" @click="openDevTools()" href="javascript:;"></a>
       </div>
@@ -193,10 +197,17 @@ export default defineComponent({
       return AllNamedLanaguages;
     },
     getAppVersion() {
-      return appVersion;
+      console.dir(appVersion);
+      return `${appVersion.major}.${appVersion.minor}.${appVersion.patch}`;
     },
     isRelease() {
       return buildMetadata.isTag;
+    },
+    isPreRelease() {
+      return appVersion.prerelease.length > 0;
+    },
+    getPreVersion() {
+      return appVersion.prerelease.join('.');
     },
     getBuildMeta() {
       return buildMetadata;

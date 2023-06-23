@@ -18,14 +18,14 @@ function saveOffline(name, data, date) {
     writeFileSync(join(offlineDataDir, name), Buffer.concat([head, data]));
 }
 
-const modlinks = JSON.parse((await axios.get('https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json', {
+const modlinks = JSON.parse((await axios.get('https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/master/modlinks.json', {
     responseType: 'text'
 })).data);
 modlinks['saveDate'] = Date.now();
 saveOffline('modlinks.json', JSON.stringify(modlinks), modlinks.lastUpdate);
 
 saveOffline("modfiles-cache.txt",
-    (await axios.get('https://raw.githubusercontent.com/HKLab/modlinks-archive/modfiles/filecache.txt', {
+    (await axios.get('https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/modfiles/filecache.txt', {
         responseType: 'text'
     })).data);
 

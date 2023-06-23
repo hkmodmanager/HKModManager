@@ -240,7 +240,7 @@
             "title": "下载源",
             "githubraw": "Github Raw (raw.githubusercontent.com) (默认)",
             "clazex": "ScarabCN (hk-modlinks.clazex.net)",
-            "gh_proxy": "Github Proxy",
+            "gh_proxy": "Github Proxy (推荐)",
             "popover": {
                 "clazex": "来源：https://github.com/Clazex"
             }

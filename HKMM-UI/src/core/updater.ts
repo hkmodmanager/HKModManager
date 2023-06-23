@@ -50,9 +50,9 @@ export interface UpdateInfo {
 }
 
 async function checkUpdateAsync(rsize = false): Promise<UpdateInfo | undefined> {
-    const alpha: IBuildMetadata = JSON.parse(await downloadText(`https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/hkmm.json`));
+    const alpha: IBuildMetadata = JSON.parse(await downloadText(`https://raw.githubusercontent.com/hkmodmanager/HKModManager/alpha-binary/hkmm.json`));
     if (alpha.buildTime < buildMetadata.buildTime || alpha.headCommit == buildMetadata.headCommit) return undefined;
-    const durl = `https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/update.zip`;
+    const durl = `https://raw.githubusercontent.com/hkmodmanager/HKModManager/alpha-binary/update.zip`;
     return {
         version: `${alpha.version}-alpha-${alpha.headCommit.substring(0, 7)}`,
         url: durl,
@@ -72,7 +72,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
         console.error(e);
     }
     try {
-        const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/releases'));
+        const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/hkmodmanager/HKModManager/releases'));
         for (const release of releases) {
             if (!release) continue;
             const cver = appVersion;
@@ -83,7 +83,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
             if (semver.gt(sver, cver)) {
                 const durl = release.assets.find(x => x.name == 'update-v3.zip')?.browser_download_url;
                 if (!durl) continue;
-                const tags: TagInfo[]= JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/tags'));
+                const tags: TagInfo[]= JSON.parse(await downloadText('https://api.github.com/repos/hkmodmanager/HKModManager/tags'));
                 const tag = tags.find(x => x.name == release.tag_name);
                 releaseUpdate= {
                     version: sver,

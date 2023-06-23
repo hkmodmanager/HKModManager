@@ -14,7 +14,7 @@ export class ModLinksArchiveProvider extends ModLinksProvider {
     protected async fetchData(): Promise<any> {
         if(this.mods) return;
 
-        this.mods = JSON.parse(await downloadText("https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json", 
+        this.mods = JSON.parse(await downloadText("https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/master/modlinks.json", 
             undefined, undefined, false, "ModLinks", "Download"));
 
         const data = { ...this.mods };

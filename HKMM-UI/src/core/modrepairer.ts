@@ -83,13 +83,13 @@ export async function repairMod(mod: LocalModInstance, taskinfo?: TaskInfo) {
         const skips = new Set<string>();
         const req_promise: Promise<void>[] = [];
         if (localModFilesCache.includes(modstr)) {
-            taskinfo?.pushState(`Use scatter files on Github https://raw.githubusercontent.com/HKLab/modlinks-archive/modfiles/files/`);
+            taskinfo?.pushState(`Use scatter files on Github https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/modfiles/files/`);
             for (const file of missingFiles) {
                 req_promise.push((async function () {
                     try {
                         const fp = join(root, file);
                         taskinfo?.pushState(`Download file: ${file}`);
-                        const r = await downloadRaw(`https://raw.githubusercontent.com/HKLab/modlinks-archive/modfiles/files/${mod.name}/${mod.info.version}/${file}`,
+                        const r = await downloadRaw(`https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/modfiles/files/${mod.name}/${mod.info.version}/${file}`,
                             undefined, undefined, true, `[${taskinfo?.taskGuid}]Download Mod File: ${file}`, 'Download');
                         if(!existsSync(dirname(fp))) mkdirSync(dirname(fp), { recursive: true });
                         await writeFile(fp, r);
