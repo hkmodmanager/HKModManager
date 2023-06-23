@@ -79,7 +79,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
             const sver = semver.clean(release.name);
             if (!sver) continue;
             const pre = semver.prerelease(sver);
-            if ((pre?.length ?? 0) > 0 && !hasOption('ACCEPT_PRE_RELEASE')) continue;
+            if ((pre?.length ?? 0) > 0 && (!hasOption('ACCEPT_PRE_RELEASE') && appVersion.prerelease.length == 0)) continue;
             if (semver.gt(sver, cver)) {
                 const durl = release.assets.find(x => x.name == 'update-v3.zip')?.browser_download_url;
                 if (!durl) continue;
