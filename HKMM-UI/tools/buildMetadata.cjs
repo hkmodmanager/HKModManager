@@ -1,5 +1,5 @@
 const { execSync } = require("child_process");
-const { readFileSync, readdirSync, existsSync } = require("fs");
+const { readFileSync, readdirSync, existsSync, statSync } = require("fs");
 const { writeJSONSync, readJSONSync } = require("fs-extra");
 const { dirname, join } = require("path");
 
@@ -15,10 +15,11 @@ for (const tagName of readdirSync(tagRoot)) {
 const curBranch = execSync("git branch --show-current", {
     encoding: 'utf8'
 }).trim();
+console.log("Branch: " + curBranch);
 const masterPath = join(gitdir, "refs", "heads", curBranch);
 let headcommit = "";
 let isTag = false;
-if (existsSync(masterPath)) {
+if (existsSync(masterPath) && !statSync(masterPath).isDirectory()) {
     headcommit = readFileSync(masterPath, 'utf-8').trim();
 } else {
     headcommit = tags[0];
