@@ -1,6 +1,8 @@
 
 name: Build Electron App
 
+permissions: write-all
+
 on:
   push
 
