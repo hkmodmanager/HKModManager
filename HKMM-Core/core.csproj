@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8</TargetFramework>
+    <TargetFramework>net7</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>11</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,6 +10,8 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishNodeModule>true</PublishNodeModule>
     <PublishDir>../HKMM-UI/native</PublishDir>
+
+    <RootNamespace>HKMM</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
