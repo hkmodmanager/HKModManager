@@ -19,4 +19,4 @@ const rootPath = !isPackaged ? (
     join(appDir, "native")
 );
 
-export default node_import<NetUtils>(join(rootPath, "netutils.node"));
+export default node_import<NetUtils>(join(rootPath, "core.node"));
