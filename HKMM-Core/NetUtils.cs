@@ -1,18 +1,9 @@
 ﻿
 #pragma warning disable CS1998
 
-global using System.Text;
-global using System.Linq;
-global using System.IO;
-global using System.Threading.Tasks;
-global using Mono.Cecil;
-global using System.Threading;
-global using System.Runtime.CompilerServices;
-global using System.Runtime.InteropServices;
-global using System.Runtime;
-global using System;
-
 using Microsoft.JavaScript.NodeApi;
+using Mono.Cecil;
+using System.Linq;
 
 namespace HKMM;
 

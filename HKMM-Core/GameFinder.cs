@@ -1,10 +1,11 @@
+using Microsoft.Win32;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Microsoft.Win32;
 using Path = System.IO.Path;
 
 namespace HKMM;
-public static class GameFileHelper
+public static partial class GameFileHelper
 {
     public static readonly int HOLLOWKNIGHT_APP_ID = 367520;
     public static readonly string HOLLOWKNIGHT_GAME_NAME = "Hollow Knight";
@@ -40,7 +41,7 @@ public static class GameFileHelper
         {
             line = line.Trim();
             line = Regex.Unescape(line);
-            Match regMatch = Regex.Match(line, "\"(.*)\"\\s*\"(.*)\"");
+            Match regMatch = KeyPairRegex().Match(line);
             string key = regMatch.Groups[1].Value;
             string value = regMatch.Groups[2].Value;
             if (key == "path")
@@ -70,5 +71,8 @@ public static class GameFileHelper
 
         return null;
     }
+
+    [GeneratedRegex("\"(.*)\"\\s*\"(.*)\"")]
+    private static partial Regex KeyPairRegex();
 }
 
