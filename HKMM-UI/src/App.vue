@@ -79,12 +79,6 @@
           </a>
         </li> -->
 
-        <li class="nav-item">
-          <a class="nav-link text-nav-item-auto" href="javascript:;" @click="exportDebugPackage"
-            :title="$t('debugpack_desc')">
-            <i class="bi bi-box-arrow-up-right"></i> {{ $t("c_exportLog") }}
-          </a>
-        </li>
         <navitem viewpath="/settings"><i class="bi bi-gear"></i> {{ $t("tabs.settings") }}</navitem>
       </ul>
     </div>
@@ -172,7 +166,6 @@ import * as remote from "@electron/remote";
 
 import { appVersion } from "./core/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
-import { br_build_zip } from "./core/bugReport";
 import { buildMetadata } from "./core/exportGlobal";
 
 export default defineComponent({
@@ -242,15 +235,6 @@ export default defineComponent({
     isRequireUpdateMods() {
       if (provider?.isOffline()) return false;
       return getRequireUpdateModsSync().length > 0;
-    },
-    exportDebugPackage() {
-      br_build_zip().then(() => {
-        remote.dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-          message: this.$t('debugpack_done'),
-          title: this.$t('debugpack_done_title')
-        });
-      });
-
     },
     useDarkMode(e: boolean) {
       document.body.setAttribute("data-bs-theme", e ? "dark" : "light");

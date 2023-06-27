@@ -1,61 +1,53 @@
 ﻿
 #pragma warning disable CS1998
 
-global using System.IO;
+global using System.Text;
 global using System.Linq;
+global using System.IO;
 global using System.Threading.Tasks;
 global using Mono.Cecil;
 global using System.Threading;
+global using System.Runtime.CompilerServices;
+global using System.Runtime.InteropServices;
+global using System.Runtime;
+global using System;
+
+using Microsoft.JavaScript.NodeApi;
 
 namespace HKMM;
 
 public static class NetUtils
 {
-    public static async Task<object> GetAPIVersion(dynamic input)
+    [JSExport]
+    public static int GetAPIVersion(string apiPath)
     {
-        var apiPath = (string)input.apiPath;
-        if (!File.Exists(apiPath)) return -1;
         using (var asm = AssemblyDefinition.ReadAssembly(apiPath))
         {
             var t_modhooks = asm.MainModule.GetType("Modding.ModHooks");
             if (t_modhooks is null) return -1;
             var ver = t_modhooks.Fields.FirstOrDefault(x => x.Name == "_modVersion");
             if (ver is null || !ver.IsLiteral) return -2;
-            return ver.Constant;
+            return (int)ver.Constant;
         }
     }
-    public static async Task<object?> GetGameVersion(dynamic input)
+
+    [JSExport]
+    public static string GetGameVersion(string apiPath)
     {
-        var apiPath = (string)input.apiPath;
-        if (!File.Exists(apiPath)) return "";
         using (var asm = AssemblyDefinition.ReadAssembly(apiPath))
         {
             var t_modhooks = asm.MainModule.GetType("Constants");
             if (t_modhooks is null) return "";
             var ver = t_modhooks.Fields.FirstOrDefault(x => x.Name == "GAME_VERSION");
             if (ver is null || !ver.IsLiteral) return "";
-            return ver.Constant;
+            var v = (string)ver.Constant;
+            return v;
         }
     }
-    public static async Task<object?> SearchHKFile(dynamic input)
+
+    [JSExport]
+    public static string? TryFindGamePath()
     {
         return GameFileHelper.FindSteamGamePath(GameFileHelper.HOLLOWKNIGHT_APP_ID, GameFileHelper.HOLLOWKNIGHT_GAME_NAME);
-    }
-    public static async Task<object?> ClipboardCopyFile(dynamic input)
-    {
-        var thread = new Thread(() =>
-        {
-            var col = new System.Collections.Specialized.StringCollection();
-            col.Add(input.file);
-            System.Windows.Clipboard.SetFileDropList(col);
-        });
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-        return null;
-    }
-    public static async Task<object> DownloadFileSeg(dynamic input)
-    {
-        return await FileDownload.DownloadFileSegment(input.url, ((int)input.from, (int)input.to), null);
     }
 }

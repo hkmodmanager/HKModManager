@@ -35,7 +35,7 @@ public static class GameFileHelper
             return null;
         }
         StreamReader file = new(libraryfolders);
-        string line;
+        string? line;
         while ((line = file.ReadLine()) != null)
         {
             line = line.Trim();
@@ -60,7 +60,7 @@ public static class GameFileHelper
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return null;
 
-        using (RegistryKey subkey = Registry.CurrentUser.OpenSubKey(path))
+        using (RegistryKey? subkey = Registry.CurrentUser.OpenSubKey(path))
         {
             if (subkey != null)
             {

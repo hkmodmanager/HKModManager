@@ -1,5 +1,6 @@
 
-const { defineConfig } = require('@vue/cli-service')
+const { defineConfig } = require('@vue/cli-service');
+
 module.exports = defineConfig({
     transpileDependencies: true,
     runtimeCompiler: true,
@@ -7,7 +8,12 @@ module.exports = defineConfig({
         config.target = "electron-renderer";
         config.plugins = config.plugins.filter(x => x.constructor.name != 'CaseSensitivePathsPlugin');
     },
-    
+    chainWebpack: config => {
+        config.module
+            .rule('node')
+            .test(/\.node$/)
+            .use('node-loader')
+    },
     pluginOptions: {
         electronBuilder: {
             builderOptions: {
@@ -24,21 +30,10 @@ module.exports = defineConfig({
                 },
                 extraResources: [
                     {
-                        from: "../netutils/bin/Debug",
-                        to: "../managed",
+                        from: "native",
+                        to: "../native",
                         filter: [
-                            "**/*"
-                        ]
-                    },
-                    {
-                        from: "./libs/EdgeJS/lib/native/win32/x64/22.0.0/edge_nativeclr.node",
-                        to: "../edge/edge_nativeclr.node"
-                    },
-                    {
-                        from: "./libs/EdgeJS/lib/native/win32/x64",
-                        to: "../edge",
-                        filter: [
-                            "*.dll"
+                            "**/*.node"
                         ]
                     },
                     {
@@ -47,13 +42,6 @@ module.exports = defineConfig({
                         filter: [
                             "**/*.dll",
 							"**/*.pdb"
-                        ]
-                    },
-                    {
-                        from: "./managed",
-                        to: "../managed",
-                        filter: [
-                            "**/*"
                         ]
                     },
                     {

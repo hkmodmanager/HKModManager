@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PAMOE9XHnScJTnNKT1MVAEhZ2NJ/JHFdbld37t6gcN76HGQEwCxQP6KV2MWa5WnodSqP9NKEXIRB7HDenRHYhQ==",
+  "dgSpecHash": "h3UXkWCffNIPIqnsbDDmvka+A1per1nPL4K8FDtz7utjQ+AY1xIfxPSr0GA6hhb8wnNvYHD9XyyIK4FF/Rhl8w==",
   "success": true,
   "projectFilePath": "F:\\HKLab\\HKMM\\netutils\\netutils.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\29676\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
-    "C:\\Users\\29676\\.nuget\\packages\\mono.cecil\\0.11.4\\mono.cecil.0.11.4.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }

@@ -4,25 +4,19 @@ import { copyFileSync, existsSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, parse } from 'path';
 import { apiInfoCache, getAPIInfo, ModdingAPIData } from './modlinks/modlinks';
-import { netfunc } from './nethelper';
 import { installGameInject } from './gameinject';
 import { store } from './settings';
 import { startTask } from './taskManager';
 import { downloadRaw } from './utils/downloadFile';
-import { gl } from './exportGlobal';
+import dn from './netutils'
 
 export function getAPIPath(root?: string) {
     return join(root ?? store.get('gamepath'), "hollow_knight_Data", "Managed", "Assembly-CSharp.dll");
 }
 
-const getapiver = netfunc("GetAPIVersion");
-const getgamever = netfunc("GetGameVersion");
-const findhkpath = netfunc("SearchHKFile");
 
 export function getAPIVersion(path?: string) {
-    return getapiver({
-        apiPath: path ?? getAPIPath()
-    }, true) as number;
+    return dn.getAPIVersion(path ?? getAPIPath());
 }
 
 export function installedAPI() {
@@ -30,16 +24,8 @@ export function installedAPI() {
 }
 
 export function getGameVersion(path?: string) {
-    return getgamever({
-        apiPath: path ?? getAPIPath()
-    }, true) as string;
+    return dn.getGameVersion(path ?? getAPIPath());
 }
-
-export function findHKPath() {
-    return findhkpath({}, true) as string;
-}
-
-gl.findHKPath = findHKPath;
 
 export function matchAPI(api: string) {
     const gv = getGameVersion();
@@ -85,6 +71,11 @@ export function checkGameFile(root: string): boolean | string {
         return "broken";
     }
     return true;
+}
+
+export function findHKPath()
+{
+    return dn.tryFindGamePath();
 }
 
 export function copyBackup() {
