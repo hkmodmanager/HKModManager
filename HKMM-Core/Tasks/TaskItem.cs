@@ -23,7 +23,13 @@ namespace HKMM.Tasks
     {
         public string Name { get; set; } = "";
         public string Guid { get; set; } = System.Guid.NewGuid().ToString();
-        public int Progress { get; set; } = -1;
+
+        private int _progress = -1;
+        public int Progress
+        {
+            get => _progress; 
+            set => _progress = Math.Clamp(value, -1, 100);
+        }
         public DateTime StartTime { get; } = DateTime.UtcNow;
         public DateTime EndTime { get; set; }
         public List<TaskLogInfo> logs = new();
@@ -34,7 +40,7 @@ namespace HKMM.Tasks
         public bool IsSuccess => Status == TaskItemStatus.Success;
         public bool IsFailed => Status == TaskItemStatus.Fail;
         public bool IsRunning => Status == TaskItemStatus.Running;
-
+        public bool IsHidden { get; set; } = false;
         public int LogCount => logs.Count;
         public TaskLogInfo GetLogAt(int id) => logs[id];
         
@@ -65,7 +71,7 @@ namespace HKMM.Tasks
 
                 logs.Add(new()
                 {
-                    Message = msg,
+                    Message = v,
                     Color = level switch
                     {
                         LogLevel.Log => "",
@@ -74,7 +80,7 @@ namespace HKMM.Tasks
                         _ => "",
                     }
                 });
-                Logger.Log($"[{Guid}-{Name}]: {msg}", level);
+                Logger.Log($"[{Guid}-{Name}]: {v}", level);
             }
             OnChanged?.Invoke(this, nameof(logs));
         }

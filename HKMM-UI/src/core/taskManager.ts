@@ -5,31 +5,28 @@ import { TaskItem, TaskItemStatus, TaskManager } from 'core';
 //let a = 0;
 
 export function createTask(taskName: string): TaskItem {
-    try
-    {
+    try {
         throw new Error(`Create Task: ${taskName}`);
-    }catch(e)
-    {
+    } catch (e) {
         console.dir(e);
     }
 
     //if(a++ > 20) return null as any;
     const result = new TaskItem();
-    
+    result.status = TaskItemStatus.Running;
     result.name = taskName;
     TaskManager.startTask(result);
-    
+
     result.log("Start task");
-    try
-    {
+    try {
         throw new Error("Start Task Stack Trace");
-    } catch(e: any) {
+    } catch (e: any) {
         result.log(e.stack ?? "");
     }
     return result;
 }
 
-export function startTask(taskName: string, task: (info: TaskItem) => Promise<any>){
+export function startTask(taskName: string, task: (info: TaskItem) => Promise<any>) {
     const t = createTask(taskName);
     try {
         const p = task(t);
@@ -54,9 +51,9 @@ export function getTask(taskGuid: string) {
 }
 
 export function* getAllTasks() {
-    for(let i = 0; i < TaskManager.taskCount ; i++) {
+    for (let i = 0; i < TaskManager.taskCount; i++) {
         const result = <TaskItem>TaskManager.getTaskAt(i);
-        if(!result) continue;
+        if (!result) continue;
         yield result;
     }
 }
@@ -64,21 +61,17 @@ export function* getAllTasks() {
 //Set Progress Bar
 (function () {
     setInterval(() => {
-        let total = 0;
-        let finished = 0;
-        for (const task of getAllTasks()) {
-            if(!task.isRunning) continue;
-            if(!task.progress || task.progress < 0) continue;
-            total += 100;
-            finished += task.progress;
+        try {
+            const progress = TaskManager.getTasksProgress();
+            if (progress == 0) {
+                getCurrentWindow().setProgressBar(-1);
+                return;
+            } else {
+                getCurrentWindow().setProgressBar(progress);
+            }
+        } catch (e) {
+            console.error(e);
         }
-        if(total == 0) {
-            getCurrentWindow().setProgressBar(-1);
-            return;
-        } else {
-            getCurrentWindow().setProgressBar(finished / total);
-        }
-        
     }, 500);
-});
+})();
 

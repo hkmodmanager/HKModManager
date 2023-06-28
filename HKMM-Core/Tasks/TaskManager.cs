@@ -26,5 +26,14 @@ namespace HKMM.Tasks
         {
             return tasks.Find(x => x.Guid == guid);
         }
+        public static double GetTasksProgress()
+        {
+            var it = tasks.Where(x => x != null && x.IsRunning && x.Progress >= 0);
+            var count = it.Count();
+            if (count == 0) return -1;
+            double total = count * 100;
+            double complete = it.Average(x => x.Progress);
+            return complete / total;
+        }
     }
 }

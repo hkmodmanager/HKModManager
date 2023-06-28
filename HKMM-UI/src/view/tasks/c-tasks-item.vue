@@ -57,6 +57,12 @@
     max-height: 15em;
     overflow: auto;
 }
+
+.task-item {
+    --bs-border-radius: 0;
+}
+
+
 </style>
 
 <script lang="ts">
@@ -74,7 +80,8 @@ export default defineComponent({
             return (this.task?.isFailed || this.task?.isSuccess) ?? true;
         },
         hideTask() {
-            //(getTask(this.taskguid ?? "") as TaskItem).isHidden = true;
+            // eslint-disable-next-line vue/no-mutating-props
+            if(this.task) this.task.isHidden = true;
             this.$parent?.$forceUpdate();
         },
         getTaskTime() {
@@ -105,22 +112,11 @@ export default defineComponent({
                 this.$forceUpdate();
             };
         }
-        if (this.checkTimerStop) {
-            //this.checkTimer = setInterval(() => this.$forceUpdate(), 500);
-        }
     },
     unmounted() {
-        if (!this.checkTimerStop) {
-            clearInterval(this.checkTimer);
-            this.checkTimerStop = true;
+        if (this.task) {
+            (this.task as TaskItem).onChanged = undefined;
         }
     },
-    updated() {
-
-        if (this.isDone() && !this.checkTimerStop) {
-            this.checkTimerStop = true;
-            clearInterval(this.checkTimer);
-        }
-    }
 });
 </script>

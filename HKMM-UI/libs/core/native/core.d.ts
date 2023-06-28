@@ -52,6 +52,8 @@ declare module "core" {
 
 		readonly isRunning: boolean;
 
+		isHidden: boolean;
+
 		readonly logCount: number;
 
 		getLogAt(id: number): TaskLogInfo;
@@ -88,6 +90,8 @@ declare module "core" {
 		export function startTask(task: TaskItem): void;
 
 		export function getTask(guid: string): TaskItem | undefined;
+
+		export function getTasksProgress(): number;
 	}
 
 	export class ResourcePackage {

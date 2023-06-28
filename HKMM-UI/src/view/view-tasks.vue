@@ -19,7 +19,7 @@ export default defineComponent({
         getTasks() {
             const arr: TaskItem[] = [];
             for (const e of getAllTasks()) {
-                //if(e.isHidden) continue;
+                if(e.isHidden) continue;
                 if(e.isFailed && this.filter === 'failed') arr.push(e);
                 if(e.isSuccess && this.filter === 'done') arr.push(e);
                 if(!e.isSuccess && !e.isFailed && this.filter === 'running') arr.push(e);
