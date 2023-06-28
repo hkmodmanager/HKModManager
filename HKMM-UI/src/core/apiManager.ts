@@ -8,7 +8,7 @@ import { installGameInject } from './gameinject';
 import { store } from './settings';
 import { startTask } from './taskManager';
 import { downloadRaw } from './utils/downloadFile';
-import dn from './netutils'
+import * as dn from 'core'
 
 export function getAPIPath(root?: string) {
     return join(root ?? store.get('gamepath'), "hollow_knight_Data", "Managed", "Assembly-CSharp.dll");
@@ -113,14 +113,14 @@ export let isDownloadingAPI = false;
 
 export async function downloadAPI() {
     if(isDownloadingAPI) return;
-    startTask("Download API", undefined, async (task) => {
+    startTask("Download API", async (task) => {
         isDownloadingAPI = true;
         try {
             copyBackup();
-            task.pushState("Get latest api info");
+            task.log("Get latest api info");
             const link = (await getAPIInfo()).link;
             const raw = await downloadRaw(link, undefined, task);
-            task.pushState("Uncompress api");
+            task.log("Uncompress api");
             const tf = join(tmpdir(), "api.zip");
             writeFileSync(tf, raw);
             await zip.uncompress(tf, parse(getAPIPath()).dir);

@@ -9,9 +9,6 @@
                     <div class="spinner-border" v-if="!(task?.isFailed || task?.isSuccess)"></div>
                     <div class="p-1">
                         {{ task?.name }}
-                        <span v-if="task?.category" class="badge bg-primary">
-                            {{ task.category }}
-                        </span>
                     </div>
 
                 </div>
@@ -21,7 +18,7 @@
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse "  ref="body">
+        <div class="accordion-collapse collapse " ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div v-if="task?.progress != undefined" class="progress">
@@ -29,16 +26,15 @@
                 </div>
                 <div class="fs-6 p-1 d-flex link-auto">
                     <div class="flex-grow-1">
-                        Guid: <i copyable> {{ task?.taskGuid }}</i>
+                        Guid: <i copyable> {{ task?.guid }}</i>
                     </div>
                     <a class="btn btn-danger" v-if="(task?.isFailed || task?.isSuccess)" @click="hideTask()">
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
-                <div class="task-state p-2 bg-secondary">
-                    <div v-for="(val, index) in task?.taskState" :key="index" copyable>
-                        <span v-if="!task?.isFailed || index !== 0">{{ val }}</span>
-                        <span v-else class="text-danger">{{ val }}</span>
+                <div class="task-state p-2 bg-dark text-white" style="border: 2px; border-color: white;">
+                    <div v-for="(val, index) in getLogs()"  :key="index" copyable>
+                        <span :class="`text-${val.color}`">{{ val.message }}</span>
                     </div>
                 </div>
                 <!--accordion body end-->
@@ -49,7 +45,6 @@
 </template>
 
 <style>
-
 .task-state-icon {
     font-size: 2rem;
     display: block;
@@ -65,8 +60,8 @@
 </style>
 
 <script lang="ts">
-import { getTask, TaskInfo } from '@/core/taskManager';
 import { Collapse } from 'bootstrap';
+import { TaskItem, TaskLogInfo } from 'core';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -75,45 +70,43 @@ export default defineComponent({
             const tgb = new Collapse(this.$refs.body as Element);
             tgb.toggle();
         },
-        updateTask() {
-            this.task = getTask(this.taskguid ?? "");
-        },
         isDone() {
-            this.updateTask();
             return (this.task?.isFailed || this.task?.isSuccess) ?? true;
         },
         hideTask() {
-            (getTask(this.taskguid ?? "") as TaskInfo).isHidden = true;
+            //(getTask(this.taskguid ?? "") as TaskItem).isHidden = true;
             this.$parent?.$forceUpdate();
         },
         getTaskTime() {
-            this.updateTask();
-            const task = this.task as TaskInfo;
-            const et = task.stopTime ?? new Date().valueOf();
-            const s = et - task.startTime;
+            const task = this.task as TaskItem;
+            const s = task.getRunningTime();
             return Math.round(s / 1000);
+        },
+        getLogs() {
+            const logs: TaskLogInfo[] = [];
+            for(let i = 0; i < this.task.logCount ; i++) {
+                logs.push(this.task.getLogAt(i));
+            }
+            return logs;
         }
     },
     props: {
-        taskguid: String
+        task: TaskItem
     },
     data() {
         return {
-            task: getTask(this.taskguid ?? ""),
             checkTimer: setInterval(() => this.$forceUpdate(), 500),
             checkTimerStop: false
         }
     },
-    created() {
-        let task = getTask(this.taskguid ?? "");
-        if (!task) return;
-        task.updateHandler = () => {
-            this.$forceUpdate();
-        };
-    },
     mounted() {
+        if (this.task) {
+            (this.task as TaskItem).onChanged = () => {
+                this.$forceUpdate();
+            };
+        }
         if (this.checkTimerStop) {
-            this.checkTimer = setInterval(() => this.$forceUpdate(), 500);
+            //this.checkTimer = setInterval(() => this.$forceUpdate(), 500);
         }
     },
     unmounted() {
@@ -123,7 +116,7 @@ export default defineComponent({
         }
     },
     updated() {
-        this.updateTask();
+
         if (this.isDone() && !this.checkTimerStop) {
             this.checkTimerStop = true;
             clearInterval(this.checkTimer);

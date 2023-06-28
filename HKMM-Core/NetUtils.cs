@@ -1,6 +1,7 @@
 ﻿
 #pragma warning disable CS1998
 
+using HKMM.Resources;
 using Microsoft.JavaScript.NodeApi;
 using Mono.Cecil;
 using System.Linq;
@@ -40,5 +41,10 @@ public static class NetUtils
     public static string? TryFindGamePath()
     {
         return GameFileHelper.FindSteamGamePath(GameFileHelper.HOLLOWKNIGHT_APP_ID, GameFileHelper.HOLLOWKNIGHT_GAME_NAME);
+    }
+    [JSExport]
+    public static void Test(ResourcePackage pack)
+    {
+
     }
 }

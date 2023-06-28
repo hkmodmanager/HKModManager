@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, s
 import { dirname, extname, join, parse, basename, normalize } from "path";
 import { fixModLinksManifestData, getLowestDep, getModLinkMod, getModLinkModSync, ModLinksManifestData, provider } from "./modlinks/modlinks";
 import { store, ModSavePathMode, hasOption } from "./settings";
-import { createTask, TaskInfo } from "./taskManager";
+import { createTask  } from "./taskManager";
 import { downloadRaw } from "./utils/downloadFile";
 import { zip } from "compressing"
 import { getCurrentGroup } from "./modgroup";
@@ -16,6 +16,7 @@ import { RL_ClearCache } from "./relocation/RLocal";
 import { ignoreVerifyMods } from "./modrepairer";
 import { IModMetadata } from "./data/IModMetadata";
 import { ver_lg } from "./utils/version";
+import { TaskItem, TaskItemStatus } from "core";
 
 export const modversionFileName = "modversion.json";
 export const hkmmmMetaDataFileName = "HKMM-Metadata";
@@ -253,26 +254,26 @@ export class LocalModsVersionGroup {
         }
         return result;
     }
-    public async installWithoutNewTask(mod: ModLinksManifestData, task: TaskInfo) {
+    public async installWithoutNewTask(mod: ModLinksManifestData, task: TaskItem) {
         if (this.versions[mod.version]) { //TODO
             delete this.versions[mod.version];
         }
         fixModLinksManifestData(mod);
         if (!mod.link) {
-            task.pushState("Unable to download mod, try fallback to the latest version");
+            task.log("Unable to download mod, try fallback to the latest version");
             const lv = await getModLinkMod(mod.name);
             if (lv?.link == undefined) {
-                task.pushState("Unable to download mod");
+                task.log("Unable to download mod");
                 throw new Error(`Unable to download mod ${mod.name}`);
             }
             mod = lv;
         }
         mod = { ...mod };
-        task.pushState(`Start downloading the mod ${mod.name}(v${mod.version})`);
+        task.log(`Start downloading the mod ${mod.name}(v${mod.version})`);
         mod.link = mod.link as string;
         const result: Buffer = await downloadRaw(mod.link, undefined, task, true);
         const verdir = join(getCacheModsPath(), mod.name, mod.version);
-        task.pushState(`Local Mods Path: ${verdir}`);
+        task.log(`Local Mods Path: ${verdir}`);
         if (!existsSync(verdir)) mkdirSync(verdir, { recursive: true });
         const info: LocalModInfo = {
             install: Date.now(),
@@ -301,7 +302,7 @@ export class LocalModsVersionGroup {
                 recursive: true
             });
         }
-        task.pushState(`Download ${mod.name} complete`);
+        task.log(`Download ${mod.name} complete`);
         const inst = this.versions[mod.version] = new LocalModInstance(info);
         this.versionsArray.push(inst);
         inst.save();
@@ -313,7 +314,7 @@ export class LocalModsVersionGroup {
         const l = LocalModsVersionGroup.downloadingMods.get(mod.name) as Promise<LocalModInstance>;
         if (l) return await l;
         const task = createTask(mod.name);
-        task.category = "Download";
+
         const promise = (async () => {
             try {
                 const req: Promise<LocalModInstance>[] = [];
@@ -327,12 +328,12 @@ export class LocalModsVersionGroup {
                             continue;
                         }
                         if (isInstallMod(element, false)) {
-                            task.pushState(`Skip Dependency ${element.name}`);
+                            task.log(`Skip Dependency ${element.name}`);
                             continue;
                         }
                         const dep = await getModLinkMod(element.name);
                         if (!dep) {
-                            task.pushState(`Missing Dependency ${element.name}`);
+                            task.log(`Missing Dependency ${element.name}`);
                             continue;
                         }
                         const group = getOrAddLocalMod(dep.name);
@@ -343,12 +344,12 @@ export class LocalModsVersionGroup {
                 await Promise.all(req);
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
                 this.getLatest()?.enable(false);
-                task.finish(false);
+                task.status = TaskItemStatus.Success;
                 return wp as LocalModInstance;
             } catch (e: any) {
-                task.pushState(e?.toString());
+                task.log(e?.toString());
                 LocalModsVersionGroup.downloadingMods.delete(mod.name);
-                task.finish(true);
+                task.status = TaskItemStatus.Fail;
                 throw e;
             }
         })();

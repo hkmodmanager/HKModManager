@@ -45,6 +45,10 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8
+      - name: Build node-api-dotnet
+        run: |
+          cd node-api-dotnet
+          dotnet pack
       - name: Build Core
         run: |
           dotnet build -c=Release

@@ -112,7 +112,7 @@ export async function getModLinksFromRepo() {
     return provider;
 }
 
-export async function getModLinks() {
+export function getModLinks() {
     return getModLinksFromRepo();
 }
 

@@ -36,6 +36,7 @@
     "@babel/preset-typescript": "^7.18.6",
     "@electron/asar": "^3.2.3",
     "compressing": "^1.6.2",
+    "core": "file:libs/core",
     "core-js": "^3.8.3",
     "electron-store": "^8.1.0",
     "fs-extra": "^11.1.0",
