@@ -34,6 +34,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "F:\\HKLab\\HKMM\\node-api-dotnet\\out\\pkg": {},
         "I:\\CSProject\\HKBuildUtils\\OutPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },

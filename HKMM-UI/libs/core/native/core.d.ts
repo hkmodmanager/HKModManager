@@ -107,6 +107,8 @@ declare module "core" {
 
 		version: string;
 
+		authors: string[];
+
 		resources: ResourceResovle[];
 	}
 
@@ -121,7 +123,7 @@ declare module "core" {
 	export class ResourceResovle {
 		type: ResourceResovleType;
 
-		path: string;
+		data: string;
 	}
 
 	export enum ResourceResovleType {

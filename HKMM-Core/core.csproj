@@ -17,12 +17,12 @@
   <ItemGroup>
  
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Mono.cecil" Version="0.11.4">
+    <PackageReference Include="Mono.cecil" Version="0.11.5">
       <Private>true</Private>
     </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
 
-    <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.31.0-*" />
+    <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.31.*-*" />
   </ItemGroup>
 
 </Project>
