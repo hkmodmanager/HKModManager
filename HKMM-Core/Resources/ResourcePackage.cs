@@ -16,7 +16,7 @@ namespace HKMM.Resources
         public string? DisplayName { get; set; }
         public string? Description { get; set; }
         public string Version { get; set; }
-        
+        public string[] Authors { get; set; }
         public ResourceResovle[] Resources { get; set; }
     }
     [JSExport]

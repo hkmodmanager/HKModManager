@@ -22,7 +22,7 @@
     </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
 
-    <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.31.0" />
+    <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.31.0-*" />
   </ItemGroup>
 
 </Project>

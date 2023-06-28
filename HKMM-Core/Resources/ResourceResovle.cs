@@ -11,7 +11,7 @@ namespace HKMM.Resources
     public struct ResourceResovle
     {
         public ResourceResovleType Type { get; set; }
-        public string Path { get; set; }
+        public string Data { get; set; }
     }
     [JSExport]
     public enum ResourceResovleType
