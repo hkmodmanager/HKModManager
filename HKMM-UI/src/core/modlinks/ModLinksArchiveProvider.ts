@@ -13,7 +13,7 @@ export class ModLinksArchiveProvider extends ModLinksProvider {
 
     protected async fetchData(): Promise<any> {
         if(this.mods) return;
-
+        console.dir(this);
         this.mods = JSON.parse(await downloadText("https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/master/modlinks.json", 
             undefined, undefined, false, "ModLinks", "Download"));
 
@@ -21,6 +21,7 @@ export class ModLinksArchiveProvider extends ModLinksProvider {
         data.saveDate = Date.now();
         const d = JSON.stringify(data, undefined, 4);
         modlinksOffline.saveLocal(Buffer.from(d, 'utf8'), data.saveDate);
+        console.dir(this.mods);
     }
     public getMod(name: string, version?: string | undefined): ModLinksManifestData | undefined {
         const ver = this.mods?.mods[name];

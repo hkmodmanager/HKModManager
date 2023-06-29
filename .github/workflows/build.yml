@@ -54,7 +54,7 @@ jobs:
         run: |
           dotnet build -c=Release
           cd HKMM-Core
-          dotnet publish
+          dotnet publish -p:PublishAsNative=true
       - name: Build Game Inject
         run: |
           cd gameinject

@@ -4,25 +4,51 @@
     <Nullable>enable</Nullable>
     <LangVersion>11</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SelfContained>true</SelfContained>
+    <RootNamespace>HKMM</RootNamespace>
 
+    <NoWarn>CS0436</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(PublishAsNative) == true"> 
+    <SelfContained>true</SelfContained>
     <PublishAot>true</PublishAot>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishNodeModule>true</PublishNodeModule>
     <PublishDir>../HKMM-UI/libs/core/native</PublishDir>
+    <OptimizationPreference>Size</OptimizationPreference>
 
-    <RootNamespace>HKMM</RootNamespace>
+    <DefineConstants>$(DefineConstants);BUILD_NODE_NATIVE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
- 
+
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Mono.cecil" Version="0.11.5">
       <Private>true</Private>
     </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
 
-    <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.31.*-*" />
+    <PackageReference Include="System.Text.Json" Version="7.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(PublishAsNative) == true">
+     <PackageReference Include="Microsoft.JavaScript.NodeApi; Microsoft.JavaScript.NodeApi.Generator" Version="0.41.*-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="F:\HKLab\HKMM\HKMM-Core\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\hpackage-schema\**\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="F:\HKLab\HKMM\HKMM-Core\.editorconfig" />
   </ItemGroup>
 
 </Project>
