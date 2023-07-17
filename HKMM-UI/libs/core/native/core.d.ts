@@ -16,6 +16,8 @@ declare module "core" {
 
 	export function tryFindGamePath(): string | undefined;
 
+	export function getRootPackageProvider(): PackageProviderProxy;
+
 	export interface TaskPropertyChanged { (
 		task: TaskItem,
 		propertyName: string | undefined,
@@ -148,6 +150,10 @@ declare module "core" {
 		readonly installDate: number;
 
 		check(): LocalPackageProxy;
+
+		static getMod(name: string): LocalPackageProxy | undefined;
+
+		static getAllMods(): Promise<LocalPackageProxy[]>;
 	}
 
 	export class PackageDisplay extends unknown {
@@ -181,7 +187,7 @@ declare module "core" {
 	export class PackageProviderProxy extends unknown {
 		constructor();
 
-		static readonly root: PackageProviderProxy;
+		static getRoot(): PackageProviderProxy;
 
 		getAllPackages(onlyTop: boolean): PackageDisplay[];
 	}

@@ -41,9 +41,8 @@
 </template>
 
 <script lang="ts">
-import { ModLinksManifestData } from '@/core/modlinks/modlinks';
-import { getLocalMod, LocalModInstance } from '@/core/modManager';
 import { Collapse } from 'bootstrap';
+import { PackageDisplay } from 'core';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -81,7 +80,7 @@ export default defineComponent({
     },
     computed: {
         modsArray() {
-            return this.mods as LocalModInstance[] | ModLinksManifestData[];
+            return this.mods as PackageDisplay[];
         },
         showCount() {
             return this.count ?? 8;

@@ -13,12 +13,9 @@ import "@/css/common.scss"
 import viewErrorVue from './view/view-error.vue'
 import { ipcRenderer } from 'electron'
 import { URL } from 'url'
-import { importGroup } from './core/modgroup'
 import { store } from './core/settings'
 import { appVersion, publicDir } from './core/remoteCache'
 import { LogSkipStackFrame } from './common'
-import { fixModLinksManifestData, getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
-import { getOrAddLocalMod } from './core/modManager'
 import { join } from 'path'
 import { onSettingChanged } from 'core'
 
@@ -84,20 +81,14 @@ console.log(`Hollow Knight Mod Manager App stared(v${appVersion}) = ${new Date()
 
 const routes: RouteRecordRaw[] = [
     {
-        name: 'allmods',
-        path: '/allmods',
-        component: () => import('./view/view-allmods.vue')
+        name: "pack",
+        path: "/pack",
+        component: () => import('./view/view-pack.vue')
     },
     {
         name: 'settings',
         path: '/settings',
         component: () => import('./view/view-settings.vue')
-    },
-    {
-        name: 'localmods',
-        path: '/localmods/:filter?',
-        component: () => import('./view/view-localmods.vue'),
-        props: true
     },
     {
         name: 'tasks',
@@ -106,19 +97,9 @@ const routes: RouteRecordRaw[] = [
         props: true
     },
     {
-        name: 'modgroups',
-        path: '/modgroups',
-        component: () => import('./view/view-modgroups.vue')
-    },
-    {
         name: 'api',
         path: '/api',
         component: () => import('./view/view-api.vue')
-    },
-    {
-        name: 'new',
-        path: '/new',
-        component: () => import('./view/view-new.vue')
     },
     {
         name: 'about',
@@ -180,45 +161,7 @@ remote.getCurrentWindow().setIcon(join(publicDir, "logo.ico"));
 ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     const url = new URL(urlStr);
     console.dir(url);
-    if (url.hostname == 'import.group') {
-        importGroup(url);
-    }
-    else if (url.hostname == 'install.mod') {
-        getModLinks().then((data) => {
-            let mds = url.searchParams.get('metadata');
-            if(!mds) {
-                const m2 = url.searchParams.get('metadata64');
-                if(m2) {
-                    mds = Buffer.from(m2, 'base64url').toString('utf-8');
-                }
-            }
-            const skipDep = url.searchParams.get('skipDep') === 'true';
-            let md: ModLinksManifestData | null = null;
 
-            const name = url.searchParams.get('name');
-            const ver = url.searchParams.get('version');
-            md = data.getMod(name ?? '', ver ?? undefined) ?? null;
-            if (mds) {
-                const m: ModLinksManifestData = JSON.parse(mds);
-                if(!md) {
-                    md = m;
-                } else {
-                    for (const name of Object.keys(m)) {
-                        if((m as any)[name]) {
-                            (md as any)[name] = (m as any)[name];
-                        }
-                    }
-                }
-            }
-            if (!md) {
-                return;
-            }
-            fixModLinksManifestData(md);
-            const mg = getOrAddLocalMod(md.name);
-            mg.installNew(md, false, skipDep);
-        });
-
-    }
 });
 
 //document.body.setAttribute("data-bs-theme", store.get('useDarkMode', false) ? "dark" : "light");

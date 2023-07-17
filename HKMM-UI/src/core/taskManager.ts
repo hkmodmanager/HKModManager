@@ -58,6 +58,7 @@ export function* getAllTasks() {
     }
 }
 
+
 //Set Progress Bar
 (function () {
     setInterval(() => {

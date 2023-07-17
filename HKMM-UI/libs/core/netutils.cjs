@@ -23,6 +23,16 @@ module.exports = d;
 module.exports.default = d;
 
 window.core = d;
+window.nothrow = function(fb)
+{
+    try
+    {
+        fb();
+    } catch(e)
+    {
+        console.error(e);
+    }
+};
 
 d.registerLogHandler("Log", msg => console.log(msg));
 d.registerLogHandler("Error", msg => console.error(msg));

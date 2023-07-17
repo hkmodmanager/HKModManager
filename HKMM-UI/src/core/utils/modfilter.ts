@@ -1,7 +1,6 @@
-import { PackageDisplay } from "core";
-import { getModDate, getModRepo, ModTag, provider } from "../modlinks/modlinks";
-import { getLocalMod, getOldestVersion, getOrAddLocalMod } from "../modManager";
-import { getShortName } from "./utils";
+import { LocalPackageProxy, PackageDisplay } from "core";
+import { ModTag } from "../interop/parser/modlinks";
+import { getModRepo, getShortName } from "./utils";
 
 function processingModName(name: string) {
     return name.trim().toLowerCase().replaceAll(' ', '');
@@ -25,14 +24,14 @@ const defaultFilters: Record<string, ModFilter> = {
         return [repo[0]?.toLowerCase() == authorName, 0];
     },
     enabled(fparts, mod){
-        const lg = getLocalMod(mod.name);
+        const lg = LocalPackageProxy.getMod(mod.name);
         if (!lg) return [false, 0];
-        return [lg.isEnabled(), 0];
+        return [lg.enabled, 0];
     },
     disabled(fparts, mod){
-        const lg = getLocalMod(mod.name);
+        const lg = LocalPackageProxy.getMod(mod.name);
         if (!lg) return [false, 0];
-        return [!lg.isEnabled(), 0];
+        return [!lg.enabled, 0];
     },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
@@ -40,32 +39,6 @@ const defaultFilters: Record<string, ModFilter> = {
         const date = mod.date;
         const span = (Date.now() - date.valueOf()) / 1000 / 60 / 60 / 24;
         return [span <= day, 0];
-    },
-    "new-in-days": (fparts, mod) =>
-    {
-        const day = Number.parseInt(fparts[1]);
-        if(!Number.isInteger(day)) return [false, 0];
-        let firstPublish: Date | undefined;
-        if(provider.hasData()) {
-            const mg = provider.getModAllVersions(mod.name);
-            if(mg) {
-                const oldest = provider.getMod(mod.name, getOldestVersion(mg.map(x => x.version)));
-                if(oldest) {
-                    firstPublish = getModDate(oldest.date);
-                }
-            }
-        }
-        if(!firstPublish) {
-            const lg = getOrAddLocalMod(mod.name);
-            const oldest = lg.versions[getOldestVersion(Object.keys(lg.versions)) ?? ''];
-            if(oldest) {
-                firstPublish = getModDate(oldest.info.modinfo.date);
-            }
-        }
-
-        if(!firstPublish) return [false, 0];
-        const span = (Date.now() - firstPublish.valueOf()) / 1000 / 60 / 60 / 24;
-        return [span <= day, -Date.now() + firstPublish.valueOf()];
     }
 };
 
@@ -114,14 +87,6 @@ export function prepareFilter(input?: string,
                 } else if (sortMode == 'lastupdate-reverse') {
                     filters.push(['sort-lastUpdate', (mod) => {
                         return [true, mod.date ? (-mod.date) : 0];
-                    }]);
-                } else if (sortMode == 'size') {
-                    filters.push(['sort-size', (mod) => {
-                        return [true, 0]//[true, mod.ei_files?.size ?? 0];
-                    }]);
-                } else if (sortMode == 'size-reverse') {
-                    filters.push(['sort-size', (mod) => {
-                        return [true, 0]//[true, -(mod.ei_files?.size ?? 0)];
                     }]);
                 }
             }

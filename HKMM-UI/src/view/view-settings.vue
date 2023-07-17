@@ -80,13 +80,6 @@
         <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.advanced.warning") }}
       </div>
 
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="CUSTOM_MODLINKS" />
-        <label class="form-check-label">{{ $t("settings.advanced.custom_modlinks") }}</label>
-      </div>
-      <div class="input-group p-1" v-if="enableOption('CUSTOM_MODLINKS')">
-        <input class="form-control" type="url" v-model="customModLinksUrl"/>
-      </div>
     </div>
     <!--Exp Mode-->
     <hr />
@@ -128,7 +121,6 @@ import { join } from "path";
 import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
-import { getModLinks, refreshModLinksProvider } from "@/core/modlinks/modlinks";
 
 export default defineComponent({
   components: {
@@ -152,18 +144,10 @@ export default defineComponent({
       return new Popover(popoverTriggerEl)
     })
   },
-  unmounted() {
-    if (store.store.customModLinks !== this.customModLinksUrl) {
-      store.set('customModLinks', this.customModLinksUrl);
-      refreshModLinksProvider();
-      getModLinks();
-    }
-  },
   data() {
     return {
       options: store.get('options', []),
       cdn: store.get('cdn', 'JSDELIVR'),
-      customModLinksUrl: store.store.customModLinks
     }
   },
   watch: {

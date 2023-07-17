@@ -45,3 +45,11 @@ export function getRealModPath(name: string = '', disabled = false) {
     if (!existsSync(p)) mkdirSync(p, { recursive: true });
     return p;
 }
+
+export function getModRepo(repo: string): [string, string] | undefined {
+    const url = new URL(repo);
+    if (url.hostname != "github.com") return undefined;
+    const parts = url.pathname.split('/');
+    return [parts[1], parts[2]];
+}
+

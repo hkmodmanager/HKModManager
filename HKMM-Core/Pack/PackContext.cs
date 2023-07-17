@@ -27,9 +27,12 @@ namespace HKMM.Pack
         public readonly List<PackContext> fallback = new();
 
         private bool _inited = false;
+        public virtual string Name => "Default";
+
         public PackContext()
         {
             packages = new();
+            Init();
         }
         public PackContext(PackCollection packages)
         {
@@ -76,7 +79,7 @@ namespace HKMM.Pack
                 {
                     _inited = false;
                 }
-            });
+            }, GetType().FullName ?? Name);
         }
         protected virtual Task<bool> TryInit()
         {

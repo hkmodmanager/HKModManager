@@ -11,6 +11,7 @@ namespace HKMM.Pack.Provider
 {
     public class ModLinksPackagesProvider : PackContext
     {
+        public override string Name => "ModLinks";
         public static readonly ModLinksPackagesProvider instance = new();
         protected override async Task<bool> TryInit()
         {

@@ -13,7 +13,7 @@ namespace HKMM.Pack.Provider
 {
     public class ApiLinksPackageProvider : PackContext
     {
-        
+        public override string Name => "API";
         public readonly static ApiLinksPackageProvider instance = new();
         protected override async Task<bool> TryInit()
         {

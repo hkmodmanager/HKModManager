@@ -1,7 +1,13 @@
 import { currentPlatform } from "@/core/exportGlobal";
-import { ModdingAPIData, } from "@/core/modlinks/modlinks";
 import { ContainerNode, findXmlNode, getCDATANodeText, getXmlNodeText, TextNode } from "@/core/utils/xml";
 import { ast, Parser } from "tsxml";
+
+export class ModdingAPIData {
+    public link: string = "";
+    public version: number = 0;
+    public lastGet: number = 0;
+    public files: string[] = [];
+}
 
 export async function parseAPILink(input: string) {
 

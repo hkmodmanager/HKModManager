@@ -50,6 +50,8 @@ namespace HKMM.Tasks
             item = t;
             t.Name = name;
             t.Guid = Guid.NewGuid().ToString();
+            t.Status = TaskItemStatus.Running;
+            StartTask(t);
             return Task.Run<T>(async () =>
             {
                 T result = default!;

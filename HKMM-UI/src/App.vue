@@ -37,7 +37,7 @@
             &nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
         </div>
         
-        <navitem viewpath="/allmods"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
+        <navitem viewpath="/pack"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
         <navitem viewpath="/new" v-if="!enableOption('CUSTOM_MODLINKS')"><i class="bi bi-cloud-plus"></i> {{ $t("tabs.whatsnew") }}</navitem>
 
         <li class="nav-item">
@@ -144,20 +144,11 @@ html {
 </style>
 
 <script lang="ts">
-import "@/view/view-allmods.vue";
-import "@/view/view-api.vue";
-import "@/view/view-error.vue";
-import "@/view/view-localmods.vue";
-import "@/view/view-modgroups.vue";
-import "@/view/view-settings.vue";
-import "@/view/view-tasks.vue";
-
 import { defineComponent } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
 import { getAPIVersion } from '@/core/apiManager';
-import { getRequireUpdateModsSync } from "./core/modManager";
-import { getModLinks, provider } from "./core/modlinks/modlinks";
+
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
 import { hasOption, SettingOptions, store } from "./core/settings";
@@ -233,8 +224,7 @@ export default defineComponent({
       return getAPIVersion() >= 72;
     },
     isRequireUpdateMods() {
-      if (provider?.isOffline()) return false;
-      return getRequireUpdateModsSync().length > 0;
+      return false; //TODO
     },
     useDarkMode(e: boolean) {
       document.body.setAttribute("data-bs-theme", e ? "dark" : "light");
@@ -245,20 +235,5 @@ export default defineComponent({
       return document.body.getAttribute("data-bs-theme") == "dark";
     }
   },
-  updated() {
-    if (!provider.hasData()) {
-      getModLinks().then(() => {
-        this.$forceUpdate();
-      });
-    }
-  },
-  mounted() {
-    if (!provider.hasData()) {
-      getModLinks().then(() => {
-        this.$forceUpdate();
-      });
-    }
-
-  }
 });
 </script>

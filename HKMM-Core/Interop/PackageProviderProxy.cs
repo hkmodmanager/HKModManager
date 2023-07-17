@@ -13,14 +13,19 @@ namespace HKMM.Interop
     {
         public PackContext context = null!;
 
-        public static PackageProviderProxy Root => new()
+        public static PackageProviderProxy GetRoot()
         {
-            context = PackContext.rootContext
-        };
+            Logger.Where();
+            return new()
+            {
+                context = PackContext.rootContext
+            };
+        }
 
         public PackageDisplay[] GetAllPackages(bool onlyTop)
         {
-            if(onlyTop)
+            Logger.Where();
+            if (onlyTop)
             {
                 return context.packages.Values
                     .Select(x => new PackageDisplay() { package = x.ToHKMMPackageDef()}).ToArray();

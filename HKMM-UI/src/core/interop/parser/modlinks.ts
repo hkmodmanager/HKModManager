@@ -1,7 +1,24 @@
 import { currentPlatform } from "@/core/exportGlobal";
-import { ModLinksManifestData, ModTag } from "@/core/modlinks/modlinks";
 import { ContainerNode, findXmlNode, getCDATANodeText, getXmlNodeText, TextNode } from "@/core/utils/xml";
 import { ast, Parser } from "tsxml";
+
+export type ModTag = "Boss" | "Cosmetic" | "Expansion" | "Gameplay" | "Library" | "Utility";
+
+export interface ModLinksManifestData {
+    name: string;
+    version: string;
+    desc: string;
+    displayName?: string;
+    link?: string;
+    dependencies: string[];
+    repository: string | undefined;
+    integrations: string[];
+    tags: ModTag[];
+    authors: string[];
+    date?: string;
+    isDeleted?: boolean;
+    owner?: string;
+}
 
 export async function parseModLinks(content: string): Promise<Record<string, ModLinksManifestData>> {
     const result: Record<string, ModLinksManifestData> = {};

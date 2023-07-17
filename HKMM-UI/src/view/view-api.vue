@@ -33,9 +33,9 @@
                     apiver: 72
             }) }}</div>
             <div class="d-flex" v-if="getAPIVersion() > 0 || !nofitapi">
-                <button class="btn btn-primary flex-grow-1" v-if="!isInstallAPI()" :disabled="apiDownloading"
+                <button class="btn btn-primary flex-grow-1" v-if="!isInstallAPI()" :disabled="false" 
                     @click="updateAPI()">{{ $t("api.install") }}</button>
-                <button class="btn btn-primary flex-grow-1" v-if="hasUpdate()" :disabled="apiDownloading"
+                <button class="btn btn-primary flex-grow-1" v-if="hasUpdate()" :disabled="false"
                     @click="updateAPI()">{{ $t("api.update") }}</button>
                 <button class="btn btn-primary flex-grow-1" v-if="isInstallAPI() && hasBackupFile()"
                     @click="showUnistallAPI()">{{
@@ -60,8 +60,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { getAPIVersion, getGameVersion, getLatestIsMatch, getLatestIsMatchSync, downloadAPI, isVaildBackup, resotreBackup, isDownloadingAPI } from '@/core/apiManager';
-import { apiInfoCache, getAPIInfo } from '@/core/modlinks/modlinks';
+import { getAPIVersion, getGameVersion,  isVaildBackup, resotreBackup } from '@/core/apiManager';
 import ModalBox from '@/components/modal-box.vue';
 import * as remote from "@electron/remote";
 
@@ -96,36 +95,18 @@ export default defineComponent({
             this.$forceUpdate();
         },
         hasUpdate() {
-            if (!this.apigf || !this.isInstallAPI() || !getLatestIsMatchSync())
-                return false;
-            const api = apiInfoCache;
-            if (!api)
-                return false;
-            return api.version > getAPIVersion();
+            //TODO
+            return false;
         },
         async updateAPI() {
-            this.apiDownloading = true;
-            this.$forceUpdate();
-            await downloadAPI();
-            this.apiDownloading = false;
-            this.$forceUpdate();
+            //TODO
         }
     },
     data() {
         return {
             nofitapi: false,
             apigf: false,
-            apiDownloading: isDownloadingAPI
         };
-    },
-    mounted() {
-        getAPIInfo().then(() => {
-            this.apigf = true;
-            this.$forceUpdate();
-        });
-        getLatestIsMatch().then((result) => {
-            this.nofitapi = !result;
-        });
     },
     components: { ModalBox }
 });

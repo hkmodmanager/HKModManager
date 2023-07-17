@@ -28,5 +28,19 @@ namespace HKMM.Interop
         public string InstallPath => package.InstallPath;
         public bool Enabled => package.Enabled;
         public double InstallDate => package.InstallDateJS;
+
+        public static LocalPackageProxy? GetMod(string name)
+        {
+            Logger.Where();
+            return LocalPackManager.DefaultInstaller.mods.TryGetValue(name, out var p) ? new() { package = p } : null;
+        }
+        public static async Task<LocalPackageProxy[]> GetAllMods()
+        {
+            Logger.Where();
+            await LocalPackManager.DefaultInstaller.LoadLocalPacks();
+            return LocalPackManager.DefaultInstaller.mods.Values
+                .Select(x => new LocalPackageProxy() { package = x })
+                .ToArray();
+        }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -55,6 +56,13 @@ namespace HKMM
         public static void LogWarning(string msg)
         {
             Log(msg, LogLevel.Warning);
+        }
+
+        public static void Where([CallerMemberName] string name = "", 
+            [CallerFilePath] string path = "", 
+            [CallerLineNumber] int line = 0)
+        {
+            Log($"Call {name} in {path}:{line}");
         }
     }
 }
