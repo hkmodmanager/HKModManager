@@ -24,7 +24,8 @@ internal static class Converter
                 IsoDateTimeOffsetConverter.Singleton
             },
         PropertyNameCaseInsensitive = true,
-        TypeInfoResolver = CSPackSC.Default
+        TypeInfoResolver = CSPackSC.Default,
+        WriteIndented = true
     };
 }
 
@@ -59,7 +60,7 @@ internal class InstallationRootConverter : JsonConverter<InstallationRoot>
         throw new Exception("Cannot marshal type InstallationRoot");
     }
 
-    public static readonly InstallationRootConverter Singleton = new InstallationRootConverter();
+    public static readonly InstallationRootConverter Singleton = new();
 }
 
 internal class ReferencesConverter : JsonConverter<References>
@@ -95,7 +96,7 @@ internal class ReferencesConverter : JsonConverter<References>
         throw new Exception("Cannot marshal type References");
     }
 
-    public static readonly ReferencesConverter Singleton = new ReferencesConverter();
+    public static readonly ReferencesConverter Singleton = new();
 }
 
 internal class ReferenceVersionConverter : JsonConverter<ReferenceVersion>
@@ -131,7 +132,7 @@ internal class ReferenceVersionConverter : JsonConverter<ReferenceVersion>
         throw new Exception("Cannot marshal type ReferenceVersion");
     }
 
-    public static readonly ReferenceVersionConverter Singleton = new ReferenceVersionConverter();
+    public static readonly ReferenceVersionConverter Singleton = new();
 }
 
 internal class FileTypeConverter : JsonConverter<FileType>
@@ -170,7 +171,7 @@ internal class FileTypeConverter : JsonConverter<FileType>
         throw new Exception("Cannot marshal type FileType");
     }
 
-    public static readonly FileTypeConverter Singleton = new FileTypeConverter();
+    public static readonly FileTypeConverter Singleton = new();
 }
 
 internal class ReleaseAssetsConverter : JsonConverter<ReleaseAssets>
@@ -206,7 +207,7 @@ internal class ReleaseAssetsConverter : JsonConverter<ReleaseAssets>
         throw new Exception("Cannot marshal type ReleaseAssets");
     }
 
-    public static readonly ReleaseAssetsConverter Singleton = new ReleaseAssetsConverter();
+    public static readonly ReleaseAssetsConverter Singleton = new();
 }
 
 public class DateOnlyConverter : JsonConverter<DateOnly>
@@ -316,7 +317,7 @@ internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
     }
 
 
-    public static readonly IsoDateTimeOffsetConverter Singleton = new IsoDateTimeOffsetConverter();
+    public static readonly IsoDateTimeOffsetConverter Singleton = new();
 }
 
 

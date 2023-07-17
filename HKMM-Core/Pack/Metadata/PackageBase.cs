@@ -29,7 +29,6 @@ namespace HKMM.Pack.Metadata
         }
     }
     [JsonConverter(typeof(PackageBaseConverter))]
-    [JSExport]
     public partial class PackageBase
     {
         public CSHollowKnightPackageDef Value => (CSHollowKnightPackageDef)this;
@@ -77,7 +76,6 @@ namespace HKMM.Pack.Metadata
             return (CSHollowKnightPackageDef?)JsonSerializer.Deserialize(json, jti.Type, Converter.Settings);
         }
         public string ToJson() => JsonSerializer.Serialize(this, GetJsonTypeInfo().Type, Converter.Settings);
-
         public List<string> GetAllDependencies(bool dev)
         {
             var list = new List<string>();

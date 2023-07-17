@@ -1,6 +1,6 @@
 
 import { getCurrentWindow } from '@electron/remote';
-import { TaskItem, TaskItemStatus, TaskManager } from 'core';
+import { TaskItem, TaskItemStatus, JSTaskManager } from 'core';
 
 //let a = 0;
 
@@ -15,7 +15,7 @@ export function createTask(taskName: string): TaskItem {
     const result = new TaskItem();
     result.status = TaskItemStatus.Running;
     result.name = taskName;
-    TaskManager.startTask(result);
+    JSTaskManager.startTask(result);
 
     result.log("Start task");
     try {
@@ -47,12 +47,12 @@ export function startTask(taskName: string, task: (info: TaskItem) => Promise<an
 }
 
 export function getTask(taskGuid: string) {
-    return TaskManager.getTask(taskGuid);
+    return JSTaskManager.getTask(taskGuid);
 }
 
 export function* getAllTasks() {
-    for (let i = 0; i < TaskManager.taskCount; i++) {
-        const result = <TaskItem>TaskManager.getTaskAt(i);
+    for (let i = 0; i < JSTaskManager.taskCount; i++) {
+        const result = <TaskItem>JSTaskManager.getTaskAt(i);
         if (!result) continue;
         yield result;
     }
@@ -62,7 +62,7 @@ export function* getAllTasks() {
 (function () {
     setInterval(() => {
         try {
-            const progress = TaskManager.getTasksProgress();
+            const progress = JSTaskManager.getTasksProgress();
             if (progress == 0) {
                 getCurrentWindow().setProgressBar(-1);
                 return;

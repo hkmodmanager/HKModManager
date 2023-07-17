@@ -20,13 +20,9 @@ import { LogSkipStackFrame } from './common'
 import { fixModLinksManifestData, getModLinks, ModLinksManifestData } from './core/modlinks/modlinks'
 import { getOrAddLocalMod } from './core/modManager'
 import { join } from 'path'
-import { initJSAPI, onSettingChanged } from 'core'
+import { onSettingChanged } from 'core'
 
-initJSAPI({
-    getConfigPath() {
-        return store.path;
-    },
-});
+import "@/core/interop/cs"
 
 store.onDidAnyChange(() => {
     setTimeout(() => {

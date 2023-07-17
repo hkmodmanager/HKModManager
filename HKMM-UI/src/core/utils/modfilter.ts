@@ -1,4 +1,5 @@
-import { getModDate, getModRepo, ModLinksManifestData, ModTag, provider } from "../modlinks/modlinks";
+import { PackageDisplay } from "core";
+import { getModDate, getModRepo, ModTag, provider } from "../modlinks/modlinks";
 import { getLocalMod, getOldestVersion, getOrAddLocalMod } from "../modManager";
 import { getShortName } from "./utils";
 
@@ -6,8 +7,8 @@ function processingModName(name: string) {
     return name.trim().toLowerCase().replaceAll(' ', '');
 }
 
-export type ModFilterInfo = [string, ((mod: ModLinksManifestData) => [boolean, number])][];
-export type ModFilter = (parts: string[], mod: ModLinksManifestData) => [boolean, number];
+export type ModFilterInfo = [string, ((mod: PackageDisplay) => [boolean, number])][];
+export type ModFilter = (parts: string[], mod: PackageDisplay) => [boolean, number];
 const defaultFilters: Record<string, ModFilter> = {
     tag(fparts, mod) {
         return [mod.tags.includes(fparts[1] as ModTag), 0];
@@ -36,7 +37,7 @@ const defaultFilters: Record<string, ModFilter> = {
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];
-        const date = getModDate(mod.date);
+        const date = mod.date;
         const span = (Date.now() - date.valueOf()) / 1000 / 60 / 60 / 24;
         return [span <= day, 0];
     },
@@ -70,7 +71,7 @@ const defaultFilters: Record<string, ModFilter> = {
 
 export function prepareFilter(input?: string,
     customFilter?: Record<string, ModFilter>,
-    aliasGetter?: (mod: ModLinksManifestData) => string) {
+    aliasGetter?: (mod: PackageDisplay) => string) {
     if (!input) return [];
     const filters: ModFilterInfo = [];
     const mix = {...defaultFilters, ...customFilter};
@@ -108,19 +109,19 @@ export function prepareFilter(input?: string,
             if (sortMode) {
                 if (sortMode == 'lastupdate') {
                     filters.push(['sort-lastUpdate', (mod) => {
-                        return [true, mod.date ? (getModDate(mod.date).valueOf()) : 0];
+                        return [true, mod.date ? (mod.date) : 0];
                     }]);
                 } else if (sortMode == 'lastupdate-reverse') {
                     filters.push(['sort-lastUpdate', (mod) => {
-                        return [true, mod.date ? (-getModDate(mod.date).valueOf()) : 0];
+                        return [true, mod.date ? (-mod.date) : 0];
                     }]);
                 } else if (sortMode == 'size') {
                     filters.push(['sort-size', (mod) => {
-                        return [true, mod.ei_files?.size ?? 0];
+                        return [true, 0]//[true, mod.ei_files?.size ?? 0];
                     }]);
                 } else if (sortMode == 'size-reverse') {
                     filters.push(['sort-size', (mod) => {
-                        return [true, -(mod.ei_files?.size ?? 0)];
+                        return [true, 0]//[true, -(mod.ei_files?.size ?? 0)];
                     }]);
                 }
             }
@@ -133,10 +134,10 @@ export function prepareFilter(input?: string,
     return filters;
 }
 
-export function filterMods<T = ModLinksManifestData>(inmods: (T | undefined)[],
+export function filterMods<T = PackageDisplay>(inmods: (T | undefined)[],
     filters: ModFilterInfo,
-    convert: ((mod: T) => ModLinksManifestData | undefined) = (mod: T) => (mod as any as ModLinksManifestData)) {
-    const result: [T, ModLinksManifestData, number][] = [];
+    convert: ((mod: T) => PackageDisplay | undefined) = (mod: T) => (mod as any as PackageDisplay)) {
+    const result: [T, PackageDisplay, number][] = [];
     for (const mod of inmods) {
         if (!mod) continue;
         const modinfo = convert(mod);
@@ -159,8 +160,6 @@ export function filterMods<T = ModLinksManifestData>(inmods: (T | undefined)[],
         const bm = b[1];
         return (
             am.name.localeCompare(bm.name) +
-            (am.isDeleted ? 1000 : 0) +
-            (bm.isDeleted ? -1000 : 0) +
             b[2] - a[2]
         );
     }).map(x => x[0]);

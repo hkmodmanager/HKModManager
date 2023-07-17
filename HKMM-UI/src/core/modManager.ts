@@ -13,7 +13,6 @@ import { installGameInject, saveConfig } from "./gameinject";
 import { appDir, userData } from "./remoteCache";
 import { createHash } from "crypto";
 import { RL_ClearCache } from "./relocation/RLocal";
-import { ignoreVerifyMods } from "./modrepairer";
 import { IModMetadata } from "./data/IModMetadata";
 import { ver_lg } from "./utils/version";
 import { TaskItem, TaskItemStatus } from "core";
@@ -29,18 +28,7 @@ export function getRealModPath(name: string = '', disabled = false) {
 }
 
 export function getCacheModsPath() {
-    let mods = "";
-    const settings = store.store;
-    if (settings.modsavepathMode == undefined) {
-        store.set('modsavepathMode', ModSavePathMode.UserDir);
-        settings.modsavepathMode = ModSavePathMode.UserDir;
-    }
-    if (settings.modsavepathMode == ModSavePathMode.AppDir) mods = join(appDir, "managedMods");
-    else if (settings.modsavepathMode == ModSavePathMode.UserDir) mods = join(userData, "managedMods");
-    else if (settings.modsavepathMode == ModSavePathMode.Gamepath) mods = join(store.get('gamepath'), "hkmm-mods");
-    else mods = settings.modsavepath;
-    if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
-    return mods;
+    
 }
 
 export enum LocalMod_FullLevel {
@@ -96,40 +84,7 @@ export class LocalModInstance {
         return false;
     }
 
-    private fixOld() {
-        try {
-            let shouldSave = false;
-            if ((this.info as any)['importFromScarab']) {
-                this.info.imported ??= {
-                    nonExclusiveImport: false
-                };
-                this.info.imported.fromScarab = true;
-                shouldSave = true;
-                delete (this.info as any)['importFromScarab'];
-            }
-            if ((!this.info.modVerify || !this.info.modVerify.verifyDate
-                || (hasOption('VERIFY_MODS_ON_AUTO') && Date.now() - this.info.modVerify.verifyDate > 1000 * 60)) && this.info.modinfo.ei_files?.files) {
-                const missingFiles: string[] = [];
-                this.info.modVerify = {
-                    fulllevel: verifyModFiles(this.info.path, this.info.modinfo.ei_files.files, missingFiles),
-                    missingFiles,
-                    verifyDate: Date.now()
-                };
-                shouldSave = true;
-            }
 
-            shouldSave = shouldSave || fixModLinksManifestData(this.info.modinfo);
-
-
-            const zipp = join(this.info.path, "mod.zip");
-            if (existsSync(zipp)) rmSync(zipp, { force: true });
-            if (shouldSave) {
-                this.save();
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
 
 
     public enable(addToCurrentGroup: boolean = true, installedSet?: Set<string>) {
@@ -199,7 +154,7 @@ export class LocalModInstance {
         const info = JSON.parse(readFileSync(infopath, "utf-8")) as LocalModInfo;
         info.path = normalize(path);
         const inst = new LocalModInstance(info);
-        inst.fixOld();
+
         return inst;
     }
 
@@ -596,32 +551,6 @@ export function getRequireUpdateModsSync() {
     }
 
     return result;
-}
-
-export function verifyModFiles(root: string, files: Record<string, string>, missingFilesRec?: string[]) {
-    if (ignoreVerifyMods.has(root)) return LocalMod_FullLevel.None;
-    const optionFileExt = ['.md', '.pdb'];
-    const optionFileName = ['readme', 'readme.txt', 'license', 'license.txt'];
-    let fulllevel = LocalMod_FullLevel.Full;
-    for (const fn in files) {
-        const sha = files[fn];
-        const fp = join(root, fn);
-        const isDll = extname(fn).toLowerCase() == '.dll';
-        const isOption = optionFileExt.includes(extname(fn)?.toLowerCase()) || optionFileName.includes(basename(fn)?.toLowerCase());
-        const fsha = existsSync(fp) ? createHash('sha256').update(readFileSync(fp)).digest('hex') : undefined;
-        if (fsha != sha) {
-            if (isDll) {
-                if (fulllevel > LocalMod_FullLevel.DllNotFull) fulllevel = LocalMod_FullLevel.DllNotFull;
-            } else if (isOption) {
-                if (fulllevel > LocalMod_FullLevel.ResourceFull) fulllevel = LocalMod_FullLevel.ResourceFull;
-            } else {
-                if (fulllevel > LocalMod_FullLevel.DllFullButResourceNotFull) fulllevel = LocalMod_FullLevel.DllFullButResourceNotFull;
-            }
-            missingFilesRec?.push(fn);
-            continue;
-        }
-    }
-    return fulllevel;
 }
 
 const gl = window as any;

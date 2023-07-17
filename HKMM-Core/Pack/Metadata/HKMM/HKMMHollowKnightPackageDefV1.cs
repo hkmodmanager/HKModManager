@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace HKMM.Pack.Metadata.HKMM
 {
-    [JSExport]
     [JsonConverter(typeof(TypeEnumConverter))]
     public enum TypeEnum { Mod, ModPack };
     internal class TypeEnumConverter : JsonConverter<TypeEnum>
@@ -43,9 +42,9 @@ namespace HKMM.Pack.Metadata.HKMM
             throw new Exception("Cannot marshal type TypeEnum");
         }
 
-        public static readonly TypeEnumConverter Singleton = new TypeEnumConverter();
+        public static readonly TypeEnumConverter Singleton = new();
     }
-    [JSExport]
+
     public partial class HKMMHollowKnightPackageDefV1 : CSHollowKnightPackageDef
     {
         public HKMMHollowKnightPackageDefV1()
@@ -75,9 +74,25 @@ namespace HKMM.Pack.Metadata.HKMM
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("version")]
         public string Version { get; set; } = null!;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; } = null!;
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("tags")]
+        public string[] Tags { get; set; } = null!;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("publishDate")]
+        public string PublishDate { get; set; } = null!;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("icon")]
+        public string Icon { get; set; } = null!;
 
         [JsonPropertyName("type")]
         public TypeEnum Type { get; set; }
+
+        public DateTime PublishDateCS => string.IsNullOrEmpty(PublishDate) ? DateTime.MinValue : DateTime.Parse(PublishDate);
     }
 }

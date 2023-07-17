@@ -61,10 +61,6 @@
                     <span v-for="(tag, index) in mod?.tags" :key="index" class="badge bg-primary mt-2">
                         {{ $t(`mods.tags.${tag}`) }}
                     </span>
-
-                    <span v-if="mod?.isDeleted" class="badge bg-danger mt-2">
-                        {{ $t("mods.isDeleted") }}
-                    </span>
                     <span v-if="(modSize == undefined) && modSizeGet && !isLocal && !isInstallMod(mod?.name ?? '')"
                         class="badge bg-danger mt-2">
                         {{ $t("mods.noSource") }}
@@ -125,10 +121,6 @@
                                         @click="openFolder(localmod?.info.path ?? '')"></a>
                                     <a class="btn btn-primary bi bi-patch-check" :title="$t('mods.verifyMod')"
                                         @click="vaildMod()"></a>
-                                    <button class="btn btn-primary bi bi-wrench-adjustable"
-                                        :title="$t('mods.repairMod')"
-                                        v-if="localmod?.info.modVerify && localmod.info.modVerify.fulllevel < 2"
-                                        :disabled="isDisbaleRepairModBtn()" @click="repairMod()"></button>
                                 </template>
                                 <div class="flex-grow-1 d-flex">
                                     <button class="btn btn-primary flex-grow-1"
@@ -194,9 +186,9 @@
                         <span>{{ $t("mods.releasePath") }}:</span>
                         <a copyable :href="releasePath">{{ releasePath }}</a>
                     </div>
-                    <div v-if="mod.date && mod.date != '1970-12-22T04:50:23Z'">
+                    <div v-if="mod.date && mod.date 0">
                         <span>{{ $t("mods.publishTime") }}:</span>
-                        <span copyable>{{ getModPublishTime(mod.date).toLocaleString() }}</span>
+                        <span copyable>{{ new Date(mod.date).toLocaleString() }}</span>
                     </div>
                     <div v-if="localmod">
                         <span>{{ $t("mods.installTime") }}:</span>
@@ -281,8 +273,8 @@
 </style>
 
 <script lang="ts">
-import { getModLinkMod, getModLinks, ModLinksManifestData, getModDate, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
-import { getLocalMod, getOrAddLocalMod, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify, verifyModFiles } from '@/core/modManager';
+import { getModLinkMod, getModLinks, ModLinksManifestData, getLowestDep, getSubMods_ModLinks, getIntegrationsMods_ModLinks, getModRepo, generateInstallURL } from '@/core/modlinks/modlinks';
+import { getLocalMod, getOrAddLocalMod, isDownloadingMod, LocalModInstance, getSubMods, getIntegrationsMods, getRealModPath, IImportedLocalModVerify } from '@/core/modManager';
 import { getCurrentGroup } from '@/core/modgroup'
 import { Collapse } from 'bootstrap';
 import { defineComponent } from 'vue';
@@ -296,11 +288,10 @@ import { dirname, join, parse } from 'path';
 import { IRLocalMod } from '@/core/relocation/RLocal';
 import { getSearchText, setSearchText } from './c-mods-search.vue';
 import { clipboard, shell } from 'electron';
-import { ignoreVerifyMods, repairMod } from '@/core/modrepairer';
-import { startTask } from '@/core/taskManager';
 import MarkdownIt from 'markdown-it';
 import { ver_lg } from '@/core/utils/version';
 import { ModLinksProvider } from '@/core/modlinks/ModLinksProvider';
+import { PackageDisplay } from 'core';
 
 const licenseCache: Record<string, string | null> = {};
 
@@ -370,35 +361,6 @@ export default defineComponent({
             const lv = lm.getLatestVersion();
 
             return lv;
-        },
-        vaildMod() {
-            if (this.mod === undefined) return;
-            const lm = getLocalMod(this.mod.name);
-            if (!lm) return;
-            const ver = lm.getLatest();
-            if (!ver || !ver.info.modinfo.ei_files?.files) return;
-            const missing_files: string[] = [];
-            ver.info.modVerify = {
-                fulllevel: verifyModFiles(ver.info.path, ver.info.modinfo.ei_files?.files, missing_files),
-                missingFiles: missing_files,
-                verifyDate: Date.now()
-            };
-            ver.save();
-            this.$forceUpdate();
-        },
-        repairMod() {
-            if (this.mod === undefined) return;
-            const lm = getLocalMod(this.mod.name);
-            if (!lm) return;
-            const ver = lm.getLatest();
-            if (!ver || !ver.info.modinfo.ei_files?.files) return;
-            startTask(`Repair mod ${lm.name}-v${ver.info.version}`, undefined, async (task) => {
-                this.$forceUpdate();
-                await repairMod(ver, task);
-            });
-        },
-        isDisbaleRepairModBtn() {
-            return ignoreVerifyMods.has(this.localmod?.info.path ?? "") || isDownloadingMod(this.mod?.name ?? '');
         },
         getModAliasName(name: string) {
             if (hasOption('HIDE_MOD_ALIAS'))
@@ -485,9 +447,6 @@ export default defineComponent({
             }
             this.$forceUpdate();
         },
-        getModPublishTime(date: string) {
-            return getModDate(date);
-        },
         getLowestDep(mod?: ModLinksManifestData) {
             if (!mod)
                 return [];
@@ -563,9 +522,9 @@ export default defineComponent({
             search = search.replace(/:author=([-A-Za-z0-9_]+)/g, " :author=" + author);
             setSearchText(search);
         },
-        getMarkdownDesc(mod?: ModLinksManifestData) {
+        getMarkdownDesc(mod?: PackageDisplay) {
             if(mod == null) return '';
-            return md.render(mod.desc
+            return md.render(mod.description
                 .replace(/\b(?:https?:\/\/|www\.)\S+\b/ig, ($0) => `<${$0}>`));
         },
         copyShareUrl(mod?: ModLinksManifestData) {
@@ -590,7 +549,7 @@ export default defineComponent({
         rlocal(): IRLocalMod {
             return this.localInstalled as IRLocalMod;
         },
-        releasePath(): string | undefined {
+        /*releasePath(): string | undefined {
             if (!this.mod?.link) return undefined;
             const url = new URL(this.mod.link);
             if (url.hostname !== 'github.com') return undefined;
@@ -598,11 +557,14 @@ export default defineComponent({
             const repo = dirname(dirname(dirname(dirname(url.pathname))));
             url.pathname = join(repo, "releases", "tag", tag.base);
             return url.toString();
+        }*/
+        releasePath() {
+            return undefined;
         }
     },
     data() {
         return {
-            mod: this.inmod as ModLinksManifestData,
+            mod: this.inmod as PackageDisplay,
             checkTimer: setInterval(() => this.$forceUpdate(), 1000),
             depOnThis: this.isLocal ? getSubMods(this.mod?.name ?? "") : getSubMods_ModLinks(this.mod?.name ?? ""),
             integrateWithThis: this.isLocal ? getIntegrationsMods(this.mod?.name ?? "") : getIntegrationsMods_ModLinks(this.mod?.name ?? ""),
@@ -628,7 +590,7 @@ export default defineComponent({
         });
         
         this.modSizeGet = true;
-        this.modSize = this.mod.ei_files?.noSource ? undefined : (this.mod.ei_files?.size ?? 0);
+
         if (this.mod.repository && hasOption('SHOW_LICENCE') && navigator.onLine) {
             const repo = this.mod.repository;
             if (licenseCache[repo] != undefined) {

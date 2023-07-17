@@ -16,5 +16,6 @@ namespace HKMM.Pack.Legacy
         public string Path { get; set; }
         public LegacyModInfoFull Modinfo { get; set; }
 
+
     }
 }

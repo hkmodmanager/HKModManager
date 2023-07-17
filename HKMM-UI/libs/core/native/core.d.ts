@@ -5,14 +5,6 @@
 
 declare module "core" {
 
-	export function initJSAPI(api: JSAPI): void;
-
-	export function onSettingChanged(): void;
-
-	export class JSAPI extends unknown {
-		getConfigPath: () => string;
-	}
-
 	export function registerLogHandler(
 		level: string,
 		handler: (arg1: string) => void,
@@ -88,180 +80,6 @@ declare module "core" {
 		Fail = 3,
 	}
 
-	export namespace TaskManager {
-		export const taskCount: number;
-
-		export function getTaskAt(id: number): TaskItem;
-
-		export function startTask(task: TaskItem): void;
-
-		export function getTask(guid: string): TaskItem | undefined;
-
-		export function getTasksProgress(): number;
-	}
-
-	export class HKMMPackage extends unknown {
-		constructor();
-
-		static readonly cURRENT_PACKAGE_VERSION: number;
-
-		packageVersion: number;
-
-		info: HKMMHollowKnightPackageDefV1;
-
-		installPath: string;
-
-		readonly version: unknown;
-
-		installDate: Date;
-
-		readonly installDateJS: number;
-
-		installedFiles: unknown[];
-
-		static fromModLegacyToHKMM(mod: LegacyModInfoFull): HKMMHollowKnightPackageDefV1;
-
-		static fromLocalModLegacy(mod: LegacyLocalModInfo): HKMMPackage;
-	}
-
-	export class PackageBase extends unknown {
-		constructor();
-
-		readonly value: CSHollowKnightPackageDef;
-
-		toHKMMPackageDef(): HKMMHollowKnightPackageDefV1;
-
-		static getJsonTypeInfo(packVersion: number | undefined): unknown;
-
-		static getJsonTypeInfo(json: unknown): unknown;
-
-		getJsonTypeInfo(): unknown;
-
-		static fromJson(json: unknown): CSHollowKnightPackageDef | undefined;
-
-		toJson(): string;
-
-		getAllDependencies(dev: boolean): unknown;
-	}
-
-	export class CSHollowKnightPackageDef extends PackageBase {
-		constructor();
-
-		additionalAssets: AdditionalAsset[];
-
-		authors: string[];
-
-		dependencies?: References;
-
-		description: string;
-
-		devDependencies?: References;
-
-		name: string;
-
-		releaseAssets?: ReleaseAssets;
-
-		repository: string;
-	}
-
-	export class AdditionalAsset extends unknown {
-		constructor();
-
-		downloadUrl: string;
-
-		installPath: string;
-
-		installRootDir: InstallationRoot;
-	}
-
-	export class ReferenceDef extends unknown {
-		constructor();
-
-		alternateInstallName: string;
-
-		fileType?: FileType;
-
-		ref: Reference;
-	}
-
-	export class Reference extends unknown {
-		constructor();
-
-		asset?: ReleaseAssets;
-
-		tag: string;
-
-		useLatestRelease?: boolean;
-
-		useLatestPublished?: boolean;
-
-		version: string;
-
-		link: string;
-	}
-
-	export class PlatformAssets extends unknown {
-		constructor();
-
-		linux: string;
-
-		macos: string;
-
-		win32: string;
-	}
-
-	export enum InstallationRoot {
-		Mods = 0,
-
-		Saves = 1,
-	}
-
-	export enum FileType {
-		Dll = 0,
-
-		Infer = 1,
-
-		Zip = 2,
-	}
-
-	export class ReleaseAssets extends unknown {
-		platformAssets?: PlatformAssets;
-
-		string?: string;
-	}
-
-	export class ReferenceVersion extends unknown {
-		referenceDef?: ReferenceDef;
-
-		string?: string;
-
-		getReferenceDef(): ReferenceDef;
-	}
-
-	export class References extends unknown {
-		anythingMap: unknown;
-
-		stringArray: string[];
-	}
-
-	export enum TypeEnum {
-		Mod = 0,
-
-		ModPack = 1,
-	}
-
-	export class HKMMHollowKnightPackageDefV1 extends CSHollowKnightPackageDef {
-		constructor();
-
-		packageVersion: number;
-
-		version: string;
-
-		type: TypeEnum;
-
-		copyFrom(def: CSHollowKnightPackageDef): void;
-	}
-
 	export class LegacyLocalModInfo extends unknown {
 		name: string;
 
@@ -272,6 +90,12 @@ declare module "core" {
 		path: string;
 
 		modinfo: LegacyModInfoFull;
+	}
+
+	export class LegacyModCollection extends unknown {
+		constructor();
+
+		addMod(mod: LegacyModInfoFull): void;
 	}
 
 	export class LegacyModInfoFull extends unknown {
@@ -296,5 +120,81 @@ declare module "core" {
 		authors: string[];
 
 		date?: string;
+	}
+
+	export function initJSAPI(api: JSAPI): void;
+
+	export function onSettingChanged(): void;
+
+	export class JSAPI extends unknown {
+		getModStorePath: () => string;
+
+		getConfigPath: () => string;
+
+		parseModLinks: (arg1: string) => Promise<LegacyModCollection>;
+
+		parseAPILink: (arg1: string) => Promise<LegacyModInfoFull>;
+	}
+
+	export class LocalPackageProxy extends unknown {
+		constructor();
+
+		readonly info: PackageDisplay;
+
+		readonly installPath: string;
+
+		readonly enabled: boolean;
+
+		readonly installDate: number;
+
+		check(): LocalPackageProxy;
+	}
+
+	export class PackageDisplay extends unknown {
+		constructor();
+
+		readonly name: string;
+
+		readonly description: string;
+
+		readonly displayName: string;
+
+		readonly version: string;
+
+		readonly authors: string[];
+
+		readonly tags: string[];
+
+		readonly repository?: string;
+
+		readonly date: number;
+
+		readonly owner: string;
+
+		readonly icon: string;
+
+		readonly dependencies: string[];
+
+		check(): PackageDisplay;
+	}
+
+	export class PackageProviderProxy extends unknown {
+		constructor();
+
+		static readonly root: PackageProviderProxy;
+
+		getAllPackages(onlyTop: boolean): PackageDisplay[];
+	}
+
+	export namespace JSTaskManager {
+		export const taskCount: number;
+
+		export function getTaskAt(id: number): TaskItem;
+
+		export function startTask(task: TaskItem): void;
+
+		export function getTask(guid: string): TaskItem | undefined;
+
+		export function getTasksProgress(): number;
 	}
 }

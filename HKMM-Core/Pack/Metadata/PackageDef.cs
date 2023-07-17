@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Linq;
 using System.Text.Json;
 using HKMM.Pack.Metadata.HKMM;
+using HKMM.Pack.Legacy;
 
 namespace HKMM.Pack.Metadata
 {
@@ -24,9 +25,12 @@ namespace HKMM.Pack.Metadata
     [JsonSerializable(typeof(HKMMPackage))]
     [JsonSerializable(typeof(HKMMHollowKnightPackageDefV1))]
     [JsonSerializable(typeof(PackCollection))]
+    [JsonSerializable(typeof(LegacyLocalModInfo))]
+    [JsonSerializable(typeof(LegacyModInfoFull))]
+    [JsonSerializable(typeof(Settings))]
     public partial class CSPackSC : JsonSerializerContext { }
-    
-    [JSExport]
+
+ 
     public partial class CSHollowKnightPackageDef : PackageBase
     {
 
@@ -62,7 +66,6 @@ namespace HKMM.Pack.Metadata
         [JsonPropertyName("repository")]
         public string Repository { get; set; }
     }
-    [JSExport]
     public partial class AdditionalAsset
     {
         [JsonPropertyName("downloadUrl")]
@@ -74,7 +77,6 @@ namespace HKMM.Pack.Metadata
         [JsonPropertyName("installRootDir")]
         public InstallationRoot InstallRootDir { get; set; }
     }
-    [JSExport]
     public partial class ReferenceDef
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -88,7 +90,6 @@ namespace HKMM.Pack.Metadata
         [JsonPropertyName("ref")]
         public Reference Ref { get; set; }
     }
-    [JSExport]
     public partial class Reference
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -115,7 +116,6 @@ namespace HKMM.Pack.Metadata
         [JsonPropertyName("link")]
         public string Link { get; set; }
     }
-    [JSExport]
     public partial class PlatformAssets
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -130,33 +130,33 @@ namespace HKMM.Pack.Metadata
         [JsonPropertyName("win32")]
         public string Win32 { get; set; }
     }
-    [JSExport]
+
     [JsonConverter(typeof(InstallationRootConverter))]
     public enum InstallationRoot { Mods, Saves };
-    [JSExport]
+
     [JsonConverter(typeof(FileTypeConverter))]
     public enum FileType { Dll, Infer, Zip };
     
-    [JSExport]
+
     [JsonConverter(typeof(ReleaseAssetsConverter))]
     public partial struct ReleaseAssets
     {
         public PlatformAssets? PlatformAssets { get; set; }
         public string? String { get; set; }
 
-        public static implicit operator ReleaseAssets(PlatformAssets PlatformAssets) => new ReleaseAssets { PlatformAssets = PlatformAssets };
-        public static implicit operator ReleaseAssets(string String) => new ReleaseAssets { String = String };
+        public static implicit operator ReleaseAssets(PlatformAssets PlatformAssets) => new() { PlatformAssets = PlatformAssets };
+        public static implicit operator ReleaseAssets(string String) => new() { String = String };
 
     }
-    [JSExport]
+
     [JsonConverter(typeof(ReferenceVersionConverter))]
     public partial struct ReferenceVersion
     {
         public ReferenceDef? ReferenceDef { get; set; }
         public string? String { get; set; }
 
-        public static implicit operator ReferenceVersion(ReferenceDef ReferenceDef) => new ReferenceVersion { ReferenceDef = ReferenceDef };
-        public static implicit operator ReferenceVersion(string String) => new ReferenceVersion { String = String };
+        public static implicit operator ReferenceVersion(ReferenceDef ReferenceDef) => new() { ReferenceDef = ReferenceDef };
+        public static implicit operator ReferenceVersion(string String) => new() { String = String };
 
         private static readonly Regex modlinksVersionRegex = MyRegex();
 
@@ -232,15 +232,15 @@ namespace HKMM.Pack.Metadata
         [GeneratedRegex("^(\\d+\\.){3}\\d+$")]
         private static partial Regex MyRegex();
     }
-    [JSExport]
+
     [JsonConverter(typeof(ReferencesConverter))]
     public partial struct References
     {
         public Dictionary<string, ReferenceVersion> AnythingMap { get; set; }
         public string[] StringArray { get; set; }
 
-        public static implicit operator References(Dictionary<string, ReferenceVersion> AnythingMap) => new References { AnythingMap = AnythingMap };
-        public static implicit operator References(string[] StringArray) => new References { StringArray = StringArray };
+        public static implicit operator References(Dictionary<string, ReferenceVersion> AnythingMap) => new() { AnythingMap = AnythingMap };
+        public static implicit operator References(string[] StringArray) => new() { StringArray = StringArray };
 
     }
 }

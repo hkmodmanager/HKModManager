@@ -1,4 +1,5 @@
-﻿using Microsoft.JavaScript.NodeApi;
+﻿using HKMM.Tasks;
+using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +22,31 @@ namespace HKMM
             handlers[Enum.Parse<LogLevel>(level)] = handler;
         }
 
-        public static void Log(string msg, LogLevel level)
+        public static void Log(string msg, LogLevel level = LogLevel.Log)
         {
+            var task = TaskManager.CurrentTask;
+            if(task != null)
+            {
+                task.Print(msg, level);
+                msg = $"[In {task.Name}({task.Guid})]: " + msg;
+            }
             if (handlers.TryGetValue(level, out var value))
             {
                 value(msg);
             }
+            var output = Console.Out;
+            var prevColor = Console.ForegroundColor;
+            if(level== LogLevel.Warning)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            }
+            if(level == LogLevel.Error)
+            {
+                output = Console.Error;
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            output?.WriteLine($"[{level}]: {msg}");
+            Console.ForegroundColor = prevColor;
         }
         public static void LogError(string msg)
         {

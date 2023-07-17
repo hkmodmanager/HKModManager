@@ -36,10 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EditorConfigFiles Remove="F:\HKLab\HKMM\HKMM-Core\.editorconfig" />
   </ItemGroup>
 

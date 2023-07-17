@@ -116,59 +116,9 @@ export function getModLinks() {
     return getModLinksFromRepo();
 }
 
-let promise_get_api: Promise<ModdingAPIData> | undefined;
+
 export let apiInfoCache: ModdingAPIData | undefined;
 
-export async function getAPIInfoFromRepo() {
-    if (promise_get_api) {
-        return await promise_get_api;
-    }
-    if (apiInfoCache) {
-        const ts = new Date().valueOf() - apiInfoCache.lastGet;
-        if (ts < 10000) {
-            promise_get_api = undefined;
-            return apiInfoCache;
-        }
-    }
-    //const url = "https://cdn.jsdelivr.net/gh/hk-modding/modlinks@latest/ApiLinks.xml";
-    const url = cdn_api[store.get('cdn', 'JSDELIVR')];
-    const content = await downloadText(url, undefined, undefined, false, "ModLinks - APIInfo", "Download");
-    const xml = await Parser.parseString(content);
-    const manifest = (<ContainerNode>xml.getAst().childNodes[1]).childNodes[0] as ContainerNode;
-    const result = new ModdingAPIData();
-    const version = getXmlNodeText(manifest, "Version");
-    if (!version) throw "Invalid ApiLinks.xml";
-    result.version = Number.parseInt(version);
-
-    const links = findXmlNode<ContainerNode>(manifest, "Links");
-    if (!links) throw new Error("Invalid ApiLinks.xml");
-
-    const link = getCDATANodeText(links, currentPlatform);
-    if (!link) throw new Error("Invalid ApiLinks.xml");
-
-    const files = findXmlNode<ContainerNode>(manifest, "Files");
-    if (!files) throw new Error("Invalid ApiLinks.xml");
-    for (const node of files.childNodes) {
-        const text = (node as ast.ContainerNode<TextNode>).childNodes[0].content;
-        result.files.push(text);
-    }
-
-
-    result.link = link;
-    result.lastGet = new Date().valueOf();
-    localStorage.setItem("cache-api-info", JSON.stringify(result));
-    return apiInfoCache = result;
-}
-
-export async function getAPIInfo() {
-    const p = promise_get_api ?? getAPIInfoFromRepo();
-    promise_get_api = p;
-    if (!apiInfoCache) return await p;
-    return p;
-}
-
-getAPIInfoFromRepo();
-getModLinksFromRepo();
 
 export async function getModLinkMod(name: string) {
     const modlinks = await getModLinks();

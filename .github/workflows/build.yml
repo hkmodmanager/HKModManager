@@ -11,6 +11,7 @@ jobs:
     name: Upload alpha
     runs-on: ubuntu-latest
     needs: [release]
+    if: startsWith(github.ref_name, 'master')
     steps:
       - name: Checkout
         uses: actions/checkout@v3

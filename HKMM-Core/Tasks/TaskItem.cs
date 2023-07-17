@@ -80,7 +80,7 @@ namespace HKMM.Tasks
                         _ => "",
                     }
                 });
-                Logger.Log($"[{Guid}-{Name}]: {v}", level);
+                //Logger.Log($"[{Guid}-{Name}]: {v}", level);
             }
             OnChanged?.Invoke(this, nameof(logs));
         }
