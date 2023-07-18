@@ -31,15 +31,7 @@
 
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
-        <navitem viewpath="/localmods/all" compare-path><i class="bi bi-hdd"></i> {{ $t("tabs.localmods") }}</navitem>
-        <div class="list-group nav-list">
-          <navitem viewpath="/localmods/requireUpdate" textcolor="warning" compare-path v-if="isRequireUpdateMods()">
-            &nbsp;{{ $t("tabs.requireUpdateMods") }}</navitem>
-        </div>
-        
-        <navitem viewpath="/pack"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allmods") }}</navitem>
-        <navitem viewpath="/new" v-if="!enableOption('CUSTOM_MODLINKS')"><i class="bi bi-cloud-plus"></i> {{ $t("tabs.whatsnew") }}</navitem>
-
+        <navitem viewpath="/pack"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allpacks") }}</navitem>
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" @click="toggleNavTasks()" href="javascript:;">
             <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
@@ -57,7 +49,6 @@
           </div>
         </li>
         
-        <navitem viewpath="/modgroups"><i class="bi bi-collection"></i> {{ $t("tabs.modgroups") }}</navitem>
         <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i
             class="bi bi-exclamation-diamond text-warning" v-if="!isInstalledVaildAPI()"></i></navitem>
       </ul>

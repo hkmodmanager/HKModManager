@@ -23,12 +23,16 @@ namespace HKMM.Pack
             return SingleTask(async () =>
             {
                 var m = new List<HKMMPackage>();
-                foreach (var mod in Directory.GetDirectories(JS.Api.GetModStorePath()))
+                var msp = JS.Api.GetModStorePath();
+                Logger.Log("Find mods in " + msp);
+                foreach (var mod in Directory.GetDirectories(msp))
                 {
                     var modname = Path.GetFileName(mod);
-                    if (!HKMMPackage.Exists(modname)) continue;
-                    m.Add(await HKMMPackage.From(modname));
+                    var pack = await HKMMPackage.From(modname, true);
+                    if (pack is null) continue;
+                    m.Add(pack);
                 }
+                Logger.Log($"Successfully loaded {m.Count} modpacks");
                 lock (mods)
                 {
                     mods.Clear();
@@ -37,6 +41,7 @@ namespace HKMM.Pack
                         mods.Add(mod.Info.Name, mod);
                     }
                 }
+                
             }, nameof(LoadLocalPacks));
         }
         public override void RecordInstalledPack(HKMMPackage mod)

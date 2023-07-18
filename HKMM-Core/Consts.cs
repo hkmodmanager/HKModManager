@@ -12,5 +12,8 @@ namespace HKMM
         public const string HKMMPACK_ENABLED_FILE_NAME = "HKMM-PACKENABLED";
 
         public const string MODPACK_NAME_MODDING_API = "$ModdingAPI$";
+
+        public const string API_FILE_NAME = "Assembly-CSharp.dll";
+        public const string API_BACKUP_FILE_NAME = "Backup-API.backup";
     }
 }

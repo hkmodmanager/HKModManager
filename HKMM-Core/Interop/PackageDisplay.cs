@@ -1,4 +1,5 @@
-﻿using HKMM.Pack.Metadata;
+﻿using HKMM.Pack;
+using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using Microsoft.JavaScript.NodeApi;
 using System;
@@ -34,5 +35,13 @@ namespace HKMM.Interop
         public string Owner => "";
         public string Icon => package.Icon ?? "";
         public string[] Dependencies => package.GetAllDependencies(false).ToArray();
+        public bool AllowToggle => package.AllowToggle;
+        public bool AllowInstall => package.AllowInstall;
+        public bool AllowUninstall => package.AllowUninstall;
+
+        public async Task Install()
+        {
+            await LocalPackManager.DefaultInstaller.InstallHKPackage(false, package);
+        }
     }
 }

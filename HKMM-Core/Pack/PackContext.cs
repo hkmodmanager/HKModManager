@@ -17,8 +17,10 @@ namespace HKMM.Pack
         {
             fallback =
             {
+#if BUILD_NODE_NATIVE
                 ModLinksPackagesProvider.instance,
                 ApiLinksPackageProvider.instance,
+#endif
                 customProviders
             }
         };

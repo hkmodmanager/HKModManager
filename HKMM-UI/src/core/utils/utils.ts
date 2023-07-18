@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, readdirSync } from "fs";
+import MarkdownIt from "markdown-it";
 import { join } from "path";
 import { store } from "../settings";
+
+export const commonMarkdown : MarkdownIt = MarkdownIt({
+    html: true
+});
 
 export function ConvertSize(bytes: number) {
     if (!bytes) return "0 KB";

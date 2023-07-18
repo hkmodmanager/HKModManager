@@ -36,5 +36,14 @@ namespace HKMM.Interop
                     .Select(x => new PackageDisplay() { package = x.ToHKMMPackageDef() }).ToArray();
             }
         }
+        public string Name => context.Name;
+        
+        public PackageDisplay? GetPackage(string name)
+        {
+            Logger.Where();
+            var pack = context.FindPack(name);
+            if (pack == null) return null;
+            return new() { package = pack.ToHKMMPackageDef() };
+        }
     }
 }

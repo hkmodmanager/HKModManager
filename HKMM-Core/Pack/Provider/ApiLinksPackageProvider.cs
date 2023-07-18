@@ -1,5 +1,6 @@
 ﻿using HKMM.Interop;
 using HKMM.Modules;
+using HKMM.Pack.Installer;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Tasks;
@@ -29,6 +30,10 @@ namespace HKMM.Pack.Provider
                 var pack = HKMMPackage.FromModLegacyToHKMM(api);
                 pack.Name = MODPACK_NAME_MODDING_API;
                 pack.Icon = @"internal-icons://moddingapi.png";
+                pack.DisplayName = "Modding API";
+                pack.Description = "A Hollow Knight Modding API/loader.";
+                pack.AllowToggle = false;
+                pack.Installer = new MAPIInstaller();
                 packages.Add(MODPACK_NAME_MODDING_API, pack);
             });
             return true;

@@ -25,11 +25,7 @@ export default defineComponent({
                 appVue = (await import('@/App.vue')).default;
 
                 this.$forceUpdate();
-                if(getAPIVersion() > 0) {
-                    this.$router.replace({ name: "modgroups" });
-                } else {
-                    this.$router.replace({ name: "api" })
-                }
+                
                 return true;
             }
             return false;

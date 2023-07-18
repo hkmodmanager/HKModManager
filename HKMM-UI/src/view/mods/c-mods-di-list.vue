@@ -1,17 +1,17 @@
 <template>
     <template v-for="(mod, i) in modsArray.slice(0, showCount)" :key="i">
         <h6 copyable>
-            <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod.name)" href="javascript:;">{{
-                mod.name
+            <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod)" href="javascript:;">{{
+                mod
             }}</a>
             <template v-if="isLocal">
-                <span v-if="isUsed(mod.name)" class="text-success" notcopyable>
-                    ({{ $t("mods.enabled") }})
+                <span v-if="isUsed(mod)" class="text-success" notcopyable>
+                    ({{ $t("modpack.status.enabled") }})
                 </span>
             </template>
             <template v-else>
-                <span v-if="isInstallMod(mod.name)" class="text-success" notcopyable>
-                    ({{ $t("mods.depInstall") }})
+                <span v-if="isInstallMod(mod)" class="text-success" notcopyable>
+                    ({{ $t("modpack.status.installed") }})
                 </span>
             </template>
         </h6>
@@ -19,17 +19,17 @@
     <template v-if="modsArray.length >= showCount">
         <div :class="['collapse']" ref="depOnThisBody">
             <h6 v-for="(mod, i) in modsArray.slice(showCount)" :key="i" copyable>
-                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod.name)" href="javascript:;">{{
-                    mod.name
+                <a :style="{ 'textDecoration': 'none' }" @click="anchorMod(mod)" href="javascript:;">{{
+                    mod
                 }}</a>
                 <template v-if="isLocal">
-                    <span v-if="isUsed(mod.name)" class="text-success" notcopyable>
-                        ({{ $t("mods.enabled") }})
+                    <span v-if="isUsed(mod)" class="text-success" notcopyable>
+                        ({{ $t("modpack.status.enabled") }})
                     </span>
                 </template>
                 <template v-else>
-                    <span v-if="isInstallMod(mod.name)" class="text-success" notcopyable>
-                        ({{ $t("mods.depInstall") }})
+                    <span v-if="isInstallMod(mod)" class="text-success" notcopyable>
+                        ({{ $t("modpack.status.installed") }})
                     </span>
                 </template>
             </h6>
@@ -42,8 +42,8 @@
 
 <script lang="ts">
 import { Collapse } from 'bootstrap';
-import { PackageDisplay } from 'core';
 import { defineComponent } from 'vue';
+import { LocalPackageProxy } from 'core';
 
 export default defineComponent({
     data() {
@@ -53,18 +53,19 @@ export default defineComponent({
     },
     methods: {
         anchorMod(name: string) {
-            const rn = `mod-download-${name.replaceAll(' ', '')}`;
+            const rn = `modpack-${name.replaceAll(' ', '')}`;
             const dom = document.getElementById(rn);
             if (!dom) return;
             dom.scrollIntoView();
         },
         isUsed(name: string) {
-            const lm = getLocalMod(name);
+            const lm = LocalPackageProxy.getMod(name);
             if (!lm) return false;
-            return lm.isEnabled();
+            return lm.enabled;
         },
         isInstallMod(name: string) {
-            return getLocalMod(name)?.isInstalled() ?? false;
+            const lm = LocalPackageProxy.getMod(name);
+            return lm != undefined;
         },
         toggleCollapse(name: string) {
             this.getCollapse(name).toggle();
@@ -74,20 +75,20 @@ export default defineComponent({
         },
         isCollapseHide(name: string) {
             const el = this.$refs[name] as Element;
-            if(!el) return false;
+            if (!el) return false;
             return el.classList.contains('collapse') && !el.classList.contains('collapsing') && !el.classList.contains('show');
         }
     },
     computed: {
         modsArray() {
-            return this.mods as PackageDisplay[];
+            return this.mods as string[];
         },
         showCount() {
             return this.count ?? 8;
         }
     },
     props: {
-        mods: Object,
+        mods: Array,
         isLocal: Boolean,
         count: Number
     }

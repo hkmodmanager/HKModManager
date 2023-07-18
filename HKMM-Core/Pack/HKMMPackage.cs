@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static HKMM.Pack.Installer.PackInstaller;
@@ -96,7 +97,7 @@ namespace HKMM.Pack
         {
             return File.Exists(Path.Combine(DefaultInstaller.GetModRoot(name), PACK_METADATA_FILE_NAME));
         }
-        public static async Task<HKMMPackage> From(string name)
+        public static async Task<HKMMPackage?> From(string name, bool noThrow = false)
         {
             var root = Path.Combine(JS.Api.GetModStorePath(), name);
 
@@ -105,9 +106,21 @@ namespace HKMM.Pack
             var md = Path.Combine(p, PACK_METADATA_FILE_NAME);
             if(File.Exists(md))
             {
-                var r = JsonSerializer.Deserialize<HKMMPackage>(File.ReadAllText(md), Converter.Settings)
-                    ?? throw new InvalidDataException($"Invalid HKMMPackage: {md}");
+                var r = JsonSerializer.Deserialize<HKMMPackage>(await File.ReadAllTextAsync(md), Converter.Settings);
+                if (r is null)
+                {
+                    if (noThrow) return null;
+                    throw new InvalidDataException($"Invalid HKMMPackage: {md}");
+                }
                 r.InstallPath = p;
+
+                //TODO:
+                if(r.Info.Name == MODPACK_NAME_MODDING_API)
+                {
+                    r.Info.Installer = new MAPIInstaller();
+                    r.Info.AllowUninstall = MAPIInstaller.CanUninstall;
+                }
+
                 return r;
             }
 
@@ -119,6 +132,7 @@ namespace HKMM.Pack
 
             if(latest is null)
             {
+                if (noThrow) return null;
                 throw new InvalidOperationException($"The specified HKMMPackage: '{name}' was not found");
             }
             var ln = latest.ToString(4);
@@ -134,9 +148,9 @@ namespace HKMM.Pack
 
         public string GetEnabledFilePath()
         {
-            return Path.Combine(Settings.Instance.GamePath, GameModsRoot, Info.Name, HKMMPACK_ENABLED_FILE_NAME);
+            return Path.Combine(GameModsRoot, Info.Name, HKMMPACK_ENABLED_FILE_NAME);
         }
-
+        [JsonIgnore]
         public bool Enabled
         {
             get

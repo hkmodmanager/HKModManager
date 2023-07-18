@@ -169,6 +169,14 @@ namespace HKMM.Pack.Installer
         {
             var p = def.ToHKMMPackageDef();
             Logger.Log($"Installing {p.Name}(v{p.Version})");
+            if(p.Installer != null && p.Installer != this)
+            {
+                Logger.Log($"Use custom installer");
+                var result = await p.Installer.InstallHKPackageUnsafe(def, waitTasks);
+                RecordInstalledPack(result);
+                return result;
+            }
+            
             var pack = new HKMMPackage();
             var files = GetAllFiles(def);
             pack.Info = def.ToHKMMPackageDef();
@@ -208,7 +216,7 @@ namespace HKMM.Pack.Installer
                 var tl = tasklist.ToArray();
                 tasklist.Add(SingleTask(() =>
                 {
-                    return TaskManager.StartTask($"Install {p.Name}", async () =>
+                    return TaskManager.StartTask($"Install {p.DisplayName ?? p.Name}", async () =>
                     {
                         var r = await InstallHKPackageUnsafe(p, tl);
                         if (r is null || !IsInstalled(p))
@@ -229,8 +237,18 @@ namespace HKMM.Pack.Installer
 
         public virtual void UninstallPack(HKMMPackage pack)
         {
+            Logger.Log("Uninstalling modpack:" + pack.InstallPath);
+            var p = pack.Info;
+            if (p.Installer != null && p.Installer != this)
+            {
+                Logger.Log($"Use custom installer");
+                p.Installer.UninstallPack(pack);
+                RemoveInstalledPack(pack.Info.Name);
+                return;
+            }
+            pack.Enabled = false;
             var root = Path.Combine(ModsRoot, pack.Info.Name);
-            if(Directory.Exists(root)) Directory.Delete(root);
+            if(Directory.Exists(root)) Directory.Delete(root, true);
             RemoveInstalledPack(pack.Info.Name);
         }
 

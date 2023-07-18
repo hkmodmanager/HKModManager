@@ -1,4 +1,4 @@
-import { initJSAPI, LegacyModCollection, LocalPackageProxy } from "core";
+import { initJSAPI, LegacyModCollection, LocalPackageProxy, PackageProviderProxy } from "core";
 import { existsSync, mkdirSync } from "fs-extra";
 import { join } from "path";
 import { appDir, userData } from "../remoteCache";
@@ -51,4 +51,10 @@ initJSAPI({
     },
 });
 
+setInterval(() => {
+    LocalPackageProxy.getAllMods();
+}, 1000);
+
 LocalPackageProxy.getAllMods();
+PackageProviderProxy.getRoot().getAllPackages(false);
+

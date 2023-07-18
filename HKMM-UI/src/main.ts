@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
 import { log, error } from 'electron-log'
@@ -113,7 +113,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const route = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes
 });
 

@@ -1,4 +1,5 @@
 ﻿using HKMM.Pack;
+using HKMM.Pack.Installer;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,15 @@ namespace HKMM.Interop
             package = package.Info
         };
         public string InstallPath => package.InstallPath;
-        public bool Enabled => package.Enabled;
+        public bool Enabled
+        {
+            get => package.Enabled; set => package.Enabled = value;
+        }
+        public void Uninstall()
+        {
+            Logger.Where();
+            LocalPackManager.DefaultInstaller.UninstallPack(package);
+        }
         public double InstallDate => package.InstallDateJS;
 
         public static LocalPackageProxy? GetMod(string name)

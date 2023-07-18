@@ -43,6 +43,7 @@
         "settings": "设置",
         "api": "MAPI管理",
         "about": "关于",
+        "allpacks": "全部ModPacks",
         "tasks": {
             "title": "任务",
             "all": "全部",
@@ -51,8 +52,31 @@
             "running": "进行中"
         }
     },
-    "mods": {
+    "modpack": {
+        "details": "详情",
+        "status": {
+            "title": "状态：",
+            "enabled": "已启用",
+            "disabled": "已禁用",
+            "uninstalled": "未安装",
+            "installed": "已安装"
+        },
+        "operate": {
+            "install": "安装",
+            "uninstall": "卸载",
+            "enable": "启用",
+            "disable": "禁用",
+            "update": "更新"
+        },
+        "dep": {
+            "title": "依赖项"
+        },
+        "author": "作者：",
+        "repo": "代码仓库：",
+        "version": "版本：",
+        "lastUpdate": "最后一次更新：{days}",
         "tags": {
+            "title": "标签：",
             "None": "无",
             "Gameplay": "玩法",
             "Boss": "Boss",

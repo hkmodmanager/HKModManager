@@ -1,4 +1,5 @@
-﻿using Microsoft.JavaScript.NodeApi;
+﻿using HKMM.Pack.Installer;
+using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +94,11 @@ namespace HKMM.Pack.Metadata.HKMM
         [JsonPropertyName("type")]
         public TypeEnum Type { get; set; }
 
+        public bool AllowToggle { get; set; } = true;
+        public bool AllowInstall { get; set; } = true;
+        public bool AllowUninstall { get; set; } = true;
+        [JsonIgnore]
+        public PackInstaller Installer { get; set; } = LocalPackManager.DefaultInstaller;
         public DateTime PublishDateCS => string.IsNullOrEmpty(PublishDate) ? DateTime.MinValue : DateTime.Parse(PublishDate);
     }
 }

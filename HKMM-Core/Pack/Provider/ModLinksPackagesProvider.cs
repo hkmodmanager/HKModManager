@@ -24,7 +24,9 @@ namespace HKMM.Pack.Provider
                 var mods = await JS.Api.ParseModLinks(text);
                 foreach(var mod in mods.mods)
                 {
-                    packages.Add(mod.Value.Name, mod.ToHKMMPackageDef());
+                    var pack = mod.ToHKMMPackageDef();
+                    pack.Icon = "internal-icons://defaultmod.svg";
+                    packages.Add(mod.Value.Name, pack);
                 }
             });
             return true;

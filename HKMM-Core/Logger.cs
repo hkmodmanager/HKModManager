@@ -11,12 +11,12 @@ namespace HKMM
 {
     public enum LogLevel
     {
-        Log, Warning, Error
+        Error, Warning, Log, Fine
     }
     public static class Logger
     {
         private static readonly Dictionary<LogLevel, Action<string>> handlers = new();
-
+        public static LogLevel OutputLevel = LogLevel.Log;
         [JSExport]
         public static void RegisterLogHandler(string level, Action<string> handler)
         {
@@ -25,6 +25,7 @@ namespace HKMM
 
         public static void Log(string msg, LogLevel level = LogLevel.Log)
         {
+            if (level > OutputLevel) return;
             var task = TaskManager.CurrentTask;
             if(task != null)
             {
@@ -41,7 +42,11 @@ namespace HKMM
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
-            if(level == LogLevel.Error)
+            else if(level == LogLevel.Fine)
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+            } 
+            else if(level == LogLevel.Error)
             {
                 output = Console.Error;
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -57,12 +62,12 @@ namespace HKMM
         {
             Log(msg, LogLevel.Warning);
         }
-
+        
         public static void Where([CallerMemberName] string name = "", 
             [CallerFilePath] string path = "", 
             [CallerLineNumber] int line = 0)
         {
-            Log($"Call {name} in {path}:{line}");
+            Log($"Call {name} in {path}:{line}", LogLevel.Fine);
         }
     }
 }

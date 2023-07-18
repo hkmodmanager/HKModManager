@@ -6,6 +6,10 @@ hr {
     border-top: 0px;
 }
 
+.hr-default {
+    border-top: var(--bs-border-width) solid;
+}
+
 .link-auto {
     color: var(--bs-light-text)
 }

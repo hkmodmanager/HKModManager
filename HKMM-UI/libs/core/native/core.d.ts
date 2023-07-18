@@ -145,11 +145,13 @@ declare module "core" {
 
 		readonly installPath: string;
 
-		readonly enabled: boolean;
+		enabled: boolean;
 
 		readonly installDate: number;
 
 		check(): LocalPackageProxy;
+
+		uninstall(): void;
 
 		static getMod(name: string): LocalPackageProxy | undefined;
 
@@ -181,15 +183,27 @@ declare module "core" {
 
 		readonly dependencies: string[];
 
+		readonly allowToggle: boolean;
+
+		readonly allowInstall: boolean;
+
+		readonly allowUninstall: boolean;
+
 		check(): PackageDisplay;
+
+		install(): Promise<void>;
 	}
 
 	export class PackageProviderProxy extends unknown {
 		constructor();
 
+		readonly name: string;
+
 		static getRoot(): PackageProviderProxy;
 
 		getAllPackages(onlyTop: boolean): PackageDisplay[];
+
+		getPackage(name: string): PackageDisplay | undefined;
 	}
 
 	export namespace JSTaskManager {
