@@ -142,7 +142,8 @@ if (!(clang = SupportedLanguages[lang])) {
 
 export const i18n = createI18n({
     messages: I18nLanguages,
-    locale: clang
+    locale: clang,
+    legacy: false
 });
 
 

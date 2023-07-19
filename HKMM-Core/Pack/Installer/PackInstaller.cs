@@ -3,26 +3,34 @@ using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Pack.Metadata;
 using HKMM.Tasks;
+using HKMM.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace HKMM.Pack.Installer
 {
+    public class PackInstaller<T> : PackInstaller where T : PackInstaller<T>, new()
+    {
+        private static T? _instance;
+        public static T Instance => _instance ??= new();
+        public PackInstaller()
+        {
+            _instance = (T)this;
+        }
+    }
+    [JsonConverter(typeof(InstallerUtils.PackInstallerConverter))]
     public class PackInstaller
     {
-        public static readonly PackInstaller DefaultInstaller = new()
-        {
-
-        };
+        public static readonly PackInstaller DefaultInstaller = new();
         public record class InstalledFileInfo(string Path, string RelativePath, SHA256Tuple SHA256);
         public record class FileInfo(string Root, string RelativeRoot, string Link, string OverwriteName = "");
         private string? _modsRoot;
+
         public string ModsRoot
         {
             get
@@ -144,12 +152,16 @@ namespace HKMM.Pack.Installer
                 using var zip = new ZipArchive(new MemoryStream(f.Item2), ZipArchiveMode.Read);
                 foreach(var e in zip.Entries)
                 {
+                    if (e.FullName.EndsWith('/') || e.FullName.EndsWith('\\')) continue;
                     var fp = Path.Combine(info.Root, e.FullName);
                     Directory.CreateDirectory(Path.GetDirectoryName(fp)!);
+
                     e.ExtractToFile(fp, true);
+
                     Logger.Log($"Got file {fp}");
-                    using var s = File.OpenRead(fp);
-                    result.Add(new(fp, Path.Combine(info.RelativeRoot, e.FullName), SHA256Module.Instance.CalcSHA256Tuple(s)));
+
+                    result.Add(new(fp, Path.Combine(info.RelativeRoot, e.FullName), 
+                        SHA256Module.Instance.CalcSHA256Tuple(File.ReadAllBytes(fp))));
                 }
                 return result;
             }
@@ -201,18 +213,28 @@ namespace HKMM.Pack.Installer
 
         public virtual async Task<HKMMPackage> InstallHKPackage(bool isDev, CSHollowKnightPackageDef def)
         {
-            await LocalPackManager.DefaultInstaller.LoadLocalPacks();
+            Logger.Where();
+
+            await LocalPackManager.Instance.LoadLocalPacks();
+
+            Logger.Where();
+
             var packs = GetAndSortPackages(ParseDependencies(isDev, def));
+
+            Logger.Where();
             HKMMPackage result = null!;
             var tasklist = new List<Task>();
+            Logger.Log("All modpack: " + string.Join(';', packs.Select(x => x.Value.Name)));
             foreach(var pack in packs)
             {
+                Logger.Where();
                 var p = pack.ToHKMMPackageDef();
                 if (IsInstalled(p))
                 {
                     Logger.Log($"Skip existing pack: {p.Name}(v{p.Version})");
                     continue;
                 }
+                Logger.Where();
                 var tl = tasklist.ToArray();
                 tasklist.Add(SingleTask(() =>
                 {
@@ -235,17 +257,41 @@ namespace HKMM.Pack.Installer
             return result;
         }
 
+        public virtual bool MakeSureCorrectInstaller(HKMMPackage pack, Action<PackInstaller> noThis)
+        {
+            var p = pack.GetInstaller();
+            if(p != null && p != this)
+            {
+                noThis(p);
+                return true;
+            }
+            return false;
+        }
+        public virtual bool MakeSureCorrectInstaller<T>(HKMMPackage pack, out T result,
+            Func<PackInstaller, T> noThis)
+        {
+            result = default!;
+            var p = pack.GetInstaller();
+            if (p != null && p != this)
+            {
+                result = noThis(p);
+                return true;
+            }
+            return false;
+        }
+
         public virtual void UninstallPack(HKMMPackage pack)
         {
             Logger.Log("Uninstalling modpack:" + pack.InstallPath);
-            var p = pack.Info;
-            if (p.Installer != null && p.Installer != this)
+            if(MakeSureCorrectInstaller(pack, i =>
             {
-                Logger.Log($"Use custom installer");
-                p.Installer.UninstallPack(pack);
+                i.UninstallPack(pack);
+            }))
+            {
                 RemoveInstalledPack(pack.Info.Name);
                 return;
             }
+
             pack.Enabled = false;
             var root = Path.Combine(ModsRoot, pack.Info.Name);
             if(Directory.Exists(root)) Directory.Delete(root, true);
@@ -254,16 +300,51 @@ namespace HKMM.Pack.Installer
 
         public virtual void RecordInstalledPack(HKMMPackage pack)
         {
-            LocalPackManager.DefaultInstaller.RecordInstalledPack(pack);
+            LocalPackManager.Instance.RecordInstalledPack(pack);
         }
         public virtual void RemoveInstalledPack(string pack)
         {
-            LocalPackManager.DefaultInstaller.RemoveInstalledPack(pack);
+            LocalPackManager.Instance.RemoveInstalledPack(pack);
         }
 
         public virtual bool IsInstalled(CSHollowKnightPackageDef pack)
         {
-            return LocalPackManager.DefaultInstaller.IsInstalled(pack);
+            return LocalPackManager.Instance.IsInstalled(pack);
+        }
+        public virtual void SetEnable(HKMMPackage pack, bool enabled)
+        {
+            if (MakeSureCorrectInstaller(pack, i => i.SetEnable(pack, enabled))) return;
+
+            if (enabled == IsEnabled(pack)) return;
+            if (enabled)
+            {
+                var p = GetEnabledFilePath(pack.Info.Name);
+                Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+                File.WriteAllText(p, pack.InstallPath);
+            }
+            else
+            {
+                File.Delete(GetEnabledFilePath(pack.Info.Name));
+            }
+        }
+        public virtual string GetEnabledFilePath(string packName)
+        {
+            return Path.Combine(HKMMPackage.GameModsRoot, packName, HKMMPACK_ENABLED_FILE_NAME);
+        }
+        public virtual bool IsEnabled(HKMMPackage pack)
+        {
+            if (MakeSureCorrectInstaller(pack, out var result, i => i.IsEnabled(pack))) return result;
+            var p = GetEnabledFilePath(pack.Info.Name);
+            if (!File.Exists(p)) return false;
+            return Path.GetFullPath(File.ReadAllText(p)) == Path.GetFullPath(pack.InstallPath);
+        }
+        public virtual void PostProcessingPackage(HKMMPackage pack)
+        {
+            MakeSureCorrectInstaller(pack, out var result, i => i.IsEnabled(pack));
+        }
+        public virtual Task<List<HKMMPackage>> GetInstalledPackage(List<HKMMPackage> pack)
+        {
+            return Task.FromResult(pack);
         }
     }
 }

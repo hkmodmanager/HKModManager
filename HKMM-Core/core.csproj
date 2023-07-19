@@ -5,7 +5,7 @@
     <LangVersion>11</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>HKMM</RootNamespace>
-
+	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <NoWarn>CS0436</NoWarn>
   </PropertyGroup>
 

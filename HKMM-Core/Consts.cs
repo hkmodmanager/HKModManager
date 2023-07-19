@@ -12,8 +12,14 @@ namespace HKMM
         public const string HKMMPACK_ENABLED_FILE_NAME = "HKMM-PACKENABLED";
 
         public const string MODPACK_NAME_MODDING_API = "$ModdingAPI$";
+        public const string MODPACK_NAME_GAME_INJECT = ".hkmm-internal.gameinject";
 
         public const string API_FILE_NAME = "Assembly-CSharp.dll";
         public const string API_BACKUP_FILE_NAME = "Backup-API.backup";
+
+        public const string INSTALLER_MAPI_NAME = "ModdingAPI";
+        public const string INSTALLER_DEFAULT_NAME = "Default";
+        public const string INSTALLER_GAMEINJECT_NAME = "GameInject";
+        public const string INSTALLER_LOCAL_PACK_MANAGER = "LocalPackManager";
     }
 }

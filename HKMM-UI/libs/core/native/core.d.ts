@@ -5,6 +5,16 @@
 
 declare module "core" {
 
+	export enum LogLevel {
+		Error = 0,
+
+		Warning = 1,
+
+		Log = 2,
+
+		Fine = 3,
+	}
+
 	export function registerLogHandler(
 		level: string,
 		handler: (arg1: string) => void,
@@ -66,7 +76,7 @@ declare module "core" {
 
 		print(
 			msg: string,
-			level: unknown,
+			level: LogLevel,
 		): void;
 
 		getRunningTime(): number;
@@ -136,6 +146,8 @@ declare module "core" {
 		parseModLinks: (arg1: string) => Promise<LegacyModCollection>;
 
 		parseAPILink: (arg1: string) => Promise<LegacyModInfoFull>;
+
+		getGameInjectRoot: () => string;
 	}
 
 	export class LocalPackageProxy extends unknown {

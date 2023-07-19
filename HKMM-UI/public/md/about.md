@@ -36,6 +36,10 @@
 
 ## Links
 
+[Hollow Knight Mod Manager Package Schema](https://github.com/hkmodmanager/hkmm-schema)
+
+[Hollow Knight PackageDef](https://github.com/hpackage/hpackage-schema)
+
 [Modding API](https://github.com/hk-modding/api)
 
 [Bufferfly](https://github.com/jngo102/Butterfly)

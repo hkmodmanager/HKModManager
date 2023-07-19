@@ -37,6 +37,7 @@
         "settings": "Settings",
         "api": "MAPI",
         "about": "About",
+        "allpacks": "ModPacks",
         "tasks": {
             "title": "Tasks",
             "all": "All",
@@ -45,8 +46,31 @@
             "running": "Running"
         }
     },
-    "mods": {
+    "modpack": {
+        "details": "Details",
+        "status": {
+            "title": "Status:",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "uninstalled": "Uninstalled",
+            "installed": "Installed"
+        },
+        "operate": {
+            "install": "Install",
+            "uninstall": "Uninstall",
+            "enable": "Enable",
+            "disable": "Disable",
+            "update": "Update"
+        },
+        "dep": {
+            "title": "Dependencies"
+        },
+        "author": "Authors: ",
+        "repo": "Repository: ",
+        "version": "Version: ",
+        "lastUpdate": "Last updated {days} ago",
         "tags": {
+            "title": "Tags: ",
             "None": "None",
             "Gameplay": "Gameplay",
             "Boss": "Boss",

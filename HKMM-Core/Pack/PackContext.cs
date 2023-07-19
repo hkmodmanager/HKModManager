@@ -20,6 +20,7 @@ namespace HKMM.Pack
 #if BUILD_NODE_NATIVE
                 ModLinksPackagesProvider.instance,
                 ApiLinksPackageProvider.instance,
+                InternalPackageProvider.instance,
 #endif
                 customProviders
             }
@@ -34,7 +35,7 @@ namespace HKMM.Pack
         public PackContext()
         {
             packages = new();
-            Init();
+            MakeSureInit();
         }
         public PackContext(PackCollection packages)
         {
@@ -59,7 +60,7 @@ namespace HKMM.Pack
         }
         public virtual PackageBase? FindPack(string name)
         {
-            Init().Wait();
+            MakeSureInit().Wait();
             if (packages.TryGetValue(name, out var pack)) return pack;
             foreach(var v in fallback)
             {
@@ -68,7 +69,7 @@ namespace HKMM.Pack
             }
             return null;
         }
-        private Task Init()
+        public Task MakeSureInit()
         {
             return SingleTask(async () =>
             {

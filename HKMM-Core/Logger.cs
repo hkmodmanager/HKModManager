@@ -2,6 +2,7 @@
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,14 +10,31 @@ using System.Threading.Tasks;
 
 namespace HKMM
 {
+    [JSExport]
     public enum LogLevel
     {
         Error, Warning, Log, Fine
     }
     public static class Logger
     {
+        private static readonly TextWriter logOutput;
+        private static readonly string LogRoot =
+            Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "hkmm-logs"
+                );
+        static Logger()
+        {
+            var d = DateTime.Now;
+            Directory.CreateDirectory(LogRoot);
+            var p = Path.Combine(LogRoot, d.ToString("yyyy-MM-dd_H-mm") + ".log");
+            logOutput = new StreamWriter(p, true);
+        }
         private static readonly Dictionary<LogLevel, Action<string>> handlers = new();
+#if DEBUG
+        public static LogLevel OutputLevel = LogLevel.Fine;
+#else
         public static LogLevel OutputLevel = LogLevel.Log;
+#endif
         [JSExport]
         public static void RegisterLogHandler(string level, Action<string> handler)
         {
@@ -51,6 +69,13 @@ namespace HKMM
                 output = Console.Error;
                 Console.ForegroundColor = ConsoleColor.Red;
             }
+            var n = DateTime.Now;
+            if (level < LogLevel.Fine)
+            {
+                var head = $"[{level}][{n:HH-mm-ss:ffff}]";
+                logOutput?.WriteLine(("\n" + msg).Replace("\n", $"\n{head}"));
+                logOutput?.Flush();
+            }
             output?.WriteLine($"[{level}]: {msg}");
             Console.ForegroundColor = prevColor;
         }
@@ -67,7 +92,7 @@ namespace HKMM
             [CallerFilePath] string path = "", 
             [CallerLineNumber] int line = 0)
         {
-            Log($"Call {name} in {path}:{line}", LogLevel.Fine);
+            Log($"Calling {name} in {path}:{line}", LogLevel.Fine);
         }
     }
 }

@@ -19,7 +19,7 @@ using static HKMM.Pack.Installer.PackInstaller;
 namespace HKMM.Pack
 {
 
-    public class HKMMPackage
+    public class HKMMPackage : ICustomInstallerProvider
     {
         public static string GameModsRoot => Path.Combine(Settings.Instance.GamePath,
             "hollow_knight_Data", "Managed", "Mods");
@@ -33,7 +33,8 @@ namespace HKMM.Pack
         public Version Version => new(Info.Version);
         public DateTime InstallDate { get; set; } = DateTime.UtcNow;
         public double InstallDateJS => InstallDate.Subtract(DateTime.MinValue).TotalMilliseconds;
-
+        [JsonIgnore]
+        public bool IsValid { get; set; } = true;
         public InstalledFileInfo[] InstalledFiles { get; set; } = Array.Empty<InstalledFileInfo>();
 
         public static implicit operator CSHollowKnightPackageDef(HKMMPackage pack)
@@ -114,13 +115,6 @@ namespace HKMM.Pack
                 }
                 r.InstallPath = p;
 
-                //TODO:
-                if(r.Info.Name == MODPACK_NAME_MODDING_API)
-                {
-                    r.Info.Installer = new MAPIInstaller();
-                    r.Info.AllowUninstall = MAPIInstaller.CanUninstall;
-                }
-
                 return r;
             }
 
@@ -146,33 +140,28 @@ namespace HKMM.Pack
             return result;
         }
 
-        public string GetEnabledFilePath()
-        {
-            return Path.Combine(GameModsRoot, Info.Name, HKMMPACK_ENABLED_FILE_NAME);
-        }
+        
         [JsonIgnore]
         public bool Enabled
         {
-            get
-            {
-                var p = GetEnabledFilePath();
-                if (!File.Exists(p)) return false;
-                return Path.GetFullPath(File.ReadAllText(p)) == Path.GetFullPath(InstallPath);
-            }
+            get => GetInstaller().IsEnabled(this);
+            set => GetInstaller().SetEnable(this, value);
+        }
+
+        private PackInstaller? _installer;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("installerType")]
+        public PackInstaller? Installer
+        {
+            get => _installer;
             set
             {
-                if (Enabled == value) return;
-                if(value)
-                {
-                    var p = GetEnabledFilePath();
-                    Directory.CreateDirectory(Path.GetDirectoryName(p)!);
-                    File.WriteAllText(p, InstallPath);
-                }
-                else
-                {
-                    File.Delete(GetEnabledFilePath());
-                }
+                if (value == _installer) return;
+                _installer = value;
+                value?.PostProcessingPackage(this);
             }
         }
+        public PackInstaller GetInstaller() => Installer ?? Info.Installer ?? DefaultInstaller;
     }
 }

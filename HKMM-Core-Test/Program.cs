@@ -14,18 +14,22 @@ var msp = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location
 JS.InitJSAPI(new()
 {
     GetModStorePath = () => msp,
-    GetConfigPath= () => "config.json",
-});
+    GetConfigPath = () => "config.json",
+    ParseAPILink = async _ => new HKMM.Pack.Legacy.LegacyModInfoFull(),
+    ParseModLinks = async _ => new HKMM.Pack.Legacy.LegacyModCollection()
+}); ;
 
 var data = JsonSerializer.Deserialize<PackCollection>(File.ReadAllText("TestDatabase.json"))!;
 
-var installer = new LocalPackManager();
-installer.Context = new(data);
+PackContext.customProviders.fallback.Add(new(data));
+
+var installer = LocalPackManager.Instance;
+
 await installer.LoadLocalPacks();
 
 await TaskManager.StartTask("Test", async () =>
 {
-    await installer.InstallHKPackage(false, data["AbsoluteZote"].Value);
+    await installer.InstallHKPackage(false, data["Custom Knight"].Value);
 });
 
 _ = Settings.Instance;

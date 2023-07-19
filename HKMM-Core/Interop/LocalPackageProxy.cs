@@ -34,20 +34,20 @@ namespace HKMM.Interop
         public void Uninstall()
         {
             Logger.Where();
-            LocalPackManager.DefaultInstaller.UninstallPack(package);
+            LocalPackManager.Instance.UninstallPack(package);
         }
         public double InstallDate => package.InstallDateJS;
 
         public static LocalPackageProxy? GetMod(string name)
         {
             Logger.Where();
-            return LocalPackManager.DefaultInstaller.mods.TryGetValue(name, out var p) ? new() { package = p } : null;
+            return LocalPackManager.Instance.mods.TryGetValue(name, out var p) ? new() { package = p } : null;
         }
         public static async Task<LocalPackageProxy[]> GetAllMods()
         {
             Logger.Where();
-            await LocalPackManager.DefaultInstaller.LoadLocalPacks();
-            return LocalPackManager.DefaultInstaller.mods.Values
+            await LocalPackManager.Instance.LoadLocalPacks();
+            return LocalPackManager.Instance.mods.Values
                 .Select(x => new LocalPackageProxy() { package = x })
                 .ToArray();
         }

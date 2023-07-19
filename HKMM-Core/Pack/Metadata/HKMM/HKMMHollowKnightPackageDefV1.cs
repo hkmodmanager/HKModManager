@@ -46,7 +46,7 @@ namespace HKMM.Pack.Metadata.HKMM
         public static readonly TypeEnumConverter Singleton = new();
     }
 
-    public partial class HKMMHollowKnightPackageDefV1 : CSHollowKnightPackageDef
+    public partial class HKMMHollowKnightPackageDefV1 : CSHollowKnightPackageDef, ICustomInstallerProvider
     {
         public HKMMHollowKnightPackageDefV1()
         {
@@ -97,8 +97,10 @@ namespace HKMM.Pack.Metadata.HKMM
         public bool AllowToggle { get; set; } = true;
         public bool AllowInstall { get; set; } = true;
         public bool AllowUninstall { get; set; } = true;
-        [JsonIgnore]
-        public PackInstaller Installer { get; set; } = LocalPackManager.DefaultInstaller;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("installerType")]
+        public PackInstaller? Installer { get; set; }
         public DateTime PublishDateCS => string.IsNullOrEmpty(PublishDate) ? DateTime.MinValue : DateTime.Parse(PublishDate);
     }
 }

@@ -10,7 +10,6 @@ import { spawn } from 'child_process';
 import { dirname, join } from 'path';
 import * as semver from 'semver';
 import * as remote from '@electron/remote/main';
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const singleLock = app.requestSingleInstanceLock();
@@ -126,6 +125,13 @@ async function createWindow() {
       shell.openExternal(url);
     }
   });
+
+  win.webContents.on('render-process-gone', (ev, details) => {
+    if(details.reason == 'crashed') {
+      dialog.showErrorBox("Crashed", "Sorry, HKMM has encountered an unrecoverable error, please restart the program.");
+      app.exit(-1);
+    }
+  });
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));
@@ -189,8 +195,6 @@ The program will start automatically after the Electron update is complete, plea
       return;
     }
   }
-
-  installExtension(VUEJS3_DEVTOOLS);
 
   registerAppScheme()
 

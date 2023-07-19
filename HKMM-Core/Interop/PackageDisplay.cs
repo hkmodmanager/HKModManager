@@ -41,7 +41,8 @@ namespace HKMM.Interop
 
         public async Task Install()
         {
-            await LocalPackManager.DefaultInstaller.InstallHKPackage(false, package);
+            Logger.Where();
+            await LocalPackManager.Instance.InstallHKPackage(false, package);
         }
     }
 }

@@ -57,51 +57,46 @@ static partial class Main
         }
         return true;
     }
-    public static void ScanMods()
+    public static void ScanModPacks()
     {
-        List<string> mods = new();
+        List<string> packs = new();
         foreach (var p in Directory.EnumerateDirectories(ModPath))
         {
-            var statusPath = Path.Combine(p, "HKMM-MODENABLE");
+            var statusPath = Path.Combine(p, "HKMM-PACKENABLED");
             if (!File.Exists(statusPath)) continue;
-            mods.Add(File.ReadAllText(statusPath, Encoding.UTF8));
-            Debug.Log($"Found enabled mod: {p}");
+            packs.Add(File.ReadAllText(statusPath, Encoding.UTF8));
+            Debug.Log($"Found enabled modpack: {p}");
         }
-        foreach (var v in mods)
+        foreach (var v in packs)
         {
-
             if (!Directory.Exists(v) || 
                 !v.StartsWith(config.modsPath, StringComparison.OrdinalIgnoreCase)) continue;
-            var mmp = Path.Combine(v, "modversion.json");
+            var mmp = Path.Combine(v, "ModPackMetadata.json");
             if (!File.Exists(mmp)) continue;
             var md = JsonConvert.DeserializeObject<ModMetadata>(File.ReadAllText(mmp))!;
-            var mp = Path.GetFullPath(Path.Combine(ModPath, md.name));
-            Debug.Log($"Redirect path: {mp} to {v}");
-            Directory.CreateDirectory(mp);
-            redirectPath.Add(mp.ToLower(), v);
-
-            void FED(string realRoot, string modRoot)
+            foreach((var path, var rp) in md.InstalledFiles)
             {
-                redirectDir[modRoot] = realRoot;
-                foreach (var f in Directory.EnumerateFiles(realRoot))
+                var realPath = rp;
+                if(rp.StartsWith("ModsRoot"))
                 {
-                    //Debug.Log(f);
-                    var fn = f;
-                    var mf = Path.GetFullPath(Path.Combine(modRoot, Path.GetFileName(f)));
-                    Debug.Log($"Redirect path: {mf} to {fn}");
-                    redirectPath.Add(mf.ToLower(), fn);
-                    if (Path.GetExtension(f) == ".dll")
-                    {
-                        get_location_redirect.Add(fn, mf);
-                    }
+                    realPath = Path.Combine(ModPath, rp.Substring(9));
                 }
-                foreach(var d in Directory.EnumerateDirectories(realRoot))
+                else if(rp.StartsWith("SaveRoot"))
                 {
-                    //Debug.Log(d);
-                    FED(d, Path.GetFullPath(Path.Combine(modRoot, Path.GetFileName(d))));
+                    realPath = Path.Combine(Application.persistentDataPath, rp.Substring(9));
+                }
+                realPath = Path.GetFullPath(realPath);
+                
+                Debug.Log($"Redirect {realPath} -> {path}");
+
+                redirectPath[realPath] = Path.GetFullPath(path);
+                redirectPath[Path.GetDirectoryName(realPath)] = Path.GetDirectoryName(path);
+
+                if(Path.GetExtension(realPath).EndsWith("dll", StringComparison.OrdinalIgnoreCase))
+                {
+                    get_location_redirect[path] = realPath;
                 }
             }
-            FED(v, mp);
         }
     }
     static void M0()
@@ -118,7 +113,7 @@ static partial class Main
     public static void Init()
     {
         if (!ShouldLoad()) return;
-        ScanMods();
+        ScanModPacks();
 
         InitHooks();
 

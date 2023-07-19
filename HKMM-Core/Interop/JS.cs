@@ -34,5 +34,6 @@ namespace HKMM.Interop
         public Func<string> GetConfigPath { get; set; }
         public Func<string, Task<LegacyModCollection>> ParseModLinks { get; set; }
         public Func<string, Task<LegacyModInfoFull>> ParseAPILink { get; set; }
+        public Func<string> GetGameInjectRoot { get; set; }
     }
 }

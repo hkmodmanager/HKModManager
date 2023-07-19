@@ -2,14 +2,14 @@
 <template>
     <div class="card mb-2" :id="`modpack-${package.displayName.replaceAll(' ', '')}`">
         <div class="d-flex g-0">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0" style="width: 128px;height: 128px">
                 <img v-if="package.icon" class="card-img-top" :src="getIcon()" width="128" height="128" />
             </div>
             <div class="flex-grow-1 d-flex flex-column">
                 <div class="flex-shrink-0 d-flex">
                     <div class="card-body flex-grow-1">
                         <h5 class="card-title">{{ package.displayName }}</h5>
-                        <div class="card-text" copyable>{{ desc }}</div>
+                        <div class="card-text" copyable v-html="desc"></div>
 
                         <div class="card-text">
                             <small class="text-muted">{{ $t("modpack.status.title") }}</small>
@@ -19,8 +19,10 @@
                             </template>
                             <small v-else class="text-danger">{{ $t("modpack.status.uninstalled") }}</small>
                         </div>
-                        <div class="card-text"><small class="text-muted">{{ $t("modpack.version") }} {{ package.version
-                        }}</small></div>
+                        <div class="card-text"><small class="text-muted">{{ $t("modpack.version") }} {{ curVer
+                        }} 
+                        <span class="text-warning" v-if="newerVer != undefined"><i class="bi bi-arrow-right" /> {{ newerVer }}</span>
+                        </small></div>
                         <div class="card-text" v-if="package.tags.length > 0">
                             <small class="text-muted">{{ $t("modpack.tags.title") }} {{ package.tags
                                 .map(x => $t("modpack.tags." + x)).join(' ') }}</small>
@@ -49,8 +51,9 @@
                                     $t("modpack.operate.disable")
                                 }}</button>
                             </template>
-                            <button v-if="false" 
+                            <button v-if="newerVer != undefined" 
                             :disabled="!package.allowInstall"
+                            @click="clickUpdate()"
                             class="btn btn-warning mt-1">{{ $t("modpack.operate.update")
                             }}</button>
                         </template>
@@ -78,9 +81,9 @@
                         <div v-if="package.dependencies.length > 0">
                             <hr />
                             <h4>{{ $t("modpack.dep.title") }}</h4>
-                            <DiList :mods="package.dependencies" />
+                            <DiList :mods="getDependencies()" />
                         </div>
-
+                        <hr />
                     </template>
                 </div>
 
@@ -94,7 +97,7 @@
 <script setup lang="ts">
 import DiList from "../mods/c-mods-di-list.vue";
 import { commonMarkdown } from '@/core/utils/utils';
-import { PackageDisplay, LocalPackageProxy } from 'core';
+import { PackageDisplay, LocalPackageProxy, getRootPackageProvider } from 'core';
 import { getCurrentInstance, nextTick, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 import { Collapse } from 'bootstrap';
 
@@ -104,6 +107,8 @@ let local: LocalPackageProxy | undefined = undefined;
 let days: string | undefined = undefined;
 let desc: string | undefined = undefined;
 let collapse: Collapse | undefined = undefined;
+let newerVer: string | undefined = undefined;
+let curVer: string | undefined = undefined;
 const showDetails = ref(false);
 
 const { ctx: _this }: any = getCurrentInstance()
@@ -147,11 +152,41 @@ function canUninstall() {
     return true;
 }
 
+function getDependencies() {
+    const result: string[] = [];
+    const root = getRootPackageProvider();
+    for (const name of props.package.dependencies) {
+        const pack = root.getPackage(name);
+        if(pack != undefined) {
+            result.push(pack.displayName);
+        } else {
+            result.push(name);
+        }
+    }
+    return result;
+}
+
 onBeforeMount(() => {
-    local = LocalPackageProxy.getMod(props.package.name);
     days = getLastUpdate();
     desc = commonMarkdown.renderInline(props.package.description);
+    update();
 });
+
+function update() {
+    local = LocalPackageProxy.getMod(props.package.name);
+    curVer = props.package.version;
+    newerVer = undefined;
+    if(local) {
+        if(local.info.version !== curVer) {
+            newerVer = curVer;
+            curVer = local.info.version;
+        }
+    }
+}
+
+function clickUpdate() {
+    props.package.install();
+}
 
 let updateTimer: any;
 
@@ -161,7 +196,7 @@ onMounted(() => {
     });
 
     updateTimer = setInterval(() => {
-        local = LocalPackageProxy.getMod(props.package.name);
+        update();
         _this.$forceUpdate();
     }, 500);
 });

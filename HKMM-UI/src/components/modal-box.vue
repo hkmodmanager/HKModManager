@@ -1,13 +1,13 @@
 <template>
   <Teleport to="body">
-    <div class="modal fade" ref="modal">
+    <div class="modal fade" ref="modal_el">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <slot name="title">
               <h5 class="modal-title">{{ title }}</h5>
             </slot>
-            <button class="btn" @click="close()"><i class="bi bi-x-lg"></i></button>
+            <button class="btn" @click="getModal().hide()"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="modal-body">
             <slot></slot>
@@ -21,43 +21,39 @@
   </Teleport>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { onUnmounted, ref } from 'vue'
 import { Modal } from 'bootstrap'
 
-export default defineComponent({
-  methods: {
-    getModal() {
-      if(this.modal) return this.modal as Modal;
-      const el = this.$refs.modal as HTMLDivElement;
-      return this.modal = new Modal(el, {
-        backdrop: (this.backdrop ?? true) ? true : 'static',
-        keyboard: this.keyboard,
-        focus: this.focus
-      });
-    },
-    close() {
-      this.getModal().hide();
-    }
-  },
-  data() {
-    return {
-      modal: undefined as any
-    }
-  },
-  unmounted() {
-    if(this.modal) {
-      this.modal.dispose();
-      this.modal = undefined;
-    }
-  },
-  props: {
-    title: String,
-    backdrop: Boolean,
-    keyboard: Boolean,
-    focus: Boolean
-  }
-})
+let modal: Modal | undefined;
+
+const modal_el = ref<HTMLElement>();
+const props = defineProps<{
+  title?: string,
+  backdrop?: boolean,
+  keyboard?: boolean,
+  focus?: boolean
+}>();
+
+function getModal() {
+  if (modal) return modal as Modal;
+  const el = modal_el.value as HTMLDivElement;
+  return modal = new Modal(el, {
+    backdrop: (props.backdrop ?? true) ? true : 'static',
+    keyboard: props.keyboard,
+    focus: props.focus
+  });
+}
+
+defineExpose({
+  getModal
+});
+
+onUnmounted(() => {
+  modal?.dispose();
+  modal = undefined;
+});
+
 </script>
 
 

@@ -1,7 +1,7 @@
 import { initJSAPI, LegacyModCollection, LocalPackageProxy, PackageProviderProxy } from "core";
 import { existsSync, mkdirSync } from "fs-extra";
 import { join } from "path";
-import { appDir, userData } from "../remoteCache";
+import { appDir, isPackaged, srcRoot, userData } from "../remoteCache";
 import { ModSavePathMode, store } from "../settings";
 import { parseAPILink } from "./parser/api";
 import { parseModLinks } from "./parser/modlinks";
@@ -48,6 +48,13 @@ initJSAPI({
         else mods = settings.modsavepath;
         if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
         return mods;
+    },
+    getGameInjectRoot() {
+        return !isPackaged ? (
+            join(srcRoot, "..", "gameinject", "Output") //Debug
+        ) : (
+            join(appDir, "managed")
+        );
     },
 });
 
