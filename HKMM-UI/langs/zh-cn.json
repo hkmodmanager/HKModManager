@@ -71,11 +71,28 @@
         "dep": {
             "title": "依赖项"
         },
+        "tips": {
+            "importantUninstalled": "请安装该Modpack否则可能无法正常使用Mods"
+        },
         "author": "作者：",
         "repo": "代码仓库：",
         "version": "版本：",
         "lastUpdate": "最后一次更新：{days}",
         "tags": {
+            "groups": {
+                "mul_tags": "标签",
+                "enabled": "是否启用",
+                "installed": "是否安装",
+                "type": "类型"
+            },
+            "installed": {
+                "installed": "已安装",
+                "uninstalled": "未安装"
+            },
+            "type": {
+                "mod": "Mod",
+                "modpack": "ModPack"
+            },
             "title": "标签：",
             "None": "无",
             "Gameplay": "玩法",

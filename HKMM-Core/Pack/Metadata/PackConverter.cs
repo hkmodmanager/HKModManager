@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System;
 using Microsoft.JavaScript.NodeApi;
+using HKMM.Pack.Metadata.Providers;
 
 namespace HKMM.Pack.Metadata;
 
@@ -21,7 +22,8 @@ internal static class Converter
                 ReleaseAssetsConverter.Singleton,
                 new DateOnlyConverter(),
                 new TimeOnlyConverter(),
-                IsoDateTimeOffsetConverter.Singleton
+                IsoDateTimeOffsetConverter.Singleton,
+                PackageConverter.Singleton,
             },
         PropertyNameCaseInsensitive = true,
         TypeInfoResolver = CSPackSC.Default,

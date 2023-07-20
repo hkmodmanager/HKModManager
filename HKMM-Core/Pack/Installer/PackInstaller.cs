@@ -111,7 +111,8 @@ namespace HKMM.Pack.Installer
                 if(!string.IsNullOrEmpty(link))
                 {
                     result.Add(new(Path.Combine(GetInstallRoot(def.Name, 
-                        InstallationRoot.Mods), def.Name), GetRelativeRoot(InstallationRoot.Mods), link));
+                        InstallationRoot.Mods), def.Name), 
+                        Path.Combine(GetRelativeRoot(InstallationRoot.Mods), def.Name), link));
                 }
             }
             if(def.AdditionalAssets != null)

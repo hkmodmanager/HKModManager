@@ -22,6 +22,7 @@ namespace HKMM.Interop
             }
             return this;
         }
+        public bool IsImportant => (package is HKMMHollowKnightPackageDefV1 v1) && v1.IsImportant;
         public string Name => package.Value.Name;
         public string Description => package.Value.Description;
         

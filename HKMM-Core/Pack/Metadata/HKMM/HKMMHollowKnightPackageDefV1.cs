@@ -97,6 +97,8 @@ namespace HKMM.Pack.Metadata.HKMM
         public bool AllowToggle { get; set; } = true;
         public bool AllowInstall { get; set; } = true;
         public bool AllowUninstall { get; set; } = true;
+        [JsonIgnore]
+        public bool IsImportant { get; set; } = false;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("installerType")]

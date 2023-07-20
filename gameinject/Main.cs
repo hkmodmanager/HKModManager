@@ -60,7 +60,7 @@ static partial class Main
     }
     public static void Log(string msg)
     {
-        if(config.outputLog)
+        if(!config.outputLog)
         {
             Debug.Log(msg);
         }
@@ -72,8 +72,8 @@ static partial class Main
         {
             var statusPath = Path.Combine(p, "HKMM-PACKENABLED");
             if (!File.Exists(statusPath)) continue;
-            packs.Add(File.ReadAllText(statusPath, Encoding.UTF8));
-            Log($"Found enabled modpack: {p}");
+            packs.Add(Path.GetFullPath(File.ReadAllText(statusPath, Encoding.UTF8)));
+            Debug.Log($"Found enabled modpack: {p}");
         }
         foreach (var v in packs)
         {

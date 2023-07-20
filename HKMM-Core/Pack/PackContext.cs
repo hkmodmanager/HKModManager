@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HKMM.Pack
@@ -28,6 +29,9 @@ namespace HKMM.Pack
         public bool IsHidden = false;
         public readonly PackCollection packages = new();
         public readonly List<PackContext> fallback = new();
+
+        public static int _initCount = 0;
+        public static int InitCount => _initCount;
 
         private bool _inited = false;
         public virtual string Name => "Default";
@@ -71,19 +75,30 @@ namespace HKMM.Pack
         }
         public Task MakeSureInit(int delay = 0)
         {
-            return SingleTask(async () =>
+            if (Name != "Default")
             {
-                if (_inited) return;
-                if (delay > 0) await Task.Delay(delay);
-                try
+                return SingleTask(() => TaskManager.StartTask("Initialize " + Name,
+                    async () =>
                 {
-                    _inited = await TryInit();
-                }
-                catch (Exception)
-                {
-                    _inited = false;
-                }
-            }, GetType().FullName ?? Name);
+                    if (_inited) return;
+                    if (delay > 0) await Task.Delay(delay);
+                    try
+                    {
+                        Interlocked.Add(ref _initCount, 1);
+                        _inited = await TryInit();
+                    }
+                    catch (Exception)
+                    {
+
+                        _inited = false;
+                    }
+                    Interlocked.Add(ref _initCount, -1);
+                }), GetType().FullName ?? Name);
+            }
+            else
+            {
+                return Task.CompletedTask;
+            }
         }
         protected virtual Task<bool> TryInit()
         {

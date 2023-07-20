@@ -65,6 +65,9 @@
         "dep": {
             "title": "Dependencies"
         },
+        "tips": {
+            "importantUninstalled": "Please install this modpack or you may not be able to use mods normally"
+        },
         "author": "Authors: ",
         "repo": "Repository: ",
         "version": "Version: ",

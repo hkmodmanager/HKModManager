@@ -11,6 +11,7 @@ using System.Text.Json;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Pack.Legacy;
 using HKMM.Pack.Installer;
+using HKMM.Pack.Metadata.Providers;
 
 namespace HKMM.Pack.Metadata
 {
@@ -32,6 +33,7 @@ namespace HKMM.Pack.Metadata
     [JsonSerializable(typeof(RuntimeInitializeOnLoads))]
     [JsonSerializable(typeof(ScriptingAssemblies))]
     [JsonSerializable(typeof(GameInjectInstaller.Config))]
+    [JsonSerializable(typeof(HKMMProviderV1))]
     public partial class CSPackSC : JsonSerializerContext { }
 
  

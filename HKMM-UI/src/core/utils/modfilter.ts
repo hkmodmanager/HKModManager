@@ -33,6 +33,12 @@ const defaultFilters: Record<string, ModFilter> = {
         if (!lg) return [false, 0];
         return [!lg.enabled, 0];
     },
+    installed(fparts, mod) {
+        return [LocalPackageProxy.getMod(mod.name) != undefined, 0];
+    },
+    uninstalled(fparts, mod) {
+        return [LocalPackageProxy.getMod(mod.name) == undefined, 0];
+    },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];

@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
 import { log, error } from 'electron-log'
@@ -95,11 +95,6 @@ const routes: RouteRecordRaw[] = [
         path: '/tasks/:filter?',
         component: () => import('./view/view-tasks.vue'),
         props: true
-    },
-    {
-        name: 'api',
-        path: '/api',
-        component: () => import('./view/view-api.vue')
     },
     {
         name: 'about',

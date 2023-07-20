@@ -37,6 +37,8 @@ namespace HKMM.Interop
             }
         }
         public string Name => context.Name;
+
+        public static bool AllInited => PackContext.InitCount == 0;
         
         public PackageDisplay? GetPackage(string name)
         {

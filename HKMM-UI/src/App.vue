@@ -50,9 +50,6 @@
 
           </div>
         </li>
-
-        <navitem viewpath="/api"><i class="bi bi-box"></i> {{ $t("tabs.api") }} <i
-            class="bi bi-exclamation-diamond text-warning" v-if="getAPIVersion() < 72"></i></navitem>
       </ul>
 
       <hr />
@@ -139,7 +136,6 @@ html {
 import { onMounted, ref } from "vue";
 import { Collapse } from 'bootstrap';
 import navitem from "./components/nav-item.vue";
-import { getAPIVersion } from '@/core/apiManager';
 
 import ModalBox from "./components/modal-box.vue";
 import { AllNamedLanaguages } from "./lang/langs";
@@ -170,11 +166,6 @@ onMounted(() => {
 });
 
 console.log(appVersion);
-
-function testError() {
-  throw new Error("Test!");
-}
-
 
 function applyLanguage() {
   console.log(current_language);

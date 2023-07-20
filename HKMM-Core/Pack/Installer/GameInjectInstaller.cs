@@ -122,7 +122,7 @@ namespace HKMM.Pack.Installer
         }
         public override void SetEnable(HKMMPackage pack, bool enabled)
         {
-            throw new NotSupportedException();
+            
         }
 
         public static void TryInstallGameInject()

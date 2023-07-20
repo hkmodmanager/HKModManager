@@ -134,6 +134,24 @@ declare module "core" {
 		date?: string;
 	}
 
+	export class CustomPackageProviderProxy extends unknown {
+		constructor();
+
+		readonly provider: PackageProviderProxy;
+
+		readonly name: string;
+
+		readonly description: string;
+
+		readonly authors?: string[];
+
+		readonly icon?: string;
+
+		readonly repository?: string;
+
+		check(): CustomPackageProviderProxy;
+	}
+
 	export function initJSAPI(api: JSAPI): void;
 
 	export function onSettingChanged(): void;
@@ -175,6 +193,8 @@ declare module "core" {
 	export class PackageDisplay extends unknown {
 		constructor();
 
+		readonly isImportant: boolean;
+
 		readonly name: string;
 
 		readonly description: string;
@@ -212,6 +232,8 @@ declare module "core" {
 		constructor();
 
 		readonly name: string;
+
+		static readonly allInited: boolean;
 
 		static getRoot(): PackageProviderProxy;
 

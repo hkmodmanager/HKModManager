@@ -25,6 +25,7 @@ namespace HKMM.Pack.Installer
                 pack.IsValid = false;
                 return;
             }
+            
             pack.IsValid = true;
             pack.Info.Version = $"{ver}.0.0.0";
             pack.Info.AllowUninstall = CanUninstall;
@@ -71,7 +72,7 @@ namespace HKMM.Pack.Installer
         }
         public override void SetEnable(HKMMPackage pack, bool enabled)
         {
-            throw new NotSupportedException();
+            
         }
         public override async Task<HKMMPackage> InstallHKPackageUnsafe(CSHollowKnightPackageDef def, 
             Task[] waitTasks)

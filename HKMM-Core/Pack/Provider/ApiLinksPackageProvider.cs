@@ -28,6 +28,7 @@ namespace HKMM.Pack.Provider
             pack.AllowToggle = false;
             pack.Repository = "https://github.com/hk-modding/api";
             pack.Installer = InstallerUtils.GetInstaller(INSTALLER_MAPI_NAME);
+            pack.IsImportant = true;
         }
         protected override async Task<bool> TryInit()
         {

@@ -1,6 +1,10 @@
 
 <template>
-    <div class="card mb-2" :id="`modpack-${package.displayName.replaceAll(' ', '')}`">
+    <div class="card mb-2" 
+        :style="{
+            'background-color': (package.isImportant && local == undefined) ? 'var(--bs-warning-border-subtle)' : ''
+        }"
+        :id="`modpack-${package.displayName.replaceAll(' ', '')}`">
         <div class="d-flex g-0">
             <div class="flex-shrink-0" style="width: 128px;height: 128px">
                 <img v-if="package.icon" class="card-img-top" :src="getIcon()" width="128" height="128" />
@@ -8,7 +12,11 @@
             <div class="flex-grow-1 d-flex flex-column">
                 <div class="flex-shrink-0 d-flex">
                     <div class="card-body flex-grow-1">
-                        <h5 class="card-title">{{ package.displayName }}</h5>
+                        <h5 class="card-title">{{ package.displayName }}
+                            <strong v-if="package.isImportant && local == undefined" class="text-danger">
+                                ({{ $t("modpack.tips.importantUninstalled") }})
+                            </strong>
+                            </h5>
                         <div class="card-text" copyable v-html="desc"></div>
 
                         <div class="card-text">

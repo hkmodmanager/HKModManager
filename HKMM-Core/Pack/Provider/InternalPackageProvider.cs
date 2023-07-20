@@ -13,6 +13,8 @@ namespace HKMM.Pack.Provider
 {
     public class InternalPackageProvider : PackContext
     {
+        public override string Name => "Internal Package Provider";
+
         public readonly static InternalPackageProvider instance = new();
         public static readonly HKMMHollowKnightPackageDefV1 MP_GameInject = new() {
             Name = MODPACK_NAME_GAME_INJECT,
@@ -24,7 +26,8 @@ namespace HKMM.Pack.Provider
             Description = "",
             AllowUninstall = false,
             AllowToggle = false,
-            Repository = "https://github.com/hkmodmanager/HKModManager"
+            Repository = "https://github.com/hkmodmanager/HKModManager",
+            IsImportant = true
         };
 
         protected override Task<bool> TryInit()
