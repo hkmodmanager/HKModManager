@@ -25,7 +25,7 @@ namespace HKMM.Interop
         public bool IsImportant => (package is HKMMHollowKnightPackageDefV1 v1) && v1.IsImportant;
         public string Name => package.Value.Name;
         public string Description => package.Value.Description;
-        
+        public string Type => package.Type == TypeEnum.Mod ? "Mod" : "ModPack";
         public string DisplayName => string.IsNullOrEmpty(package.DisplayName) ? 
             Name : package.DisplayName;
         public string Version => package.Version ?? "0.0.0.0";

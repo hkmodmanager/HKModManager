@@ -83,7 +83,8 @@
                 "mul_tags": "标签",
                 "enabled": "是否启用",
                 "installed": "是否安装",
-                "type": "类型"
+                "type": "类型",
+                "author": "作者"
             },
             "installed": {
                 "installed": "已安装",

@@ -15,19 +15,17 @@ namespace HKMM.Pack.Provider
         public static readonly ModLinksPackagesProvider instance = new();
         protected override async Task<bool> TryInit()
         {
-            await TaskManager.StartTask("Fetch ModLinks", async () =>
+            var text =
+                Encoding.UTF8.GetString(
+                    (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml")).Item2
+                    );
+            var mods = await JS.Api.ParseModLinks(text);
+            foreach (var mod in mods.mods)
             {
-                var text = 
-                    Encoding.UTF8.GetString(
-                        (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml")).Item2
-                        );
-                var mods = await JS.Api.ParseModLinks(text);
-                foreach(var mod in mods.mods)
-                {
-                    var pack = mod.ToHKMMPackageDef();
-                    packages.Add(mod.Value.Name, pack);
-                }
-            });
+                var pack = mod.ToHKMMPackageDef();
+                packages.Add(mod.Value.Name, pack);
+            }
+            CacheModule.Instance.SetObject("MPP", "p.Info", packages);
             return true;
         }
     }

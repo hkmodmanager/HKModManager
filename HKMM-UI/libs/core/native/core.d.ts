@@ -168,6 +168,8 @@ declare module "core" {
 		getGameInjectRoot: () => string;
 
 		getInternalLibRoot: () => string;
+
+		getCacheDir: () => string;
 	}
 
 	export class LocalPackageProxy extends unknown {
@@ -198,6 +200,8 @@ declare module "core" {
 		readonly name: string;
 
 		readonly description: string;
+
+		readonly type: string;
 
 		readonly displayName: string;
 

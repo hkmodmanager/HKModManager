@@ -83,5 +83,6 @@ namespace HKMM.Interop
         public Func<string, Task<LegacyModInfoFull>> ParseAPILink { get; set; }
         public Func<string> GetGameInjectRoot { get; set; }
         public Func<string> GetInternalLibRoot { get; set; }
+        public Func<string> GetCacheDir { get; set; }
     }
 }

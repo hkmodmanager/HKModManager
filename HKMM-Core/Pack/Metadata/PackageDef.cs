@@ -20,6 +20,9 @@ namespace HKMM.Pack.Metadata
                                     IgnoreReadOnlyFields = true,
                                     IncludeFields = false)]
     [JsonSerializable(typeof(CSHollowKnightPackageDef))]
+    [JsonSerializable(typeof(PackCollection))]
+    [JsonSerializable(typeof(Dictionary<string, CSHollowKnightPackageDef>))]
+    [JsonSerializable(typeof(Dictionary<string, HKMMHollowKnightPackageDefV1>))]
     [JsonSerializable(typeof(Dictionary<string, ReferenceVersion>))]
     [JsonSerializable(typeof(string[]))]
     [JsonSerializable(typeof(DateTimeOffset))]

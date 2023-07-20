@@ -95,7 +95,7 @@ namespace HKMM
             [CallerFilePath] string path = "", 
             [CallerLineNumber] int line = 0)
         {
-            Log($"Calling {name} in {path}:{line}", LogLevel.Fine);
+            //Log($"Calling {name} in {path}:{line}", LogLevel.Fine);
         }
     }
 }

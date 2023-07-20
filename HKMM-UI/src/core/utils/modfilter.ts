@@ -39,6 +39,9 @@ const defaultFilters: Record<string, ModFilter> = {
     uninstalled(fparts, mod) {
         return [LocalPackageProxy.getMod(mod.name) == undefined, 0];
     },
+    type(fparts, mod) {
+        return [mod.type == fparts[1], 0];
+    },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];

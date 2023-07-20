@@ -25,10 +25,13 @@ namespace HKMM.Pack.Provider.Custom
             Info = JsonUtils.ToObject<HKMMProviderV1>(
                 Encoding.UTF8.GetString((await WebModule.Instance.DownloadRawFile(url)).Item2)
                 );
+            var cacheKey = "CPP-" + Info.Name;
+            CacheModule.Instance.SetObject(cacheKey, "info", Info);
             Logger.Log($"Provider Name: " + Info.Name);
             Logger.Log($"Packages: ");
             foreach(var v in Info.Packages)
             {
+                PackageBase? pack = null;
                 if (v.PurpleUri != null)
                 {
                     Logger.Log($"From URL: " + v.PurpleUri);
@@ -38,12 +41,17 @@ namespace HKMM.Pack.Provider.Custom
                             )).Item2)
                     ).ToHKMMPackageDef();
                     Logger.Log($"Got package: {data.Name}(v{data.Version})");
-                    packages[data.Name] = data;
+                    pack = data;
                 }
                 if(v.Pack != null)
                 {
                     Logger.Log($"Got package: {v.Pack.Value.Name}");
-                    packages[v.Pack.Value.Name] = v.Pack;
+                    pack = v.Pack;
+                }
+                if(pack != null)
+                {
+                    CacheModule.Instance.SetObject(cacheKey, "p." + pack.Value.Name);
+                    packages[pack.Value.Name] = pack;
                 }
             }
 

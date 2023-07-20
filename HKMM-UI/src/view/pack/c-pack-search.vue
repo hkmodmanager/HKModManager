@@ -9,7 +9,9 @@
             </div>
             <div class="mt-1 collapse" ref="detailsBody">
                 <div v-for="(group, id) in groups" :key="id" class="row">
-                    <div class="col">{{ $t("modpack.tags.groups." + id) }}:</div>
+
+                    <div class="col">{{ $t("modpack.tags.groups." + id) }}</div>
+
                     <div v-for="(key, name) in group" :key="key" class="col form-check"> 
                         
                         <input :id="`cps-g-${id}-${key}`" class="form-check-input" 
@@ -25,6 +27,12 @@
                             {{ $t("modpack.tags." + name) }}<span v-if="false">(:{{ key }})</span>
                         </label>
                     </div>
+                </div>
+                <div class="input-group d-flex">
+                    <label class="input-group-text">{{ $t("modpack.tags.groups.author") }}</label>
+                    <select class="form-select" v-model="filters['autho']" @change="refresh()">
+                        <option v-for="author in authors" :key="author" :value="`author=${author}`">{{ author }}</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -42,6 +50,8 @@ const filters = ref<Record<string, string>>({});
 const options = ref<string[]>([])
 const textinput = ref(searchText);
 const commonTags: Record<string, string> = {};
+
+
 
 let db_collapse: Collapse | undefined = undefined;
 
@@ -67,6 +77,8 @@ const defaultTags: Record<string, Record<string, string>> = {
     }
 };
 
+const authors: string[] = ["",  ...(JSON.parse(localStorage.getItem('allAuthors') ?? '[]') as string[])
+                    .sort((a, b) => a.localeCompare(b))];
 const emit = defineEmits(['update']);
 
 const props = defineProps<{

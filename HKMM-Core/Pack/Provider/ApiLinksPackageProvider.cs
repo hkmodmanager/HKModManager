@@ -33,18 +33,16 @@ namespace HKMM.Pack.Provider
         protected override async Task<bool> TryInit()
         {
             IsHidden = true;
-            await TaskManager.StartTask("Fetch ApiLinks", async () =>
-            {
-                var text = 
-                    Encoding.UTF8.GetString(
-                        (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml")).Item2
-                        );
-                
-                var api = await JS.Api.ParseAPILink(text);
-                var pack = HKMMPackage.FromModLegacyToHKMM(api);
-                EditPackage(pack);
-                packages.Add(MODPACK_NAME_MODDING_API, pack);
-            });
+            var text =
+                Encoding.UTF8.GetString(
+                    (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml")).Item2
+                    );
+
+            var api = await JS.Api.ParseAPILink(text);
+            var pack = HKMMPackage.FromModLegacyToHKMM(api);
+            EditPackage(pack);
+            CacheModule.Instance.SetObject("APP", "p.Info", pack);
+            packages.Add(MODPACK_NAME_MODDING_API, pack);
             return true;
         }
     }

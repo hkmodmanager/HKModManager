@@ -62,6 +62,9 @@ initJSAPI({
         ) : (
             join(appDir, "managed")
         );
+    },
+    getCacheDir() {
+        return join(userData, "hkmm-cache");
     }
 });
 

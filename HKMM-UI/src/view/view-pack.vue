@@ -45,9 +45,23 @@ let packages = filterMods(getRootPackageProvider().getAllPackages(false) as Pack
 const input = ref<string>();
 
 function updateFilter(i: string | undefined) {
+    
+    const allpackages = getRootPackageProvider().getAllPackages(false) as PackageDisplay[];
+    
+    const authorNames: Set<string> = new Set<string>();
+    for (const pack of allpackages) {
+        const authors = pack.authors;
+        if(authors) {
+            for (const author of authors) {
+                authorNames.add(author);
+            }
+        }
+    }
+    localStorage.setItem("allAuthors", JSON.stringify([...authorNames.values()]));
+
     input.value = i;
     const filter = prepareFilter(i);
-    packages = filterMods(getRootPackageProvider().getAllPackages(false) as PackageDisplay[], filter);
+    packages = filterMods(allpackages, filter);
     _this.$forceUpdate();
 }
 
@@ -57,8 +71,11 @@ onBeforeMount(() => {
     } else {
         checkInit = setInterval(() => {
             if (PackageProviderProxy.allInited) {
-                inited.value = true;
-                _this.$forceUpdate();
+                setTimeout(() => {
+                    inited.value = true;
+                    _this.$forceUpdate();
+                }, 100);
+                
                 clearInterval(checkInit);
                 checkInit = undefined;
             }
