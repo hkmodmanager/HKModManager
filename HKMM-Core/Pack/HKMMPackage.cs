@@ -4,6 +4,7 @@ using HKMM.Pack.Installer;
 using HKMM.Pack.Legacy;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
+using HKMM.Utils;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -107,7 +108,7 @@ namespace HKMM.Pack
             var md = Path.Combine(p, PACK_METADATA_FILE_NAME);
             if(File.Exists(md))
             {
-                var r = JsonSerializer.Deserialize<HKMMPackage>(await File.ReadAllTextAsync(md), Converter.Settings);
+                var r = JsonUtils.ToObject<HKMMPackage>(await File.ReadAllTextAsync(md));
                 if (r is null)
                 {
                     if (noThrow) return null;
@@ -131,8 +132,8 @@ namespace HKMM.Pack
             }
             var ln = latest.ToString(4);
             var lroot = Path.Combine(root, ln);
-            var lmi = JsonSerializer.Deserialize<LegacyLocalModInfo>(
-                File.ReadAllText(Path.Combine(lroot, "modversion.json")), Converter.Settings);
+            var lmi = JsonUtils.ToObject<LegacyLocalModInfo>(
+                File.ReadAllText(Path.Combine(lroot, "modversion.json")));
 
             var result = await FromLocalModLegacy(lmi);
             result.InstallPath = p;

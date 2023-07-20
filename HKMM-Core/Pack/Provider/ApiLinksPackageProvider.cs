@@ -26,6 +26,7 @@ namespace HKMM.Pack.Provider
             pack.DisplayName = "Modding API";
             pack.Description = "A Hollow Knight Modding API/loader.";
             pack.AllowToggle = false;
+            pack.Repository = "https://github.com/hk-modding/api";
             pack.Installer = InstallerUtils.GetInstaller(INSTALLER_MAPI_NAME);
         }
         protected override async Task<bool> TryInit()

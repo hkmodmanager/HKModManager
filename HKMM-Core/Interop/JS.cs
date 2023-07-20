@@ -14,6 +14,53 @@ namespace HKMM.Interop
         private static JSAPI api;
         public static bool SupportJSAPI { get; private set; } = false;
 
+        public static T ToCS<T>(Func<T> action)
+        {
+            try
+            {
+                return action();
+            } catch(Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+        public static void ToCS(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+        public static async Task<T> ToCS<T>(Func<Task<T>> task)
+        {
+            try
+            {
+                return await task();
+            } catch(Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+        public static async Task ToCS(Func<Task> task)
+        {
+            try
+            {
+                await task();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
         [JSExport]
         public static void InitJSAPI(JSAPI api)
         {
@@ -35,5 +82,6 @@ namespace HKMM.Interop
         public Func<string, Task<LegacyModCollection>> ParseModLinks { get; set; }
         public Func<string, Task<LegacyModInfoFull>> ParseAPILink { get; set; }
         public Func<string> GetGameInjectRoot { get; set; }
+        public Func<string> GetInternalLibRoot { get; set; }
     }
 }

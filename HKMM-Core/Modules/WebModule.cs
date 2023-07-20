@@ -19,9 +19,11 @@ namespace HKMM.Modules
         };
         public static readonly Dictionary<string, string> localFiles = new()
         {
+#if TEST_DATA
             [@"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml"] = @"F:\HKLab\HKMM-Data\ApiLinks.xml",
             [@"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml"] = @"F:\HKLab\HKMM-Data\ModLinks.xml",
             [@"https://github.com/hk-modding/api/releases/download/1.5.78.11833-74/ModdingApiWin.zip"] = @"F:\HKLab\HKMM-Data\ModdingApiWin.zip"
+#endif
         };
         private readonly HttpClient client = new();
         public virtual async Task<(string, byte[], bool)> DownloadRawFileDirect(string uri, bool noThrow = false)

@@ -148,6 +148,8 @@ declare module "core" {
 		parseAPILink: (arg1: string) => Promise<LegacyModInfoFull>;
 
 		getGameInjectRoot: () => string;
+
+		getInternalLibRoot: () => string;
 	}
 
 	export class LocalPackageProxy extends unknown {
@@ -228,5 +230,13 @@ declare module "core" {
 		export function getTask(guid: string): TaskItem | undefined;
 
 		export function getTasksProgress(): number;
+	}
+
+	export class Test extends unknown {
+		constructor();
+
+		static crash(): void;
+
+		static attachDebugger(): void;
 	}
 }

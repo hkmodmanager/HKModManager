@@ -1,11 +1,13 @@
 ﻿using HKMM.Tasks;
 using Microsoft.JavaScript.NodeApi;
+using PInvoke;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HKMM
@@ -52,7 +54,7 @@ namespace HKMM
             }
             if (handlers.TryGetValue(level, out var value))
             {
-                value(msg);
+                //value(msg);
             }
             var output = Console.Out;
             var prevColor = Console.ForegroundColor;
@@ -72,11 +74,12 @@ namespace HKMM
             var n = DateTime.Now;
             if (level < LogLevel.Fine)
             {
-                var head = $"[{level}][{n:HH-mm-ss:ffff}]";
+                
+                var head = $"[{level}][{n:HH-mm-ss:ffff}][t:{Kernel32.GetCurrentThreadId()}]";
                 logOutput?.WriteLine(("\n" + msg).Replace("\n", $"\n{head}"));
                 logOutput?.Flush();
             }
-            output?.WriteLine($"[{level}]: {msg}");
+            output?.WriteLine($"[{level}][p:{Kernel32.GetCurrentProcessId()}][t:{Kernel32.GetCurrentThreadId()}]: {msg}");
             Console.ForegroundColor = prevColor;
         }
         public static void LogError(string msg)
@@ -92,7 +95,7 @@ namespace HKMM
             [CallerFilePath] string path = "", 
             [CallerLineNumber] int line = 0)
         {
-            Log($"Calling {name} in {path}:{line}", LogLevel.Fine);
+            //Log($"Calling {name} in {path}:{line}", LogLevel.Fine);
         }
     }
 }

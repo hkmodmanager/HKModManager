@@ -39,10 +39,13 @@ namespace HKMM.Interop
         public bool AllowInstall => package.AllowInstall;
         public bool AllowUninstall => package.AllowUninstall;
 
-        public async Task Install()
+        public Task Install()
         {
-            Logger.Where();
-            await LocalPackManager.Instance.InstallHKPackage(false, package);
+            return JS.ToCS(async () =>
+            {
+                Logger.Where();
+                await LocalPackManager.Instance.InstallHKPackage(false, package);
+            });
         }
     }
 }

@@ -56,6 +56,13 @@ initJSAPI({
             join(appDir, "managed")
         );
     },
+    getInternalLibRoot() {
+        return !isPackaged ? (
+            join(srcRoot, "managed") //Debug
+        ) : (
+            join(appDir, "managed")
+        );
+    }
 });
 
 setInterval(() => {

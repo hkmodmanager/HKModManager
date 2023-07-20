@@ -5,9 +5,10 @@ namespace GameInject;
 static partial class Main
 {
     public static readonly string ModPath = Path.Combine(Application.dataPath, "Managed", "Mods");
-    public static readonly Dictionary<string, string> redirectPath = new();
+    public static readonly Dictionary<string, string> fake2realPath = new();
     public static readonly Dictionary<string, string> get_location_redirect = new();
-    public static readonly Dictionary<string, string> redirectDir = new();
+    public static readonly Dictionary<string, string> real2fakePath = new();
+    public static readonly Dictionary<string, List<string>> fake2realDir = new();
     public static Config config = null!;
     public static bool CheckAPI()
     {
@@ -57,6 +58,13 @@ static partial class Main
         }
         return true;
     }
+    public static void Log(string msg)
+    {
+        if(config.outputLog)
+        {
+            Debug.Log(msg);
+        }
+    }
     public static void ScanModPacks()
     {
         List<string> packs = new();
@@ -65,7 +73,7 @@ static partial class Main
             var statusPath = Path.Combine(p, "HKMM-PACKENABLED");
             if (!File.Exists(statusPath)) continue;
             packs.Add(File.ReadAllText(statusPath, Encoding.UTF8));
-            Debug.Log($"Found enabled modpack: {p}");
+            Log($"Found enabled modpack: {p}");
         }
         foreach (var v in packs)
         {
@@ -74,27 +82,39 @@ static partial class Main
             var mmp = Path.Combine(v, "ModPackMetadata.json");
             if (!File.Exists(mmp)) continue;
             var md = JsonConvert.DeserializeObject<ModMetadata>(File.ReadAllText(mmp))!;
-            foreach((var path, var rp) in md.InstalledFiles)
+            foreach((var realPath, var rp) in md.InstalledFiles)
             {
-                var realPath = rp;
+                var fakePath = rp;
                 if(rp.StartsWith("ModsRoot"))
                 {
-                    realPath = Path.Combine(ModPath, rp.Substring(9));
+                    fakePath = Path.Combine(ModPath, rp.Substring(9));
                 }
                 else if(rp.StartsWith("SaveRoot"))
                 {
-                    realPath = Path.Combine(Application.persistentDataPath, rp.Substring(9));
+                    fakePath = Path.Combine(Application.persistentDataPath, rp.Substring(9));
                 }
-                realPath = Path.GetFullPath(realPath);
+                fakePath = Path.GetFullPath(fakePath);
                 
-                Debug.Log($"Redirect {realPath} -> {path}");
+                Log($"Redirect {fakePath} -> {realPath}");
 
-                redirectPath[realPath] = Path.GetFullPath(path);
-                redirectPath[Path.GetDirectoryName(realPath)] = Path.GetDirectoryName(path);
+                var r = Path.GetFullPath(realPath);
 
-                if(Path.GetExtension(realPath).EndsWith("dll", StringComparison.OrdinalIgnoreCase))
+                fake2realPath[fakePath] = r;
+                real2fakePath[r] = fakePath;
+                fake2realPath[Path.GetDirectoryName(fakePath)] = Path.GetDirectoryName(realPath);
+                
+                var fakeDir = Path.GetDirectoryName(fakePath);
+                var realDir = Path.GetDirectoryName(realPath);
+                if(!fake2realDir.TryGetValue(fakeDir, out var targets))
                 {
-                    get_location_redirect[path] = realPath;
+                    targets = new();
+                    fake2realDir[fakeDir] = targets;
+                }
+                if(!targets.Contains(realDir)) targets.Add(realDir);
+
+                if(Path.GetExtension(fakePath).EndsWith("dll", StringComparison.OrdinalIgnoreCase))
+                {
+                    get_location_redirect[realPath] = fakePath;
                 }
             }
         }

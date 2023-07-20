@@ -1,5 +1,6 @@
 ﻿using HKMM.Interop;
 using HKMM.Pack.Metadata;
+using HKMM.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +30,7 @@ namespace HKMM
                 Instance = new();
                 return;
             }
-            Instance = JsonSerializer.Deserialize<Settings>(File.ReadAllText(conf), Converter.Settings) 
+            Instance = JsonUtils.ToObject<Settings>(File.ReadAllText(conf)) 
                 ?? new();
         }
         static Settings()

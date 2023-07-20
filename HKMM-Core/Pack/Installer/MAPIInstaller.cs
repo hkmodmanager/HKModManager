@@ -1,6 +1,7 @@
 ﻿using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Pack.Provider;
+using HKMM.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,35 +29,31 @@ namespace HKMM.Pack.Installer
             pack.Info.Version = $"{ver}.0.0.0";
             pack.Info.AllowUninstall = CanUninstall;
         }
-        public override async Task<List<HKMMPackage>> GetInstalledPackage(List<HKMMPackage> pack)
+        public override Task<List<HKMMPackage>> GetInstalledPackage(List<HKMMPackage> pack)
         {
+            Logger.Where();
             var ver = NetUtils.GetAPIVersion(APIPath);
+            Logger.Where();
             if (ver <= 0)
             {
-                return pack;
+                Logger.Where();
+                return Task.FromResult(pack);
             }
             HKMMHollowKnightPackageDefV1? info;
-            try
-            {
-                await ApiLinksPackageProvider.instance.MakeSureInit();
-                info = ApiLinksPackageProvider.instance.FindPack(MODPACK_NAME_MODDING_API)?.ToHKMMPackageDef();
-            } catch(Exception)
-            {
-                info = new();
-                ApiLinksPackageProvider.EditPackage(info);
-            }
-            if(info == null)
-            {
-                return pack;
-            }
-            var p = new HKMMPackage()
+
+            info = new();
+            Logger.Where();
+            ApiLinksPackageProvider.EditPackage(info);
+            Logger.Where();
+            var p = new HKMMPackage
             {
                 Info = info,
-                InstallDate = DateTime.MinValue
+                InstallDate = DateTime.MinValue,
+                Installer = this
             };
-
+            Logger.Where();
             pack.Add(p);
-            return pack;
+            return Task.FromResult(pack);
         }
         public override void UninstallPack(HKMMPackage pack)
         {

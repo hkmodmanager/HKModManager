@@ -35,7 +35,7 @@ namespace HKMM.Pack
         public PackContext()
         {
             packages = new();
-            MakeSureInit();
+            MakeSureInit(1);
         }
         public PackContext(PackCollection packages)
         {
@@ -69,11 +69,12 @@ namespace HKMM.Pack
             }
             return null;
         }
-        public Task MakeSureInit()
+        public Task MakeSureInit(int delay = 0)
         {
             return SingleTask(async () =>
             {
                 if (_inited) return;
+                if (delay > 0) await Task.Delay(delay);
                 try
                 {
                     _inited = await TryInit();

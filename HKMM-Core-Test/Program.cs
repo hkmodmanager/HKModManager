@@ -16,7 +16,8 @@ JS.InitJSAPI(new()
     GetModStorePath = () => msp,
     GetConfigPath = () => "config.json",
     ParseAPILink = async _ => new HKMM.Pack.Legacy.LegacyModInfoFull(),
-    ParseModLinks = async _ => new HKMM.Pack.Legacy.LegacyModCollection()
+    ParseModLinks = async _ => new HKMM.Pack.Legacy.LegacyModCollection(),
+    GetGameInjectRoot = () => "F:\\HKLab\\HKMM\\gameinject\\Output"
 }); ;
 
 var data = JsonSerializer.Deserialize<PackCollection>(File.ReadAllText("TestDatabase.json"))!;

@@ -17,20 +17,34 @@ namespace HKMM.Pack
         public readonly Dictionary<string, HKMMPackage> mods = new();
         public Task LoadLocalPacks()
         {
+            Logger.Where();
             return SingleTask(async () =>
             {
                 var m = new List<HKMMPackage>();
-                foreach(var v in InstallerUtils.nameToInstaller.Values)
+                Logger.Where();
+                foreach(var v in InstallerUtils.nameToInstaller)
                 {
-                    if (v == null) continue;
-                    await v.GetInstalledPackage(m);
+                    Logger.Where();
+                    Logger.Log("Installer: " + v.Key);
+                    Logger.Where();
+                    if (v.Value == null) continue;
+                    try
+                    {
+                        Logger.Where();
+                        await v.Value.GetInstalledPackage(m);
+                        Logger.Where();
+                    }catch(TimeoutException)
+                    {
+                        Logger.LogError("Unable to complete GetInstalledPackage: " + v.Key);
+                    }
                 }
-                Logger.Log($"Successfully loaded {m.Count} modpacks");
+                Logger.Log($"Successfully loaded {m.Count} modpacks", LogLevel.Fine);
                 lock (mods)
                 {
                     mods.Clear();
                     foreach (var mod in m)
                     {
+                        if (mod == null) continue;
                         if(mods.ContainsKey(mod.Info.Name))
                         {
                             //Logger.LogWarning("Duplicate local modpack: " + mod.Info.Name);
@@ -54,6 +68,10 @@ namespace HKMM.Pack
                 pack.Add(p);
             }
             return pack;
+        }
+        public HKMMPackage? FindPack(string name)
+        {
+            return mods.TryGetValue(name, out var result) ? result : null;
         }
         public override void RecordInstalledPack(HKMMPackage mod)
         {

@@ -179,6 +179,11 @@ namespace HKMM.Pack.Installer
         public virtual async Task<HKMMPackage> InstallHKPackageUnsafe(CSHollowKnightPackageDef def,
             Task[] waitTasks)
         {
+            if(this != GameInjectInstaller.Instance)
+            {
+                GameInjectInstaller.TryInstallGameInject();
+            }
+
             var p = def.ToHKMMPackageDef();
             Logger.Log($"Installing {p.Name}(v{p.Version})");
             if(p.Installer != null && p.Installer != this)
@@ -315,9 +320,26 @@ namespace HKMM.Pack.Installer
         {
             if (MakeSureCorrectInstaller(pack, i => i.SetEnable(pack, enabled))) return;
 
+            if (this != GameInjectInstaller.Instance)
+            {
+                GameInjectInstaller.TryInstallGameInject();
+            }
+
             if (enabled == IsEnabled(pack)) return;
             if (enabled)
             {
+                foreach(var dep in pack.Info.GetAllDependencies(false))
+                {
+                    var loc = LocalPackManager.Instance.FindPack(dep);
+                    if(loc == null)
+                    {
+                        Logger.LogWarning($"Missing dependencies(in {pack.Info.Name}): {dep}");
+                    }
+                    else
+                    {
+                        loc.Enabled = true;
+                    }
+                }
                 var p = GetEnabledFilePath(pack.Info.Name);
                 Directory.CreateDirectory(Path.GetDirectoryName(p)!);
                 File.WriteAllText(p, pack.InstallPath);

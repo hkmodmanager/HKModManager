@@ -26,6 +26,7 @@
     <PackageReference Include="Mono.cecil" Version="0.11.5">
       <Private>true</Private>
     </PackageReference>
+    <PackageReference Include="PInvoke.Kernel32" Version="0.7.124" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
 
     <PackageReference Include="System.Text.Json" Version="7.*" />

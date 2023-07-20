@@ -40,10 +40,13 @@ namespace HKMM.Interop
         
         public PackageDisplay? GetPackage(string name)
         {
-            Logger.Where();
-            var pack = context.FindPack(name);
-            if (pack == null) return null;
-            return new() { package = pack.ToHKMMPackageDef() };
+            return JS.ToCS<PackageDisplay?>(() =>
+            {
+                Logger.Where();
+                var pack = context.FindPack(name);
+                if (pack == null) return null;
+                return new() { package = pack.ToHKMMPackageDef() };
+            });
         }
     }
 }

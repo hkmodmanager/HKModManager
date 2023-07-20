@@ -32,6 +32,7 @@ namespace HKMM.Pack.Metadata
     public partial class PackageBase
     {
         public CSHollowKnightPackageDef Value => (CSHollowKnightPackageDef)this;
+        public PackageBase Clone() => (PackageBase)MemberwiseClone();
         public HKMMHollowKnightPackageDefV1 ToHKMMPackageDef()
         {
             var t = (CSHollowKnightPackageDef)this;
@@ -85,6 +86,11 @@ namespace HKMM.Pack.Metadata
                 {
                     foreach (var v in deps.StringArray)
                     {
+                        if(v == Value.Name)
+                        {
+                            Logger.LogWarning("A package depends on itself: " + v);
+                            continue;
+                        }
                         list.Add(v);
                     }
                 }
@@ -96,6 +102,11 @@ namespace HKMM.Pack.Metadata
                         if (!string.IsNullOrEmpty(d.Version) ||
                             d.UseLatestPublished == true)
                         {
+                            if (v.Key == Value.Name)
+                            {
+                                Logger.LogWarning("A package depends on itself: " + v);
+                                continue;
+                            }
                             list.Add(v.Key);
                         }
                     }
