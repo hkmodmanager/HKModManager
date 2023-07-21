@@ -16,7 +16,7 @@ public static class NetUtils
     {
         if (!File.Exists(apiPath)) return -3;
         Logger.Where();
-        var data = File.ReadAllBytes(apiPath);
+        var data = FileModule.Instance.ReadBytes(apiPath);
 
         using var asm = AssemblyDefinition.ReadAssembly(new MemoryStream(data));
         Logger.Where();

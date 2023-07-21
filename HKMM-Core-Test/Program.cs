@@ -14,13 +14,15 @@ var msp = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location
 JS.InitJSAPI(new()
 {
     GetModStorePath = () => msp,
-    GetConfigPath = () => "config.json",
     ParseAPILink = async _ => new HKMM.Pack.Legacy.LegacyModInfoFull(),
     ParseModLinks = async _ => new HKMM.Pack.Legacy.LegacyModCollection(),
     GetGameInjectRoot = () => "F:\\HKLab\\HKMM\\gameinject\\Output"
-}); ;
+});
+
+Settings.LoadSettings("config.json");
 
 var data = JsonSerializer.Deserialize<PackCollection>(File.ReadAllText("TestDatabase.json"))!;
+
 
 PackContext.customProviders.fallback.Add(new(data));
 

@@ -154,12 +154,10 @@ declare module "core" {
 
 	export function initJSAPI(api: JSAPI): void;
 
-	export function onSettingChanged(): void;
+	export function onSettingChanged(path: string): void;
 
 	export class JSAPI extends unknown {
 		getModStorePath: () => string;
-
-		getConfigPath: () => string;
 
 		parseModLinks: (arg1: string) => Promise<LegacyModCollection>;
 
@@ -170,6 +168,10 @@ declare module "core" {
 		getInternalLibRoot: () => string;
 
 		getCacheDir: () => string;
+
+		getStartArgs: () => string;
+
+		getElectronExe: () => string;
 	}
 
 	export class LocalPackageProxy extends unknown {
@@ -190,6 +192,15 @@ declare module "core" {
 		static getMod(name: string): LocalPackageProxy | undefined;
 
 		static getAllMods(): Promise<LocalPackageProxy[]>;
+	}
+
+	export class NetUtility extends unknown {
+		constructor();
+
+		static initUACHelper(
+			parentPID: string,
+			pipeName: string,
+		): void;
 	}
 
 	export class PackageDisplay extends unknown {
@@ -261,8 +272,8 @@ declare module "core" {
 	export class Test extends unknown {
 		constructor();
 
-		static crash(): void;
+		static checkUACHelper(): void;
 
-		static attachDebugger(): void;
+		static crash(): void;
 	}
 }

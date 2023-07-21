@@ -19,12 +19,12 @@ namespace HKMM
         public List<string> MirrorGithub { get; set; } = new();
         [JsonPropertyName("gamepath")]
         public string GamePath { get; set; } = "";
-        public static Settings Instance { get; set; } = null!;
+        public static Settings Instance { get; set; } = new();
 
         
-        internal static void LoadSettings()
+        public static void LoadSettings(string configPath)
         {
-            var conf = JS.Api.GetConfigPath();
+            var conf = configPath;
             if (!File.Exists(conf))
             {
                 Instance = new();
@@ -32,10 +32,6 @@ namespace HKMM
             }
             Instance = JsonUtils.ToObject<Settings>(File.ReadAllText(conf)) 
                 ?? new();
-        }
-        static Settings()
-        {
-            LoadSettings();
         }
     }
 }

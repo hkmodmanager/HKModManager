@@ -76,8 +76,8 @@ namespace HKMM.Pack
                 var rp = Path.GetRelativePath(mod.Path, f);
                 var dp = Path.Combine(imp, rp);
                 Directory.CreateDirectory(Path.GetDirectoryName(dp)!);
-                var data = await File.ReadAllBytesAsync(f);
-                var wt = File.WriteAllBytesAsync(dp, data);
+                var data = await FileModule.Instance.ReadBytesAsync(f);
+                var wt = FileModule.Instance.WriteBytesAsync(dp, data);
                 var fi = new InstalledFileInfo(dp, Path.Combine(rmp, rp),
                     SHA256Module.Instance.CalcSHA256Tuple(data));
                 await wt;
@@ -92,7 +92,7 @@ namespace HKMM.Pack
         {
             var root = InstallPath;
             Directory.CreateDirectory(root);
-            File.WriteAllText(Path.Combine(root, PACK_METADATA_FILE_NAME),
+            FileModule.Instance.WriteText(Path.Combine(root, PACK_METADATA_FILE_NAME),
                 JsonSerializer.Serialize(this, Converter.Settings));
         }
         public static bool Exists(string name)

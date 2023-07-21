@@ -1,4 +1,5 @@
 ﻿using HKMM.Interop;
+using HKMM.Modules;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Provider;
 using HKMM.Utils;
@@ -31,7 +32,7 @@ namespace HKMM.Pack.Installer
             }
             public void Save()
             {
-                File.WriteAllText(ConfigPath, JsonUtils.ToJSON(this));
+                FileModule.Instance.WriteText(ConfigPath, JsonUtils.ToJSON(this));
             }
         }
 

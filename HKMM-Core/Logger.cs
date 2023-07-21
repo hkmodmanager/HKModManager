@@ -29,7 +29,8 @@ namespace HKMM
             var d = DateTime.Now;
             Directory.CreateDirectory(LogRoot);
             var p = Path.Combine(LogRoot, d.ToString("yyyy-MM-dd_H-mm") + ".log");
-            logOutput = new StreamWriter(p, true);
+            logOutput = new StreamWriter(File.Open(p, FileMode.Append | FileMode.OpenOrCreate, 
+                FileAccess.Write, FileShare.ReadWrite), Encoding.UTF8);
         }
         private static readonly Dictionary<LogLevel, Action<string>> handlers = new();
 #if DEBUG

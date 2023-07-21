@@ -9,6 +9,7 @@ using System;
 using System.Text.Json.Serialization;
 using HKMM;
 using HKMM.Utils;
+using HKMM.Modules;
 
 [Serializable]
 public class RuntimeInitializeOnLoads
@@ -49,7 +50,7 @@ public class RuntimeInitializeOnLoads
     }
     public void Save()
     {
-        File.WriteAllText(JSON_PATH, JsonSerializer.Serialize(this, Converter.Settings));
+        FileModule.Instance.WriteText(JSON_PATH, JsonSerializer.Serialize(this, Converter.Settings));
     }
 }
 [Serializable]
@@ -94,6 +95,6 @@ public class ScriptingAssemblies
     }
     public void Save()
     {
-        File.WriteAllText(JSON_PATH, JsonSerializer.Serialize(this, Converter.Settings));
+        FileModule.Instance.WriteText(JSON_PATH, JsonSerializer.Serialize(this, Converter.Settings));
     }
 }

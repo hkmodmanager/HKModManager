@@ -141,7 +141,7 @@ namespace HKMM.Pack.Installer
             if (info.Link.StartsWith("local:"))
             {
                 var p = info.Link[6..];
-                f = (Path.GetFileName(p), await File.ReadAllBytesAsync(p));
+                f = (Path.GetFileName(p), await FileModule.Instance.ReadBytesAsync(p));
             }
             else
             {
@@ -162,7 +162,7 @@ namespace HKMM.Pack.Installer
                     Logger.Log($"Got file {fp}");
 
                     result.Add(new(fp, Path.Combine(info.RelativeRoot, e.FullName), 
-                        SHA256Module.Instance.CalcSHA256Tuple(File.ReadAllBytes(fp))));
+                        SHA256Module.Instance.CalcSHA256Tuple(FileModule.Instance.ReadBytes(fp))));
                 }
                 return result;
             }
@@ -170,7 +170,7 @@ namespace HKMM.Pack.Installer
                 var fn = string.IsNullOrEmpty(info.OverwriteName) ? f.Item1 : info.OverwriteName;
                 var fp = Path.Combine(info.Root, fn);
                 Logger.Log($"Got file {fp}");
-                await File.WriteAllBytesAsync(fp, f.Item2);
+                await FileModule.Instance.WriteBytesAsync(fp, f.Item2);
                 using var s = File.OpenRead(fp);
                 result.Add(new(fp, Path.Combine(info.RelativeRoot, fn), SHA256Module.Instance.CalcSHA256Tuple(s)));
             }
@@ -300,7 +300,7 @@ namespace HKMM.Pack.Installer
 
             pack.Enabled = false;
             var root = Path.Combine(ModsRoot, pack.Info.Name);
-            if(Directory.Exists(root)) Directory.Delete(root, true);
+            if(Directory.Exists(root)) FileModule.Instance.Delete(root);
             RemoveInstalledPack(pack.Info.Name);
         }
 
@@ -323,7 +323,7 @@ namespace HKMM.Pack.Installer
 
             if (this != GameInjectInstaller.Instance)
             {
-                GameInjectInstaller.TryInstallGameInject();
+                Task.Run(() => GameInjectInstaller.TryInstallGameInject());
             }
 
             if (enabled == IsEnabled(pack)) return;
@@ -343,11 +343,11 @@ namespace HKMM.Pack.Installer
                 }
                 var p = GetEnabledFilePath(pack.Info.Name);
                 Directory.CreateDirectory(Path.GetDirectoryName(p)!);
-                File.WriteAllText(p, pack.InstallPath);
+                FileModule.Instance.WriteText(p, pack.InstallPath);
             }
             else
             {
-                File.Delete(GetEnabledFilePath(pack.Info.Name));
+                FileModule.Instance.Delete(GetEnabledFilePath(pack.Info.Name));
             }
         }
         public virtual string GetEnabledFilePath(string packName)

@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell } from 'electron'
+import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell, crashReporter } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -10,7 +10,10 @@ import { spawn } from 'child_process';
 import { dirname, join } from 'path';
 import * as semver from 'semver';
 import * as remote from '@electron/remote/main';
+import { checkNetUtility } from './electron/netutility';
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+checkNetUtility();
 
 const singleLock = app.requestSingleInstanceLock();
 if (!singleLock) {
@@ -28,6 +31,11 @@ if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_update')
     app.exit();
   }
 }
+
+crashReporter.start({
+
+});
+
 
 remote.initialize();
 

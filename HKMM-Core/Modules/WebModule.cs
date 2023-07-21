@@ -31,7 +31,7 @@ namespace HKMM.Modules
             //TODO:
             if(localFiles.TryGetValue(uri, out var lf))
             {
-                return (Path.GetFileName(lf), File.ReadAllBytes(lf), true);
+                return (Path.GetFileName(lf), FileModule.Instance.ReadBytes(lf), true);
             }
 
 

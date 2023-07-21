@@ -1,4 +1,6 @@
-﻿using Microsoft.JavaScript.NodeApi;
+﻿using HKMM.Modules;
+using HKMM.UACHelper;
+using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,13 +13,13 @@ namespace HKMM.Interop
     [JSExport]
     public class Test
     {
-        public static void Crash()
+        public static void CheckUACHelper()
         {
-            throw new NotImplementedException();
+            UACHelperServer.CheckUACProcess();
         }
-        public static void AttachDebugger()
+        public static unsafe void Crash()
         {
-            Debugger.Launch();
+            *((int*)0) = 1024;
         }
     }
 }

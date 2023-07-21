@@ -69,20 +69,21 @@ namespace HKMM.Interop
         }
 
         [JSExport]
-        public static void OnSettingChanged()
+        public static void OnSettingChanged(string path)
         {
-            Settings.LoadSettings();
+            Settings.LoadSettings(path);
         }
     }
     [JSExport]
     public struct JSAPI
     {
         public Func<string> GetModStorePath { get; set; }
-        public Func<string> GetConfigPath { get; set; }
         public Func<string, Task<LegacyModCollection>> ParseModLinks { get; set; }
         public Func<string, Task<LegacyModInfoFull>> ParseAPILink { get; set; }
         public Func<string> GetGameInjectRoot { get; set; }
         public Func<string> GetInternalLibRoot { get; set; }
         public Func<string> GetCacheDir { get; set; }
+        public Func<string> GetStartArgs { get; set; }
+        public Func<string> GetElectronExe { get; set; }
     }
 }

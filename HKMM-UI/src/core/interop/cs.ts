@@ -1,17 +1,14 @@
-import { initJSAPI, LegacyModCollection, LocalPackageProxy, PackageProviderProxy } from "core";
+import { initJSAPI, LegacyModCollection, LocalPackageProxy, onSettingChanged, PackageProviderProxy } from "core";
 import { existsSync, mkdirSync } from "fs-extra";
-import { join } from "path";
-import { appDir, isPackaged, srcRoot, userData } from "../remoteCache";
+import { join, resolve } from "path";
+import { appDir, exePath, isPackaged, srcRoot, userData } from "../remoteCache";
 import { ModSavePathMode, store } from "../settings";
 import { parseAPILink } from "./parser/api";
 import { parseModLinks } from "./parser/modlinks";
-
+import * as remote from '@electron/remote';
 
 
 initJSAPI({
-    getConfigPath() {
-        return store.path;
-    },
     async parseAPILink(arg1) {
         const api = await parseAPILink(arg1);
 
@@ -65,8 +62,20 @@ initJSAPI({
     },
     getCacheDir() {
         return join(userData, "hkmm-cache");
+    },
+    getStartArgs() {
+        if(!isPackaged) {
+            return "\"" + resolve(remote.process.argv[1]) + "\"";
+        }
+        return "";
+    },
+    getElectronExe() {
+        return exePath;
     }
 });
+
+
+onSettingChanged(store.path);
 
 setInterval(() => {
     LocalPackageProxy.getAllMods();

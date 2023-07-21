@@ -26,7 +26,7 @@ namespace HKMM.Modules
         {
             var p = GetCachePath(key);
             Directory.CreateDirectory(Path.GetDirectoryName(p)!);
-            File.WriteAllText(p, value);
+            FileModule.Instance.WriteText(p, value);
         }
         public virtual string? GetString(string key, string subKey)
         {
