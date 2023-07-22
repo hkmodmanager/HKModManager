@@ -4,6 +4,7 @@ using HKMM.Pack.Metadata.Providers;
 using HKMM.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,12 @@ namespace HKMM.Pack.Provider.Custom
             Info = JsonUtils.ToObject<HKMMProviderV1>(
                 await WebModule.Instance.DownloadTextFile(url)
                 );
+            if(string.IsNullOrEmpty(Info.Name) || 
+                string.IsNullOrEmpty(Info.Description) ||
+                Info.Packages == null )
+            {
+                throw new InvalidDataException();
+            }
             Logger.Log($"Provider Name: " + Info.Name);
             Logger.Log($"Packages: ");
             foreach(var v in Info.Packages)

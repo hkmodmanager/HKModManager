@@ -1,19 +1,19 @@
 
 <template>
-    <div class="card mb-2" 
+    <div class="card mb-2" v-if="packItem"
         :style="{
-            'background-color': (package.isImportant && local == undefined) ? 'var(--bs-warning-border-subtle)' : ''
+            'background-color': (packItem.isImportant && local == undefined) ? 'var(--bs-warning-border-subtle)' : ''
         }"
-        :id="`modpack-${package.displayName.replaceAll(' ', '')}`">
+        :id="`modpack-${packItem.displayName.replaceAll(' ', '')}`">
         <div class="d-flex g-0">
             <div class="flex-shrink-0" style="width: 128px;height: 128px">
-                <img v-if="package.icon" class="card-img-top" :src="getIcon()" width="128" height="128" />
+                <img v-if="packItem.icon" class="card-img-top" :src="getIcon()" width="128" height="128" />
             </div>
             <div class="flex-grow-1 d-flex flex-column">
                 <div class="flex-shrink-0 d-flex">
                     <div class="card-body flex-grow-1">
-                        <h5 class="card-title">{{ package.displayName }}
-                            <strong v-if="package.isImportant && local == undefined" class="text-danger">
+                        <h5 class="card-title">{{ packItem.displayName }}
+                            <strong v-if="packItem.isImportant && local == undefined" class="text-danger">
                                 ({{ $t("modpack.tips.importantUninstalled") }})
                             </strong>
                             </h5>
@@ -31,8 +31,8 @@
                         }} 
                         <span class="text-warning" v-if="newerVer != undefined"><i class="bi bi-arrow-right" /> {{ newerVer }}</span>
                         </small></div>
-                        <div class="card-text" v-if="package.tags.length > 0">
-                            <small class="text-muted">{{ $t("modpack.tags.title") }} {{ package.tags
+                        <div class="card-text" v-if="packItem.tags.length > 0">
+                            <small class="text-muted">{{ $t("modpack.tags.title") }} {{ packItem.tags
                                 .map(x => $t("modpack.tags." + x)).join(' ') }}</small>
                         </div>
                         <div class="card-text" v-if="days != undefined"><small class="text-muted">
@@ -52,7 +52,7 @@
                                 @click="local.uninstall()">{{
                                 $t("modpack.operate.uninstall")
                             }}</button>
-                            <template v-if="package.allowToggle">
+                            <template v-if="packItem.allowToggle">
                                 <button v-if="!local.enabled" class="btn btn-primary mt-1" @click="setEnabled(true)">{{
                                     $t("modpack.operate.enable") }}</button>
                                 <button v-else class="btn btn-primary mt-1" @click="setEnabled(false)">{{
@@ -60,14 +60,14 @@
                                 }}</button>
                             </template>
                             <button v-if="newerVer != undefined" 
-                            :disabled="!package.allowInstall"
+                            :disabled="!packItem.allowInstall"
                             @click="clickUpdate()"
                             class="btn btn-warning mt-1">{{ $t("modpack.operate.update")
                             }}</button>
                         </template>
                         <button v-else class="btn btn-primary mt-1" 
-                        :disabled="!package.allowInstall"
-                            @click="package.install()">{{
+                        :disabled="!packItem.allowInstall"
+                            @click="packItem.install()">{{
                             $t("modpack.operate.install")
                         }}</button>
                     </div>
@@ -77,16 +77,16 @@
                     <template v-if="showDetails">
                         <hr class="hr-default" />
 
-                        <div v-if="package.repository != undefined">
+                        <div v-if="packItem.repository != undefined">
                             {{ $t("modpack.repo") }}
-                            <a :href="package.repository">{{ package.repository }}</a>
+                            <a :href="packItem.repository">{{ packItem.repository }}</a>
                         </div>
-                        <div v-if="package.authors.length > 0">
+                        <div v-if="packItem.authors.length > 0">
                             {{ $t("modpack.author") }}
-                            <span copyable>{{ package.authors.join(';') }}</span>
+                            <span copyable>{{ packItem.authors.join(';') }}</span>
                         </div>
 
-                        <div v-if="package.dependencies.length > 0">
+                        <div v-if="packItem.dependencies.length > 0">
                             <hr />
                             <h4>{{ $t("modpack.dep.title") }}</h4>
                             <DiList :mods="getDependencies()" />
@@ -106,7 +106,7 @@
 import DiList from "../mods/c-mods-di-list.vue";
 import { commonMarkdown } from '@/core/utils/utils';
 import { PackageDisplay, LocalPackageProxy, getRootPackageProvider } from 'core';
-import { getCurrentInstance, nextTick, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
+import { nextTick, onBeforeMount, onMounted, onUnmounted, ref, shallowRef, triggerRef } from 'vue';
 import { Collapse } from 'bootstrap';
 
 const bodyCollapse = ref<HTMLDivElement>();
@@ -119,11 +119,11 @@ let newerVer: string | undefined = undefined;
 let curVer: string | undefined = undefined;
 const showDetails = ref(false);
 
-const { ctx: _this }: any = getCurrentInstance()
-
 const props = defineProps<{
     package: PackageDisplay
 }>();
+
+const packItem = shallowRef<PackageDisplay>();
 
 function getIcon() {
     if (!props.package.icon) return undefined;
@@ -151,7 +151,6 @@ function CollapseBody() {
 function setEnabled(e: boolean) {
     if (local == undefined) return;
     local.enabled = e;
-    _this.$forceUpdate();
 }
 
 function canUninstall() {
@@ -175,6 +174,7 @@ function getDependencies() {
 }
 
 onBeforeMount(() => {
+    packItem.value = props.package;
     days = getLastUpdate();
     desc = commonMarkdown.renderInline(props.package.description);
     update();
@@ -190,6 +190,7 @@ function update() {
             curVer = local.info.version;
         }
     }
+    triggerRef(packItem);
 }
 
 function clickUpdate() {
@@ -205,7 +206,6 @@ onMounted(() => {
 
     updateTimer = setInterval(() => {
         update();
-        _this.$forceUpdate();
     }, 500);
 });
 

@@ -38,6 +38,7 @@
         "api": "MAPI",
         "about": "About",
         "allpacks": "ModPacks",
+        "sources": "ModPacks Sources",
         "tasks": {
             "title": "Tasks",
             "all": "All",
@@ -60,7 +61,9 @@
             "uninstall": "Uninstall",
             "enable": "Enable",
             "disable": "Disable",
-            "update": "Update"
+            "update": "Update",
+            "refresh": "Refresh",
+            "remove": "Remove"
         },
         "dep": {
             "title": "Dependencies"
@@ -68,11 +71,27 @@
         "tips": {
             "importantUninstalled": "Please install this modpack or you may not be able to use mods normally"
         },
+        "source": "Source: ",
         "author": "Authors: ",
         "repo": "Repository: ",
         "version": "Version: ",
         "lastUpdate": "Last updated {days} ago",
         "tags": {
+            "groups": {
+                "mul_tags": "Tags",
+                "enabled": "Whether it is enabled",
+                "installed": "whether it is installed",
+                "type": "Type",
+                "author": "Author"
+            },
+            "installed": {
+                "installed": "Installed",
+                "uninstalled": "Uninstalled"
+            },
+            "type": {
+                "mod": "Mod",
+                "modpack": "ModPack"
+            },
             "title": "Tags: ",
             "None": "None",
             "Gameplay": "Gameplay",

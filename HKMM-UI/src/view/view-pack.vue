@@ -34,14 +34,13 @@ import CPackSearch from './pack/c-pack-search.vue';
 import PackItem from './pack/c-pack-item.vue';
 import { PackageDisplay, getRootPackageProvider, PackageProviderProxy } from 'core';
 import { filterMods, prepareFilter } from '@/core/utils/modfilter';
-import { getCurrentInstance, onBeforeMount, onUnmounted, ref } from 'vue';
+import { onBeforeMount, onUnmounted, ref, shallowRef } from 'vue';
 
-const { ctx: _this }: any = getCurrentInstance();
 const filter = prepareFilter();
 const inited = ref(false);
 let checkInit: any = undefined;
 let autoRefresh: any = undefined;
-let packages = filterMods(getRootPackageProvider().getAllPackages(false) as PackageDisplay[], filter);
+let packages = shallowRef(filterMods(getRootPackageProvider().getAllPackages(false) as PackageDisplay[], filter));
 
 const input = ref<string>();
 
@@ -62,8 +61,7 @@ function updateFilter(i: string | undefined) {
 
     input.value = i;
     const filter = prepareFilter(i);
-    packages = filterMods(allpackages, filter);
-    _this.$forceUpdate();
+    packages.value = filterMods(allpackages, filter);
 }
 
 onBeforeMount(() => {
@@ -74,7 +72,6 @@ onBeforeMount(() => {
             if (PackageProviderProxy.allInited) {
                 setTimeout(() => {
                     inited.value = true;
-                    _this.$forceUpdate();
                 }, 100);
                 
                 clearInterval(checkInit);

@@ -23,9 +23,11 @@ import ModalBox from '@/components/modal-box.vue';
 import { checkGameFile, } from '@/core/apiManager';
 import { store } from '@/core/settings';
 import { Component, onErrorCaptured, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 let appVue: Component | undefined;
 
+const router = useRouter();
 const errorModal = ref<typeof ModalBox>();
 const throughCheck = ref(false);
 const prevErr = ref<Error>();
@@ -53,6 +55,9 @@ async function check() {
     if (checkGameFile(gs) === true) {
         appVue = (await import('@/App.vue')).default;
         throughCheck.value = true;
+        router.replace({
+            name: "pack"
+        });
         return true;
     }
     return false;

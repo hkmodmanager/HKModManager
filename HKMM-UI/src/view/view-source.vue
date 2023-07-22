@@ -1,27 +1,41 @@
 
 <template>
+    <div class="input-group mb-2">
+        <input class="form-control" v-model="srcURL" />
+        <button class="btn btn-primary" @click="addURL()"><i class="bi bi-plus" /></button>
+    </div>
     <div>
-        <div v-for="(s) in sources" :key="s.name">
-            <CSourceItemVue :item="s" />
+        <div v-for="(s) in sources" :key="s.uRL">
+            <CSourceItemVue :initem="s" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { store } from '@/core/settings';
 import CSourceItemVue from '@/view/source/c-source-item.vue';
 import { CustomPackageProviderProxy } from 'core';
-import { getCurrentInstance, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
 
-const { ctx: _this }: any = getCurrentInstance();
 
-let sources = CustomPackageProviderProxy.getAllCustomProviders();
+const srcURL = ref("");
+
+const sources = shallowRef(CustomPackageProviderProxy.getAllCustomProviders());
 
 let autoRefresh: any = undefined;
 
 function refresh() {
-    sources = CustomPackageProviderProxy.getAllCustomProviders();
+    sources.value = CustomPackageProviderProxy.getAllCustomProviders();
+}
 
-    _this.$forceUpdate();
+function addURL() {
+    let url = srcURL.value;
+    if(url == "") return;
+    if(!url.startsWith("local:") && !url.startsWith("https://")) {
+        url = "https://" + url;
+    }
+    CustomPackageProviderProxy.addCustomProvider(url);
+    store.set('modpackSources', [ ...store.store.modpackSources, url ]);
 }
 
 onMounted(() => {

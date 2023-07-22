@@ -1,4 +1,4 @@
-﻿using HKMM.Pack.Metadata;
+using HKMM.Pack.Metadata;
 using HKMM.Pack.Provider;
 using HKMM.Tasks;
 using System;
@@ -90,6 +90,7 @@ namespace HKMM.Pack
                     catch (Exception ex)
                     {
                         Logger.LogError(ex.ToString());
+                        TaskManager.CurrentTask!.Status = TaskItemStatus.Fail;
                         _inited = false;
                     }
                     Interlocked.Add(ref _initCount, -1);
