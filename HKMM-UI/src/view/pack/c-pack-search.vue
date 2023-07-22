@@ -72,6 +72,7 @@ const defaultTags: Record<string, Record<string, string>> = {
         "installed.uninstalled": "Uninstalled"
     },
     "type": {
+        "None": "",
         "type.mod": "type=Mod",
         "type.modpack": "type=ModPack"
     }

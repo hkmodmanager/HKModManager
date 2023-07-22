@@ -44,6 +44,7 @@
         "api": "MAPI管理",
         "about": "关于",
         "allpacks": "ModPacks",
+        "sources": "Modpacks源",
         "tasks": {
             "title": "任务",
             "all": "全部",
@@ -66,7 +67,9 @@
             "uninstall": "卸载",
             "enable": "启用",
             "disable": "禁用",
-            "update": "更新"
+            "update": "更新",
+            "refresh": "刷新",
+            "remove": "删除"
         },
         "dep": {
             "title": "依赖项"
@@ -74,6 +77,7 @@
         "tips": {
             "importantUninstalled": "请安装该Modpack否则可能无法正常使用Mods"
         },
+        "source": "来源：",
         "author": "作者：",
         "repo": "代码仓库：",
         "version": "版本：",

@@ -1,4 +1,4 @@
-﻿using HKMM.Tasks;
+using HKMM.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,11 +25,12 @@ namespace HKMM.Modules
             [@"https://github.com/hk-modding/api/releases/download/1.5.78.11833-74/ModdingApiWin.zip"] = @"F:\HKLab\HKMM-Data\ModdingApiWin.zip"
 #endif
         };
-        private readonly HttpClient client = new();
+        public static SocketsHttpHandler Handler { get; } = new();
+        public static HttpClient Client { get; } = new(Handler);
         public virtual async Task<(string, byte[], bool)> DownloadRawFileDirect(string uri, bool noThrow = false)
         {
             //TODO:
-            if(localFiles.TryGetValue(uri, out var lf))
+            if (localFiles.TryGetValue(uri, out var lf))
             {
                 return (Path.GetFileName(lf), FileModule.Instance.ReadBytes(lf), true);
             }
@@ -37,7 +38,7 @@ namespace HKMM.Modules
 
             Logger.Log($"Downloading {uri}");
             string? fileName = null;
-            var result = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+            var result = await Client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
             Logger.Log($"Response header:");
             foreach (var header in result.Headers)
             {
@@ -80,6 +81,11 @@ namespace HKMM.Modules
         }
         public virtual async Task<(string, byte[])> DownloadRawFile(string uri)
         {
+            if(uri.StartsWith("local:"))
+            {
+                var p = uri[6..];
+                return (Path.GetFileName(p), FileModule.Instance.ReadBytes(p));
+            }
             var uri_inst = new Uri(uri);
             if (githubHost.Contains(uri_inst.Host, StringComparer.OrdinalIgnoreCase))
             {
@@ -98,14 +104,39 @@ namespace HKMM.Modules
                     {
                         Logger.LogWarning($"Mirror `{v}` is unavailable");
                     }
-                    
+
                 }
             }
-            
+
             {
                 Logger.Log("Use the original download URL");
                 var (filename, data, s) = await DownloadRawFileDirect(uri, false);
                 return (filename, data);
+            }
+        }
+
+        public virtual async Task<string> DownloadTextFile(string uri, bool saveCache = true)
+        {
+            try
+            {
+                var result = Encoding.UTF8.GetString((await DownloadRawFile(uri)).Item2);
+                if(saveCache)
+                {
+                    CacheModule.Instance.SetString("TextCache", uri, result);
+                }
+                return result;
+            } catch(IOException ex)
+            {
+                Logger.LogError(ex.ToString());
+                var data = saveCache ? CacheModule.Instance.GetString("TextCache", uri) : null;
+                if(data != null)
+                {
+                    return data;
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
     }

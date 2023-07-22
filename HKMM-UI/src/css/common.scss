@@ -41,8 +41,14 @@ hr {
     --bs-btn-border-radius: 0px;
 }
 
+.form-check-input, .form-check {
+    --bs-form-check-bg: rgba(0,0,0,0);    
+    padding-left: 0;
+}
+
 .form-control, .form-select {
     border-radius: 0px;
+
 }
 
 .accordion-button, .accordion-item {

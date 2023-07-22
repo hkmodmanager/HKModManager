@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Tasks;
 using System;
@@ -15,10 +15,8 @@ namespace HKMM.Pack.Provider
         public static readonly ModLinksPackagesProvider instance = new();
         protected override async Task<bool> TryInit()
         {
-            var text =
-                Encoding.UTF8.GetString(
-                    (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml")).Item2
-                    );
+            var text = await WebModule.Instance.DownloadTextFile(
+                @"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml");
             var mods = await JS.Api.ParseModLinks(text);
             foreach (var mod in mods.mods)
             {

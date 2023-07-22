@@ -7,7 +7,7 @@
             <slot name="title">
               <h5 class="modal-title">{{ title }}</h5>
             </slot>
-            <button class="btn" @click="getModal().hide()"><i class="bi bi-x-lg"></i></button>
+            <button class="btn text-white" @click="getModal().hide()"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="modal-body">
             <slot></slot>

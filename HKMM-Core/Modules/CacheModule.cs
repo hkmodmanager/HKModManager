@@ -1,9 +1,11 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Utils;
+using K4os.Hash.xxHash;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,16 +27,19 @@ namespace HKMM.Modules
         public virtual void SetString(string key, string value)
         {
             var p = GetCachePath(key);
+            Logger.Log("Save cache: " + p);
             FileModule.Instance.CreateDirectory(Path.GetDirectoryName(p)!);
             FileModule.Instance.WriteText(p, value);
         }
         public virtual string? GetString(string key, string subKey)
         {
-            return GetString(key + Path.DirectorySeparatorChar + subKey);
+            return GetString(key + Path.DirectorySeparatorChar +
+                XXH32.DigestOf(Encoding.Default.GetBytes(subKey)));
         }
         public virtual void SetString(string key, string subKey, string value)
         {
-            SetString(key + Path.DirectorySeparatorChar + subKey, value);
+            SetString(key + Path.DirectorySeparatorChar +
+                XXH32.DigestOf(Encoding.Default.GetBytes(subKey)), value);
         }
 
         public T GetObject<T>(string key)

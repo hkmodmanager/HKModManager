@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>GameInject</AssemblyName>
     <TargetFramework>net472</TargetFramework>
-    <Version>3.3.7.0</Version>
+    <Version>3.3.12.0</Version>
     <NoWarn>CS0436</NoWarn>
     <Nullable>enable</Nullable>
     <ExportDir>Output</ExportDir>

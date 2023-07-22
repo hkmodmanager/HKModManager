@@ -1,4 +1,5 @@
-﻿using HKMM.Pack;
+using HKMM.Pack;
+using HKMM.Pack.Provider.Custom;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -50,5 +51,6 @@ namespace HKMM.Interop
                 return new() { package = pack.ToHKMMPackageDef() };
             });
         }
+
     }
 }

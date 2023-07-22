@@ -40,6 +40,7 @@ const { ctx: _this }: any = getCurrentInstance();
 const filter = prepareFilter();
 const inited = ref(false);
 let checkInit: any = undefined;
+let autoRefresh: any = undefined;
 let packages = filterMods(getRootPackageProvider().getAllPackages(false) as PackageDisplay[], filter);
 
 const input = ref<string>();
@@ -81,7 +82,7 @@ onBeforeMount(() => {
             }
         }, 500);
     }
-
+    autoRefresh = setInterval(() => updateFilter(input.value ?? ""), 1000);
     updateFilter(input.value ?? "");
 });
 
@@ -90,6 +91,10 @@ onUnmounted(() => {
     if (checkInit) {
         clearInterval(checkInit);
         checkInit = undefined;
+    }
+    if(autoRefresh) {
+        clearInterval(autoRefresh);
+        autoRefresh = undefined;
     }
 });
 

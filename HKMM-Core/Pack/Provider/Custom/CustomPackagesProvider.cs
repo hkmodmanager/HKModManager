@@ -1,4 +1,4 @@
-﻿using HKMM.Modules;
+using HKMM.Modules;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.Providers;
 using HKMM.Utils;
@@ -23,10 +23,8 @@ namespace HKMM.Pack.Provider.Custom
         protected override async Task<bool> TryInit()
         {
             Info = JsonUtils.ToObject<HKMMProviderV1>(
-                Encoding.UTF8.GetString((await WebModule.Instance.DownloadRawFile(url)).Item2)
+                await WebModule.Instance.DownloadTextFile(url)
                 );
-            var cacheKey = "CPP-" + Info.Name;
-            CacheModule.Instance.SetObject(cacheKey, "info", Info);
             Logger.Log($"Provider Name: " + Info.Name);
             Logger.Log($"Packages: ");
             foreach(var v in Info.Packages)
@@ -36,9 +34,7 @@ namespace HKMM.Pack.Provider.Custom
                 {
                     Logger.Log($"From URL: " + v.PurpleUri);
                     var data = JsonUtils.ToObject<PackageBase>(
-                        Encoding.UTF8.GetString((await WebModule.Instance.DownloadRawFile(
-                            v.PurpleUri.ToString()
-                            )).Item2)
+                        await WebModule.Instance.DownloadTextFile(v.PurpleUri.ToString())
                     ).ToHKMMPackageDef();
                     Logger.Log($"Got package: {data.Name}(v{data.Version})");
                     pack = data;
@@ -50,7 +46,6 @@ namespace HKMM.Pack.Provider.Custom
                 }
                 if(pack != null)
                 {
-                    CacheModule.Instance.SetObject(cacheKey, "p." + pack.Value.Name);
                     packages[pack.Value.Name] = pack;
                 }
             }

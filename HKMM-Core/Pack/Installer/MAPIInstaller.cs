@@ -1,4 +1,4 @@
-﻿using HKMM.Modules;
+using HKMM.Modules;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Pack.Provider;
@@ -26,7 +26,7 @@ namespace HKMM.Pack.Installer
                 pack.IsValid = false;
                 return;
             }
-            
+
             pack.IsValid = true;
             pack.Info.Version = $"{ver}.0.0.0";
             pack.Info.AllowUninstall = CanUninstall;
@@ -73,21 +73,21 @@ namespace HKMM.Pack.Installer
         }
         public override void SetEnable(HKMMPackage pack, bool enabled)
         {
-            
+
         }
-        public override async Task<HKMMPackage> InstallHKPackageUnsafe(CSHollowKnightPackageDef def, 
+        public override async Task<HKMMPackage> InstallHKPackageUnsafe(CSHollowKnightPackageDef def,
             Task[] waitTasks)
         {
             var orig = NetUtils.GetAPIVersion(APIPath);
-            if(orig <= 0)
+            if (orig <= 0)
             {
                 Logger.Log("Create backup");
                 FileModule.Instance.Copy(APIPath, BackupPath);
             }
-            
+
             var result = await base.InstallHKPackageUnsafe(def, waitTasks);
             result.Info.AllowUninstall = CanUninstall;
-            foreach(var file in result.InstalledFiles)
+            foreach (var file in result.InstalledFiles)
             {
                 FileModule.Instance.Copy(file.Path, Path.Combine(ManagedPath, Path.GetFileName(file.Path)));
             }

@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.UACHelper;
 using System;
 using System.Collections.Generic;
@@ -22,6 +22,10 @@ namespace HKMM.Modules
             }
             catch (UnauthorizedAccessException)
             {
+                if (Directory.Exists(path))
+                {
+                    throw new InvalidOperationException("Target path is a folder");
+                }
                 return await UACHelperServer.ReadFileAsync(path);
             }
         }
@@ -33,6 +37,10 @@ namespace HKMM.Modules
             }
             catch (UnauthorizedAccessException)
             {
+                if (Directory.Exists(path))
+                {
+                    throw new InvalidOperationException("Target path is a folder");
+                }
                 return UACHelperServer.ReadFile(path);
             }
         }
@@ -42,23 +50,37 @@ namespace HKMM.Modules
         }
         public virtual async Task WriteBytesAsync(string path, byte[] data)
         {
+            CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
             try
             {
                 await File.WriteAllBytesAsync(path, data);
             }
             catch (UnauthorizedAccessException)
             {
+                if(Directory.Exists(path))
+                {
+                    Delete(path);
+                    await WriteBytesAsync(path, data);
+                    return;
+                }
                 await UACHelperServer.WriteFileAsync(path, data);
             }
         }
         public virtual void WriteBytes(string path, byte[] data)
         {
+            CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
             try
             {
                 File.WriteAllBytesAsync(path, data);
             }
             catch (UnauthorizedAccessException)
             {
+                if (Directory.Exists(path))
+                {
+                    Delete(path);
+                    WriteBytes(path, data);
+                    return;
+                }
                 UACHelperServer.WriteFile(path, data);
             }
         }
@@ -107,6 +129,10 @@ namespace HKMM.Modules
                 File.Copy(src, dest, true);
             } catch (UnauthorizedAccessException)
             {
+                if (Directory.Exists(src))
+                {
+                    throw new InvalidOperationException("Target path is a folder");
+                }
                 UACHelperServer.CopyFile(src, dest);
             }
         }

@@ -1,4 +1,5 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
+using HKMM.Modules;
 using HKMM.Pack.Installer;
 using HKMM.Pack.Metadata;
 using HKMM.Utils;
@@ -59,6 +60,7 @@ namespace HKMM.Pack
         public override async Task<List<HKMMPackage>> GetInstalledPackage(List<HKMMPackage> pack)
         {
             var msp = JS.Api.GetModStorePath();
+            FileModule.Instance.CreateDirectory(msp);
             Logger.Log("Find mods in " + msp);
             foreach (var mod in Directory.GetDirectories(msp))
             {

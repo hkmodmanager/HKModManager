@@ -23,6 +23,8 @@
 
   <ItemGroup>
 
+    <PackageReference Include="K4os.Hash.xxHash" Version="1.0.8" />
+
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Mono.cecil" Version="0.11.5">
       <Private>true</Private>

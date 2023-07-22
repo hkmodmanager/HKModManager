@@ -9,4 +9,4 @@ F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.CoreCompileInputs.cache
 F:\HKLab\HKMM\updater\obj\Debug\updater.exe
 F:\HKLab\HKMM\updater\obj\Debug\updater.pdb
 F:\HKLab\HKMM\updater\bin\Debug\rcedit.exe
-F:\HKLab\HKMM\updater\obj\Debug\updater.sourcelink.json
+F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.SuggestedBindingRedirects.cache

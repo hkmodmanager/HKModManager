@@ -33,7 +33,8 @@
 
       <hr />
       <ul class="nav nav-pnavills flex-column mb-auto">
-        <navitem viewpath="/pack"><i class="bi bi-cloud-download"></i> {{ $t("tabs.allpacks") }}</navitem>
+        <navitem viewpath="/pack"><i class="bi bi-layers"></i> {{ $t("tabs.allpacks") }}</navitem>
+        <navitem viewpath="/sources"><i class="bi bi-cloud-download"></i> {{ $t("tabs.sources") }}</navitem>
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" @click="taskNavGroupCollapse?.toggle()" href="javascript:;">
             <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}
@@ -47,7 +48,6 @@
             </navitem>
             <navitem viewpath="/tasks/failed" class="list-group-item" compare-path>{{ $t("tabs.tasks.failed") }}
             </navitem>
-
           </div>
         </li>
       </ul>
@@ -147,8 +147,11 @@ import { appVersion } from "./core/remoteCache";
 import ModalUpdate from "./view/update/modal-update.vue";
 import { buildMetadata } from "./core/exportGlobal";
 import { useI18n } from "vue-i18n";
+import { CustomPackageProviderProxy } from "core";
 
-
+for (const src of store.store.modpackSources) {
+  CustomPackageProviderProxy.addCustomProvider(src);
+}
 
 const i18n = useI18n();
 const current_language = ref(i18n.locale.value);

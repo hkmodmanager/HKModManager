@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Provider;
@@ -128,7 +128,8 @@ namespace HKMM.Pack.Installer
 
         public static void TryInstallGameInject()
         {
-            var pack = PackContext.rootContext.FindPack(MODPACK_NAME_GAME_INJECT)!.ToHKMMPackageDef();
+            var pack = PackContext.rootContext.FindPack(MODPACK_NAME_GAME_INJECT)?.ToHKMMPackageDef();
+            if (pack == null) return;
             var local = LocalPackManager.Instance.FindPack(MODPACK_NAME_GAME_INJECT);
             if(local != null)
             {

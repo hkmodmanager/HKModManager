@@ -45,6 +45,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./view/view-pack.vue')
     },
     {
+        name: "sources",
+        path: "/sources",
+        component: () => import('./view/view-source.vue')
+    },
+    {
         name: 'settings',
         path: '/settings',
         component: () => import('./view/view-settings.vue')
@@ -116,7 +121,6 @@ remote.getCurrentWindow().setIcon(join(publicDir, "logo.ico"));
 ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
     const url = new URL(urlStr);
     console.dir(url);
-
 });
 
 //document.body.setAttribute("data-bs-theme", store.get('useDarkMode', false) ? "dark" : "light");

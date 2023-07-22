@@ -186,10 +186,13 @@ static partial class Main
     {
         path = Path.GetFullPath(path);
         List<string> results = new();
-        results.AddRange(orig(path, originalUserPath, searchPattern, includeFiles,
-            includeDirs, searchOption, checkHost)
-            .Select(x => Path.GetFullPath(x)));
-
+        if (Directory.Exists(path))
+        {
+            results.AddRange(orig(path, originalUserPath, searchPattern, includeFiles,
+                includeDirs, searchOption, checkHost)
+                .Select(x => Path.GetFullPath(x)));
+        }
+        Log($"[FSE]: " + path + " " + searchPattern);
         foreach (var v in GetDirRedirect(path))
         {
             foreach (var item in orig(v, v, searchPattern, includeFiles, includeDirs,

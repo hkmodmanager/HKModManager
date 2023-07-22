@@ -1,4 +1,4 @@
-﻿
+
 using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Pack.Metadata;
@@ -136,7 +136,7 @@ namespace HKMM.Pack.Installer
         {
             Logger.Log($"Downloading modpack file: {info}");
             var result = new List<InstalledFileInfo>();
-            FileModule.Instance.CreateDirectory(info.Root);
+            
             (string, byte[]) f;
             if (info.Link.StartsWith("local:"))
             {
@@ -150,6 +150,7 @@ namespace HKMM.Pack.Installer
                 
             if(Path.GetExtension(f.Item1) .Equals(".zip", StringComparison.OrdinalIgnoreCase))
             {
+                FileModule.Instance.CreateDirectory(info.Root);
                 using var zip = new ZipArchive(new MemoryStream(f.Item2), ZipArchiveMode.Read);
                 foreach(var e in zip.Entries)
                 {
@@ -158,8 +159,11 @@ namespace HKMM.Pack.Installer
                     FileModule.Instance.CreateDirectory(Path.GetDirectoryName(fp)!);
 
                     using var es = e.Open();
-                    var buffer = new byte[es.Length];
-                    es.Read(buffer);
+                    var buffer = new byte[e.Length];
+                    for(int i = 0; i < e.Length;)
+                    {
+                        i += es.Read(buffer, i, (int)e.Length - i);
+                    }
                     FileModule.Instance.WriteBytes(fp, buffer);
                     Logger.Log($"Got file {fp}");
 
@@ -169,12 +173,10 @@ namespace HKMM.Pack.Installer
                 return result;
             }
             {
-                var fn = string.IsNullOrEmpty(info.OverwriteName) ? f.Item1 : info.OverwriteName;
-                var fp = Path.Combine(info.Root, fn);
+                var fp = info.Root;
                 Logger.Log($"Got file {fp}");
                 await FileModule.Instance.WriteBytesAsync(fp, f.Item2);
-                using var s = File.OpenRead(fp);
-                result.Add(new(fp, Path.Combine(info.RelativeRoot, fn), SHA256Module.Instance.CalcSHA256Tuple(s)));
+                result.Add(new(fp, info.RelativeRoot, SHA256Module.Instance.CalcSHA256Tuple(f.Item2)));
             }
             return result;
         }

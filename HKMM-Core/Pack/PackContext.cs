@@ -87,9 +87,9 @@ namespace HKMM.Pack
                         Interlocked.Add(ref _initCount, 1);
                         _inited = await TryInit();
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-
+                        Logger.LogError(ex.ToString());
                         _inited = false;
                     }
                     Interlocked.Add(ref _initCount, -1);

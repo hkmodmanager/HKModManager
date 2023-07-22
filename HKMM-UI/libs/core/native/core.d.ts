@@ -139,6 +139,8 @@ declare module "core" {
 
 		readonly provider: PackageProviderProxy;
 
+		readonly uRL: string;
+
 		readonly name: string;
 
 		readonly description: string;
@@ -150,6 +152,12 @@ declare module "core" {
 		readonly repository?: string;
 
 		check(): CustomPackageProviderProxy;
+
+		remove(): void;
+
+		static addCustomProvider(url: string): CustomPackageProviderProxy;
+
+		static getAllCustomProviders(): CustomPackageProviderProxy[];
 	}
 
 	export function enableWatchDog(enable: boolean): void;

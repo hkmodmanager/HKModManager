@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Pack.Installer;
 using HKMM.Pack.Metadata;
@@ -33,10 +33,8 @@ namespace HKMM.Pack.Provider
         protected override async Task<bool> TryInit()
         {
             IsHidden = true;
-            var text =
-                Encoding.UTF8.GetString(
-                    (await WebModule.Instance.DownloadRawFile(@"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml")).Item2
-                    );
+            var text = await WebModule.Instance.DownloadTextFile(
+                @"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml");
 
             var api = await JS.Api.ParseAPILink(text);
             var pack = HKMMPackage.FromModLegacyToHKMM(api);
