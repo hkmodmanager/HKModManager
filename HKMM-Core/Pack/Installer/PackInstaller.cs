@@ -136,7 +136,7 @@ namespace HKMM.Pack.Installer
         {
             Logger.Log($"Downloading modpack file: {info}");
             var result = new List<InstalledFileInfo>();
-            Directory.CreateDirectory(info.Root);
+            FileModule.Instance.CreateDirectory(info.Root);
             (string, byte[]) f;
             if (info.Link.StartsWith("local:"))
             {
@@ -155,14 +155,16 @@ namespace HKMM.Pack.Installer
                 {
                     if (e.FullName.EndsWith('/') || e.FullName.EndsWith('\\')) continue;
                     var fp = Path.Combine(info.Root, e.FullName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(fp)!);
+                    FileModule.Instance.CreateDirectory(Path.GetDirectoryName(fp)!);
 
-                    e.ExtractToFile(fp, true);
-
+                    using var es = e.Open();
+                    var buffer = new byte[es.Length];
+                    es.Read(buffer);
+                    FileModule.Instance.WriteBytes(fp, buffer);
                     Logger.Log($"Got file {fp}");
 
                     result.Add(new(fp, Path.Combine(info.RelativeRoot, e.FullName), 
-                        SHA256Module.Instance.CalcSHA256Tuple(FileModule.Instance.ReadBytes(fp))));
+                        SHA256Module.Instance.CalcSHA256Tuple(buffer)));
                 }
                 return result;
             }
@@ -342,12 +344,16 @@ namespace HKMM.Pack.Installer
                     }
                 }
                 var p = GetEnabledFilePath(pack.Info.Name);
-                Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+                FileModule.Instance.CreateDirectory(Path.GetDirectoryName(p)!);
                 FileModule.Instance.WriteText(p, pack.InstallPath);
             }
             else
             {
                 FileModule.Instance.Delete(GetEnabledFilePath(pack.Info.Name));
+            }
+            if(IsEnabled(pack) != enabled)
+            {
+                throw new InvalidOperationException("Can't enable/disable modpack");
             }
         }
         public virtual string GetEnabledFilePath(string packName)

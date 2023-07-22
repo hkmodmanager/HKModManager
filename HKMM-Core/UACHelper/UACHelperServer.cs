@@ -29,36 +29,48 @@ namespace HKMM.UACHelper
                 {
                     if (!uacProcess.HasExited && pipeServerIn.IsConnected) return;
                 }
-                if (User32.MessageBox(nint.Zero, 
-                    "HKMM requires administrator privileges for the next step.",
-                    "Request admin access",
-                    User32.MessageBoxOptions.MB_YESNO)
-                != User32.MessageBoxResult.IDYES)
-                {
-                    throw new OperationCanceledException();
-                }
-                if (pipeServerIn.IsConnected)
-                {
-                    pipeServerIn.Disconnect();
-                }
-                var cmd = $"{JS.Api.GetStartArgs()} --netutility initUACHelper " +
-                    $"\"['{Environment.ProcessId}', '{PIPE_NAME}']\"";
-                uacProcess = Process.Start(new ProcessStartInfo()
-                {
-                    Verb = "runas",
-                    Arguments = cmd,
-                    FileName = Environment.ProcessPath ?? JS.Api.GetElectronExe(),
-                    UseShellExecute = true
-                });
                 try
                 {
-                    pipeServerIn.WaitForConnectionAsync().Wait(1000);
-                }
-                catch (TimeoutException)
+                    JSWatchDog.disabled = true;
+
+                    if (User32.MessageBox(nint.Zero,
+                        "HKMM requires administrator privileges for the next step.",
+                        "Request admin access",
+                        User32.MessageBoxOptions.MB_YESNO)
+                    != User32.MessageBoxResult.IDYES)
+                    {
+                        throw new OperationCanceledException();
+                    }
+                    if (pipeServerIn.IsConnected)
+                    {
+                        pipeServerIn.Disconnect();
+                    }
+                    var cmd = $"{JS.Api.StartArgv} --netutility initUACHelper " +
+                        $"\"['{Environment.ProcessId}', '{PIPE_NAME}']\"";
+                    uacProcess = Process.Start(new ProcessStartInfo()
+                    {
+                        Verb = "runas",
+                        Arguments = cmd,
+                        FileName = Environment.ProcessPath ?? JS.Api.ElectronExe,
+                        UseShellExecute = true
+                    });
+                    if (uacProcess == null)
+                    {
+                        throw new InvalidProgramException();
+                    }
+                    try
+                    {
+                        pipeServerIn.WaitForConnectionAsync().Wait(1000);
+                    }
+                    catch (TimeoutException)
+                    {
+                        uacProcess?.Kill();
+                        uacProcess = null;
+                        throw;
+                    }
+                } finally
                 {
-                    uacProcess?.Kill();
-                    uacProcess = null;
-                    throw;
+                    JSWatchDog.disabled = false;
                 }
             }, null);
         }
@@ -88,6 +100,36 @@ namespace HKMM.UACHelper
             var b = ReadBytes(len);
             return Encoding.UTF8.GetString(b);
         }
+        private static void WaitResult()
+        {
+            var result = ReadString();
+            if(result.StartsWith("error:"))
+            {
+                var error = result[6..];
+                throw new InvalidOperationException(error);
+            }
+        }
+        public static byte[] ReadFile(string path)
+        {
+            CheckUACProcess();
+            byte[] result = null!;
+            UACHelperSyncContext.instance.Send(_ =>
+            {
+                WriteString("READ_FILE");
+                WriteString(Path.GetFullPath(path));
+                var len = BitConverter.ToInt32(ReadBytes(4));
+                if (len > 0)
+                {
+                    result = ReadBytes(len);
+                }
+                WaitResult();
+            }, null);
+            return result;
+        }
+        public static Task<byte[]> ReadFileAsync(string path)
+        {
+            return Task.Run(() => ReadFile(path));
+        }
         public static void WriteFile(string path, byte[] data)
         {
             CheckUACProcess();
@@ -103,24 +145,9 @@ namespace HKMM.UACHelper
                 accessor.Flush();
 
                 WriteString("WRITE_FILE");
-                WriteString(path);
+                WriteString(Path.GetFullPath(path));
                 WriteString(mapName);
-                while (true)
-                {
-                    Thread.Yield();
-                    var result = accessor.ReadInt32(0);
-                    if (result == 0)
-                    {
-                        break;
-                    }
-                    if (result < 0)
-                    {
-                        var len = accessor.ReadInt32(4);
-                        var buffer = new byte[len];
-                        accessor.ReadArray(8, buffer, 0, len);
-                        throw new Exception(Encoding.UTF8.GetString(buffer));
-                    }
-                }
+                WaitResult();
             }, null);
         }
         public static Task WriteFileAsync(string path, byte[] data)
@@ -136,7 +163,40 @@ namespace HKMM.UACHelper
             UACHelperSyncContext.instance.Send(_ =>
             {
                 WriteString("DELETE");
-                WriteString(path);
+                WriteString(Path.GetFullPath(path));
+                WaitResult();
+            }, null);
+        }
+        public static void CreateDirectory(string path)
+        {
+            CheckUACProcess();
+            UACHelperSyncContext.instance.Send(_ =>
+            {
+                WriteString("CREATE_DIR");
+                WriteString(Path.GetFullPath(path));
+                WaitResult();
+            }, null);
+        }
+        public static void CopyFile(string src, string dest)
+        {
+            CheckUACProcess();
+            UACHelperSyncContext.instance.Send(_ =>
+            {
+                WriteString("COPY_FILE");
+                WriteString(Path.GetFullPath(src));
+                WriteString(Path.GetFullPath(dest));
+                WaitResult();
+            }, null);
+        }
+        public static void MoveFile(string src, string dest)
+        {
+            CheckUACProcess();
+            UACHelperSyncContext.instance.Send(_ =>
+            {
+                WriteString("MOVE_FILE");
+                WriteString(Path.GetFullPath(src));
+                WriteString(Path.GetFullPath(dest));
+                WaitResult();
             }, null);
         }
     }

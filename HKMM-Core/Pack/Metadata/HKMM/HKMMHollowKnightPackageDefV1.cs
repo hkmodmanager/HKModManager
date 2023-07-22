@@ -57,7 +57,7 @@ namespace HKMM.Pack.Metadata.HKMM
         {
             PackageVersion = 1;
             Version = "0.0.0.0";
-            Type = TypeEnum.Mod;
+            Type = def.ReleaseAssets == null ? TypeEnum.ModPack : TypeEnum.Mod;
 
             AdditionalAssets = def.AdditionalAssets;
             ReleaseAssets = def.ReleaseAssets;

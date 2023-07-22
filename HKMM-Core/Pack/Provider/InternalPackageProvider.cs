@@ -19,7 +19,7 @@ namespace HKMM.Pack.Provider
         public static readonly HKMMHollowKnightPackageDefV1 MP_GameInject = new() {
             Name = MODPACK_NAME_GAME_INJECT,
             Version = (NetUtils.GetAssemblyVersion(
-                    Path.Combine(JS.Api.GetGameInjectRoot(), GAMEINJECT_DLL_NAME)
+                    Path.Combine(JS.Api.GameInjectRoot, GAMEINJECT_DLL_NAME)
                     ) ?? throw new InvalidProgramException()).ToString(),
             DisplayName = "ModPack Loader",
             Icon = "internal-icons://defaultmod.svg",

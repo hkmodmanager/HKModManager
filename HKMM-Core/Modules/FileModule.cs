@@ -8,37 +8,33 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HKMM.Modules
 {
     public class FileModule : ModuleBase<FileModule>
     {
 
-        public virtual Task<byte[]> ReadBytesUAC(string path)
-        {
-            UACHelperServer.CheckUACProcess();
-            throw new NotImplementedException();
-        }
-        public virtual Task WriteBytesUAC(string path)
-        {
-            UACHelperServer.CheckUACProcess();
-            throw new NotImplementedException();
-        }
         public virtual async Task<byte[]> ReadBytesAsync(string path)
         {
             try
             {
                 return await File.ReadAllBytesAsync(path);
             }
-            catch (SecurityException)
+            catch (UnauthorizedAccessException)
             {
-                return await ReadBytesUAC(path);
+                return await UACHelperServer.ReadFileAsync(path);
             }
         }
         public virtual byte[] ReadBytes(string path)
         {
-            return File.ReadAllBytes(path);
+            try
+            {
+                return File.ReadAllBytes(path);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return UACHelperServer.ReadFile(path);
+            }
         }
         public virtual string ReadText(string path)
         {
@@ -50,7 +46,7 @@ namespace HKMM.Modules
             {
                 await File.WriteAllBytesAsync(path, data);
             }
-            catch (SecurityException)
+            catch (UnauthorizedAccessException)
             {
                 await UACHelperServer.WriteFileAsync(path, data);
             }
@@ -61,7 +57,7 @@ namespace HKMM.Modules
             {
                 File.WriteAllBytesAsync(path, data);
             }
-            catch (SecurityException)
+            catch (UnauthorizedAccessException)
             {
                 UACHelperServer.WriteFile(path, data);
             }
@@ -74,7 +70,18 @@ namespace HKMM.Modules
         {
             WriteBytes(path, Encoding.UTF8.GetBytes(text));
         }
-
+        public virtual void CreateDirectory(string path)
+        {
+            if (Directory.Exists(path)) return;
+            try
+            {
+                Directory.CreateDirectory(path);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UACHelperServer.CreateDirectory(path);
+            }
+        }
         public virtual void Delete(string path)
         {
             try
@@ -88,9 +95,19 @@ namespace HKMM.Modules
                     Directory.Delete(path, true);
                 }
             }
-            catch (SecurityException)
+            catch (UnauthorizedAccessException)
             {
                 UACHelperServer.Delete(path);
+            }
+        }
+        public virtual void Copy(string src, string dest)
+        {
+            try
+            {
+                File.Copy(src, dest, true);
+            } catch (UnauthorizedAccessException)
+            {
+                UACHelperServer.CopyFile(src, dest);
             }
         }
     }

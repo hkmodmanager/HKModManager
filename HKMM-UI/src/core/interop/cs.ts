@@ -1,4 +1,4 @@
-import { initJSAPI, LegacyModCollection, LocalPackageProxy, onSettingChanged, PackageProviderProxy } from "core";
+import { enableWatchDog, initJSAPI, LegacyModCollection, LocalPackageProxy, onSettingChanged, PackageProviderProxy, resetWatchDog } from "core";
 import { existsSync, mkdirSync } from "fs-extra";
 import { join, resolve } from "path";
 import { appDir, exePath, isPackaged, srcRoot, userData } from "../remoteCache";
@@ -46,32 +46,31 @@ initJSAPI({
         if (!existsSync(mods)) mkdirSync(mods, { recursive: true });
         return mods;
     },
-    getGameInjectRoot() {
+    gameInjectRoot: (function() {
         return !isPackaged ? (
             join(srcRoot, "..", "gameinject", "Output") //Debug
         ) : (
             join(appDir, "managed")
         );
-    },
-    getInternalLibRoot() {
+    })(),
+    internalLibRoot: (function() {
         return !isPackaged ? (
             join(srcRoot, "managed") //Debug
         ) : (
             join(appDir, "managed")
         );
-    },
-    getCacheDir() {
-        return join(userData, "hkmm-cache");
-    },
-    getStartArgs() {
+    })(),
+    cacheDir: join(userData, "hkmm-cache"),
+    startArgv: (function() {
         if(!isPackaged) {
             return "\"" + resolve(remote.process.argv[1]) + "\"";
         }
         return "";
+    })(),
+    watchDogCheck() {
+
     },
-    getElectronExe() {
-        return exePath;
-    }
+    electronExe: exePath
 });
 
 
@@ -81,6 +80,23 @@ setInterval(() => {
     LocalPackageProxy.getAllMods();
 }, 1000);
 
+setInterval(() => {
+    resetWatchDog();
+}, 500);
+
+resetWatchDog();
 LocalPackageProxy.getAllMods();
 PackageProviderProxy.getRoot().getAllPackages(false);
+
+export function syncInvoke(action: () => void) {
+    try
+    {
+        enableWatchDog(false);
+        action();
+    }
+    finally
+    {
+        enableWatchDog(true);
+    }
+}
 

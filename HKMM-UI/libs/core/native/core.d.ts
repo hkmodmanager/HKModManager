@@ -152,9 +152,13 @@ declare module "core" {
 		check(): CustomPackageProviderProxy;
 	}
 
+	export function enableWatchDog(enable: boolean): void;
+
 	export function initJSAPI(api: JSAPI): void;
 
 	export function onSettingChanged(path: string): void;
+
+	export function resetWatchDog(): void;
 
 	export class JSAPI extends unknown {
 		getModStorePath: () => string;
@@ -163,15 +167,17 @@ declare module "core" {
 
 		parseAPILink: (arg1: string) => Promise<LegacyModInfoFull>;
 
-		getGameInjectRoot: () => string;
+		watchDogCheck: () => void;
 
-		getInternalLibRoot: () => string;
+		gameInjectRoot: string;
 
-		getCacheDir: () => string;
+		internalLibRoot: string;
 
-		getStartArgs: () => string;
+		cacheDir: string;
 
-		getElectronExe: () => string;
+		startArgv: string;
+
+		electronExe: string;
 	}
 
 	export class LocalPackageProxy extends unknown {

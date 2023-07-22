@@ -50,5 +50,9 @@
     <None Include="F:\HKLab\HKMM\HKMM-Core\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Crash\" />
+  </ItemGroup>
+
 </Project>
 

@@ -75,7 +75,7 @@ namespace HKMM.Pack
         }
         public Task MakeSureInit(int delay = 0)
         {
-            if (Name != "Default" || _inited)
+            if (Name != "Default" && !_inited)
             {
                 return SingleTask(() => TaskManager.StartTask("Initialize " + Name,
                     async () =>

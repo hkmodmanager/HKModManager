@@ -48,7 +48,7 @@ namespace HKMM.Pack.Installer
             var c = Config.Load();
             if (string.IsNullOrEmpty(c.modsPath) || string.IsNullOrEmpty(c.internalLibPath)) return null;
             if(Path.GetFullPath(c.modsPath) != Path.GetFullPath(JS.Api.GetModStorePath())) return null;
-            if (Path.GetFullPath(c.internalLibPath) != Path.GetFullPath(JS.Api.GetInternalLibRoot())) return null;
+            if (Path.GetFullPath(c.internalLibPath) != Path.GetFullPath(JS.Api.InternalLibRoot)) return null;
             Logger.Where();
             var p = new HKMMPackage()
             {
@@ -100,13 +100,13 @@ namespace HKMM.Pack.Installer
             item.isUnityClass = false;
             loads.Save();
 
-            var src = Path.Combine(JS.Api.GetGameInjectRoot(), GAMEINJECT_DLL_NAME);
-            File.Copy(src, GameInjectDest, true);
-            File.Copy(Path.ChangeExtension(src, "pdb"), Path.ChangeExtension(GameInjectDest, "pdb"), true);
+            var src = Path.Combine(JS.Api.GameInjectRoot, GAMEINJECT_DLL_NAME);
+            FileModule.Instance.Copy(src, GameInjectDest);
+            FileModule.Instance.Copy(Path.ChangeExtension(src, "pdb"), Path.ChangeExtension(GameInjectDest, "pdb"));
 
             var config = new Config
             {
-                internalLibPath = JS.Api.GetInternalLibRoot(),
+                internalLibPath = JS.Api.InternalLibRoot,
                 modsPath = JS.Api.GetModStorePath()
             };
             config.Save();

@@ -25,7 +25,7 @@ namespace HKMM.Pack
                 foreach(var v in InstallerUtils.nameToInstaller)
                 {
                     Logger.Where();
-                    Logger.Log("Installer: " + v.Key);
+                    Logger.LogFine("Installer: " + v.Key);
                     Logger.Where();
                     if (v.Value == null) continue;
                     try
@@ -38,7 +38,7 @@ namespace HKMM.Pack
                         Logger.LogError("Unable to complete GetInstalledPackage: " + v.Key);
                     }
                 }
-                Logger.Log($"Successfully loaded {m.Count} modpacks", LogLevel.Fine);
+                Logger.LogFine($"Successfully loaded {m.Count} modpacks");
                 lock (mods)
                 {
                     mods.Clear();

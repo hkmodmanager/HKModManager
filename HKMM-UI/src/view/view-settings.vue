@@ -121,6 +121,7 @@ import { join } from "path";
 import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
+import { syncInvoke } from "@/core/interop/cs";
 
 export default defineComponent({
   components: {
@@ -191,11 +192,13 @@ export default defineComponent({
       return hasOption(option);
     },
     selectModsSavePath() {
-      const result = remote.dialog.showOpenDialogSync({
-        properties: ["dontAddToRecent", "openDirectory"]
+      syncInvoke(() => {
+        const result = remote.dialog.showOpenDialogSync({
+          properties: ["dontAddToRecent", "openDirectory"]
+        });
+        if (!result) return;
+        store.set("modsavepath", result[0]);
       });
-      if (!result) return;
-      store.set("modsavepath", result[0]);
     },
     changeModsSavePathMode() {
       const select = this.$refs.modssavepathmode as SelectHTMLAttributes;

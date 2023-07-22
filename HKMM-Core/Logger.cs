@@ -1,4 +1,6 @@
-﻿using HKMM.Tasks;
+﻿using HKMM.Interop;
+using HKMM.Modules;
+using HKMM.Tasks;
 using Microsoft.JavaScript.NodeApi;
 using PInvoke;
 using System;
@@ -27,7 +29,7 @@ namespace HKMM
         static Logger()
         {
             var d = DateTime.Now;
-            Directory.CreateDirectory(LogRoot);
+            FileModule.Instance.CreateDirectory(LogRoot);
             var p = Path.Combine(LogRoot, d.ToString("yyyy-MM-dd_H-mm") + ".log");
             logOutput = new StreamWriter(File.Open(p, FileMode.Append | FileMode.OpenOrCreate, 
                 FileAccess.Write, FileShare.ReadWrite), Encoding.UTF8);
@@ -55,7 +57,14 @@ namespace HKMM
             }
             if (handlers.TryGetValue(level, out var value))
             {
-                //value(msg);
+                if(Thread.CurrentThread == JS.JSMain)
+                {
+                    value(msg);
+                }
+                else
+                {
+                    Task.Run(() => value(msg)).Wait(100);
+                }
             }
             var output = Console.Out;
             var prevColor = Console.ForegroundColor;
@@ -91,7 +100,11 @@ namespace HKMM
         {
             Log(msg, LogLevel.Warning);
         }
-        
+        public static void LogFine(string msg)
+        {
+            Log(msg, LogLevel.Fine);
+        }
+
         public static void Where([CallerMemberName] string name = "", 
             [CallerFilePath] string path = "", 
             [CallerLineNumber] int line = 0)

@@ -1,4 +1,5 @@
-﻿using HKMM.Pack.Metadata;
+﻿using HKMM.Modules;
+using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Pack.Provider;
 using HKMM.Utils;
@@ -63,7 +64,7 @@ namespace HKMM.Pack.Installer
             {
                 throw new InvalidOperationException("The original assembly backup is missing or contaminated");
             }
-            File.Copy(BackupPath, APIPath, true);
+            FileModule.Instance.Copy(BackupPath, APIPath);
             base.UninstallPack(pack);
         }
         public override bool IsEnabled(HKMMPackage pack)
@@ -81,14 +82,14 @@ namespace HKMM.Pack.Installer
             if(orig <= 0)
             {
                 Logger.Log("Create backup");
-                File.Copy(APIPath, BackupPath, true);
+                FileModule.Instance.Copy(APIPath, BackupPath);
             }
             
             var result = await base.InstallHKPackageUnsafe(def, waitTasks);
             result.Info.AllowUninstall = CanUninstall;
             foreach(var file in result.InstalledFiles)
             {
-                File.Copy(file.Path, Path.Combine(ManagedPath, Path.GetFileName(file.Path)), true);
+                FileModule.Instance.Copy(file.Path, Path.Combine(ManagedPath, Path.GetFileName(file.Path)));
             }
             if (!result.Info.AllowUninstall)
             {

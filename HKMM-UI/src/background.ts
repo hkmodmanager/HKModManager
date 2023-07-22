@@ -33,9 +33,8 @@ if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_update')
 }
 
 crashReporter.start({
-
+  uploadToServer: false
 });
-
 
 remote.initialize();
 
@@ -114,6 +113,14 @@ async function createWindow() {
   });
 
   remote.enable(win.webContents);
+  
+  win.webContents.on('render-process-gone', (ev, details) => {
+    if(details.reason == 'crashed' || details.reason == 'launch-failed'
+      || details.reason == 'abnormal-exit') {
+      dialog.showErrorBox("Crashed", "Sorry, HKMM has encountered an unrecoverable error, please restart the program.");
+      app.exit(-1);
+    }
+  });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -134,12 +141,7 @@ async function createWindow() {
     }
   });
 
-  win.webContents.on('render-process-gone', (ev, details) => {
-    if(details.reason == 'crashed') {
-      dialog.showErrorBox("Crashed", "Sorry, HKMM has encountered an unrecoverable error, please restart the program.");
-      app.exit(-1);
-    }
-  });
+  
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));

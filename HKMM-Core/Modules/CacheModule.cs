@@ -13,19 +13,19 @@ namespace HKMM.Modules
     {
         protected virtual string GetCachePath(string key)
         {
-            return Path.Combine(JS.Api.GetCacheDir(), key + ".cache");
+            return Path.Combine(JS.Api.CacheDir, key + ".cache");
         }
         public virtual string? GetString(string key)
         {
             var p = GetCachePath(key);
-            Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+            FileModule.Instance.CreateDirectory(Path.GetDirectoryName(p)!);
             if(!File.Exists(p)) return null;
             return File.ReadAllText(p);
         }
         public virtual void SetString(string key, string value)
         {
             var p = GetCachePath(key);
-            Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+            FileModule.Instance.CreateDirectory(Path.GetDirectoryName(p)!);
             FileModule.Instance.WriteText(p, value);
         }
         public virtual string? GetString(string key, string subKey)

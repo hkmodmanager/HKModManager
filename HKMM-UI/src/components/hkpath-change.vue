@@ -18,6 +18,7 @@ import { parse } from 'path';
 import { defineComponent } from 'vue';
 import { checkGameFile, findHKPath } from '@/core/apiManager';
 import { store } from '@/core/settings';
+import { syncInvoke } from "@/core/interop/cs";
 
 export default defineComponent({
     data() {
@@ -27,26 +28,28 @@ export default defineComponent({
     },
     methods: {
         selectHKPath() {
-            const result = remote.dialog.showOpenDialogSync({
-                filters: [
-                    {
-                        name: this.$t("settings.gamepath.hkexe"),
-                        extensions: ["exe"]
-                    }
-                ],
-                properties: ["dontAddToRecent", "openFile"]
+            syncInvoke(() => {
+                const result = remote.dialog.showOpenDialogSync({
+                    filters: [
+                        {
+                            name: this.$t("settings.gamepath.hkexe"),
+                            extensions: ["exe"]
+                        }
+                    ],
+                    properties: ["dontAddToRecent", "openFile"]
+                });
+                if (!result) return;
+                const p = parse(result[0]);
+                console.log(p);
+                const re = checkGameFile(p.dir);
+                if (typeof re == "string") {
+                    this.msg = re;
+                    return;
+                }
+                this.msg = '';
+                store.set('gamepath', p.dir);
+                this.$emit('onsave', p.dir);
             });
-            if (!result) return;
-            const p = parse(result[0]);
-            console.log(p);
-            const re = checkGameFile(p.dir);
-            if (typeof re == "string") {
-                this.msg = re;
-                return;
-            }
-            this.msg = '';
-            store.set('gamepath', p.dir);
-            this.$emit('onsave', p.dir);
         },
         getHKPath() {
             return store.get('gamepath', '');
@@ -56,20 +59,18 @@ export default defineComponent({
         let re = checkGameFile(this.getHKPath());
         if (typeof re == "string") {
             const afh = findHKPath();
-            if(!afh) {
+            if (!afh) {
                 this.msg = 'aff';
                 return;
             }
-            else
-            {
+            else {
                 re = checkGameFile(afh);
             }
-            if(typeof re == 'string') {
+            if (typeof re == 'string') {
                 this.msg = 'aff';
                 return;
             }
-            else
-            {
+            else {
                 store.set('gamepath', afh);
                 this.$emit('onsave', afh);
             }

@@ -56,17 +56,17 @@ namespace HKMM.UACHelper
             pipe = new(".", pipeName, PipeDirection.InOut);
             pipe.Connect();
 
-            while(pipe.IsConnected)
+            while (pipe.IsConnected)
             {
-                var cmd = ReadString();
-                if(cmd == "WRITE_FILE")
+                try
                 {
-                    var path = ReadString();
-                    var mmName = ReadString();
-                    using var mm = MemoryMappedFile.OpenExisting(mmName, MemoryMappedFileRights.ReadWrite);
-                    using var s = mm.CreateViewStream();
-                    try
+                    var cmd = ReadString();
+                    if (cmd == "WRITE_FILE")
                     {
+                        var path = ReadString();
+                        var mmName = ReadString();
+                        using var mm = MemoryMappedFile.OpenExisting(mmName, MemoryMappedFileRights.ReadWrite);
+                        using var s = mm.CreateViewStream();
                         using var br = new BinaryReader(s);
                         using var dest = File.OpenWrite(path);
                         var len = br.ReadUInt32();
@@ -78,36 +78,61 @@ namespace HKMM.UACHelper
                             i += l;
                             dest.Write(buffer, 0, l);
                         }
-                        s.Position = 0;
-                        s.Write(BitConverter.GetBytes(0), 0, 4);
-                        s.Flush();
-                    } catch(Exception ex)
-                    {
-                        s.Position = 0;
-                        var bytes = Encoding.UTF8.GetBytes(ex.ToString());
-                        s.Write(BitConverter.GetBytes(-1), 0, 4);
-                        s.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-                        s.Write(bytes);
-                        s.Flush();
+                        WriteString(path);
                     }
-                }
-                else if(cmd == "DELETE")
-                {
-                    var path = ReadString();
-                    try
+                    else if (cmd == "DELETE")
                     {
-                        if(File.Exists(path))
+                        var path = ReadString();
+                        if (File.Exists(path))
                         {
                             File.Delete(path);
-                        } else if(Directory.Exists(path))
+                        }
+                        else if (Directory.Exists(path))
                         {
                             Directory.Delete(path, true);
                         }
+                        WriteString(path);
                     }
-                    catch(Exception)
+                    else if (cmd == "CREATE_DIR")
                     {
-
+                        var path = ReadString();
+                        Directory.CreateDirectory(path);
+                        WriteString(path);
                     }
+                    else if(cmd == "COPY_FILE")
+                    {
+                        var src = ReadString();
+                        var dst = ReadString();
+                        File.Copy(src, dst, true);
+                        WriteString(dst);
+                    }
+                    else if (cmd == "MOVE_FILE")
+                    {
+                        var src = ReadString();
+                        var dst = ReadString();
+                        File.Move(src, dst, true);
+                        WriteString(dst);
+                    }
+                    else if(cmd == "READ_FILE")
+                    {
+                        var path = ReadString();
+                        
+                        try
+                        {
+                            using var fs = File.OpenRead(path);
+                            var buffer = new byte[fs.Length];
+                            fs.Read(buffer);
+                            WriteBytes(BitConverter.GetBytes(buffer.Length));
+                            WriteBytes(buffer);
+                        }catch(Exception e)
+                        {
+                            WriteBytes(BitConverter.GetBytes(0));
+                            WriteString("error:" + e.ToString());
+                        }
+                    }
+                }catch(Exception ex)
+                {
+                    WriteString("error:" + ex.ToString());
                 }
                 Thread.Yield();
             }

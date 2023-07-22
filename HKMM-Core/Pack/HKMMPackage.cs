@@ -75,7 +75,7 @@ namespace HKMM.Pack
             {
                 var rp = Path.GetRelativePath(mod.Path, f);
                 var dp = Path.Combine(imp, rp);
-                Directory.CreateDirectory(Path.GetDirectoryName(dp)!);
+                FileModule.Instance.CreateDirectory(Path.GetDirectoryName(dp)!);
                 var data = await FileModule.Instance.ReadBytesAsync(f);
                 var wt = FileModule.Instance.WriteBytesAsync(dp, data);
                 var fi = new InstalledFileInfo(dp, Path.Combine(rmp, rp),
@@ -91,7 +91,7 @@ namespace HKMM.Pack
         public void Save()
         {
             var root = InstallPath;
-            Directory.CreateDirectory(root);
+            FileModule.Instance.CreateDirectory(root);
             FileModule.Instance.WriteText(Path.Combine(root, PACK_METADATA_FILE_NAME),
                 JsonSerializer.Serialize(this, Converter.Settings));
         }
@@ -104,11 +104,11 @@ namespace HKMM.Pack
             var root = Path.Combine(JS.Api.GetModStorePath(), name);
 
             var p = Path.Combine(root, HKMMPACK_VERSION_NAME);
-            Directory.CreateDirectory(p);
+            FileModule.Instance.CreateDirectory(p);
             var md = Path.Combine(p, PACK_METADATA_FILE_NAME);
             if(File.Exists(md))
             {
-                var r = JsonUtils.ToObject<HKMMPackage>(await File.ReadAllTextAsync(md));
+                var r = JsonUtils.ToObject<HKMMPackage>(FileModule.Instance.ReadText(md));
                 if (r is null)
                 {
                     if (noThrow) return null;
@@ -133,7 +133,7 @@ namespace HKMM.Pack
             var ln = latest.ToString(4);
             var lroot = Path.Combine(root, ln);
             var lmi = JsonUtils.ToObject<LegacyLocalModInfo>(
-                File.ReadAllText(Path.Combine(lroot, "modversion.json")));
+                FileModule.Instance.ReadText(Path.Combine(lroot, "modversion.json")));
 
             var result = await FromLocalModLegacy(lmi);
             result.InstallPath = p;
