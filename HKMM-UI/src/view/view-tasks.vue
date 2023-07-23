@@ -1,6 +1,6 @@
 <template>
     <div class="accordion">
-        <CTasksItem v-for="(task) in getTasks()" :key="task.guid" :task="task"></CTasksItem>
+        <CTasksItem v-for="(task) in getTasks()" :key="task.guid" :task-item="task"></CTasksItem>
     </div>
 </template>
 

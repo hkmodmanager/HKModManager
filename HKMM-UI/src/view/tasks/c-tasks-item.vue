@@ -66,16 +66,15 @@
 <script setup lang="ts">
 import { Collapse } from 'bootstrap';
 import { TaskItem, TaskLogInfo } from 'core';
-import { getCurrentInstance, nextTick, onMounted, onUnmounted, ref } from 'vue';
-
-const { ctx: _this }: any = getCurrentInstance();
+import { nextTick, onBeforeMount, onMounted, onUnmounted, ref, shallowRef, triggerRef } from 'vue';
 
 const body = ref<Element>();
 const logBody = ref<HTMLDivElement>();
 const logs = ref<TaskLogInfo[]>([]);
+const task = shallowRef<TaskItem>();
 
 const props = defineProps<{
-    task: TaskItem
+    taskItem: TaskItem
 }>();
 function toggleBody() {
     const tgb = new Collapse(body.value as Element);
@@ -84,19 +83,19 @@ function toggleBody() {
 
 function hideTask() {
     // eslint-disable-next-line vue/no-mutating-props
-    if (props.task) props.task.isHidden = true;
+    if (props.taskItem) props.taskItem.isHidden = true;
 }
 
 function getTaskTime() {
-    const task = props.task;
+    const task = props.taskItem;
     const s = task.getRunningTime();
     return Math.round(s / 1000);
 }
 
 function getLogs() {
     const logs: TaskLogInfo[] = [];
-    for (let i = 0; i < props.task.logCount; i++) {
-        logs.push(props.task.getLogAt(i));
+    for (let i = 0; i < props.taskItem.logCount; i++) {
+        logs.push(props.taskItem.getLogAt(i));
     }
     nextTick(() => {
         if (logBody.value) {
@@ -107,17 +106,21 @@ function getLogs() {
     return logs;
 }
 
+onBeforeMount(() => {
+    task.value = props.taskItem;
+})
+
 onMounted(() => {
     // eslint-disable-next-line vue/no-mutating-props
-    props.task.onChanged = () => {
+    props.taskItem.onChanged = () => {
         logs.value = getLogs();
-        _this.$forceUpdate();
+        triggerRef(task);
     };
 });
 
 onUnmounted(() => {
     // eslint-disable-next-line vue/no-mutating-props
-    props.task.onChanged = undefined;
+    props.taskItem.onChanged = undefined;
 });
 
 </script>
