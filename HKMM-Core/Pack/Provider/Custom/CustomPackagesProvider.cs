@@ -23,6 +23,7 @@ namespace HKMM.Pack.Provider.Custom
         public override string Name => "Custom Provider";
         protected override async Task<bool> TryInit()
         {
+            packages.Clear();
             Info = JsonUtils.ToObject<HKMMProviderV1>(
                 await WebModule.Instance.DownloadTextFile(url)
                 );
@@ -34,7 +35,7 @@ namespace HKMM.Pack.Provider.Custom
             }
             Logger.Log($"Provider Name: " + Info.Name);
             Logger.Log($"Packages: ");
-            foreach(var v in Info.Packages)
+            foreach (var v in Info.Packages)
             {
                 PackageBase? pack = null;
                 if (v.PurpleUri != null)

@@ -1,4 +1,4 @@
-﻿using HKMM.Pack.Installer;
+using HKMM.Pack.Installer;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -56,7 +56,7 @@ namespace HKMM.Pack.Metadata.HKMM
         public void CopyFrom(CSHollowKnightPackageDef def)
         {
             PackageVersion = 1;
-            Version = "0.0.0.0";
+            Version = def.Version ?? "0.0.0.0";
             Type = def.ReleaseAssets == null ? TypeEnum.ModPack : TypeEnum.Mod;
 
             AdditionalAssets = def.AdditionalAssets;
@@ -66,23 +66,17 @@ namespace HKMM.Pack.Metadata.HKMM
             DevDependencies = def.DevDependencies;
             Description = def.Description;
             Name = def.Name;
+            Tags = def.Tags;
         }
 
         protected virtual int PACKAGE_VERSION => 1;
 
         [JsonPropertyName("packageVersion")]
         public int PackageVersion { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [JsonPropertyName("version")]
-        public string Version { get; set; } = null!;
+        
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; } = null!;
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [JsonPropertyName("tags")]
-        public string[] Tags { get; set; } = null!;
-
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("publishDate")]
         public string PublishDate { get; set; } = null!;
@@ -97,6 +91,9 @@ namespace HKMM.Pack.Metadata.HKMM
         public bool AllowToggle { get; set; } = true;
         public bool AllowInstall { get; set; } = true;
         public bool AllowUninstall { get; set; } = true;
+
+        [JsonIgnore]
+        public bool IsHidden { get; set; } = false;
         [JsonIgnore]
         public bool IsImportant { get; set; } = false;
 

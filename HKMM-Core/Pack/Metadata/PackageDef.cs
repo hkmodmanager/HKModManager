@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8618
+#pragma warning disable CS8618
 
 using System.Collections.Generic;
 using System;
@@ -42,6 +42,12 @@ namespace HKMM.Pack.Metadata
  
     public partial class CSHollowKnightPackageDef : PackageBase
     {
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("tags")]
+        public string[] Tags { get; set; } = null!;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("version")]
+        public string Version { get; set; } = null!;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("additionalAssets")]

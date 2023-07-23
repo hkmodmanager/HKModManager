@@ -1,5 +1,5 @@
 using HKMM.Pack.Metadata;
-using HKMM.Pack.Provider;
+
 using HKMM.Tasks;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,11 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+#if BUILD_NODE_NATIVE
+using HKMM.Pack.Provider.Custom;
+using HKMM.Pack.Provider;
+#endif
 
 namespace HKMM.Pack
 {
@@ -22,6 +27,7 @@ namespace HKMM.Pack
                 ModLinksPackagesProvider.instance,
                 ApiLinksPackageProvider.instance,
                 InternalPackageProvider.instance,
+                LocalCustomPackagesProvider.instance,
 #endif
                 customProviders
             }
@@ -72,6 +78,10 @@ namespace HKMM.Pack
                 if(p != null) return p;
             }
             return null;
+        }
+        public void Reset()
+        {
+            _inited = false;
         }
         public Task MakeSureInit(int delay = 0)
         {

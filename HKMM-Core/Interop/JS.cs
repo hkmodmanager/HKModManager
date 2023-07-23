@@ -1,4 +1,4 @@
-﻿using HKMM.Pack.Legacy;
+using HKMM.Pack.Legacy;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -105,6 +105,7 @@ namespace HKMM.Interop
         public string GameInjectRoot { get; set; }
         public string InternalLibRoot { get; set; }
         public string CacheDir { get; set; }
+        public string AppDataDir { get; set; }
         public string StartArgv { get; set; }
         public string ElectronExe { get; set; }
     }

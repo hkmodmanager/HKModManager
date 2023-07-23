@@ -70,7 +70,8 @@ initJSAPI({
     watchDogCheck() {
 
     },
-    electronExe: exePath
+    electronExe: exePath,
+    appDataDir: userData
 });
 
 

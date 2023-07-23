@@ -183,6 +183,8 @@ declare module "core" {
 
 		cacheDir: string;
 
+		appDataDir: string;
+
 		startArgv: string;
 
 		electronExe: string;
@@ -251,6 +253,8 @@ declare module "core" {
 		readonly allowInstall: boolean;
 
 		readonly allowUninstall: boolean;
+
+		readonly isHidden: boolean;
 
 		check(): PackageDisplay;
 

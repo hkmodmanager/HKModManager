@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Pack.Installer;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Utils;

@@ -1,4 +1,4 @@
-﻿using HKMM.Pack;
+using HKMM.Pack;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using Microsoft.JavaScript.NodeApi;
@@ -39,7 +39,7 @@ namespace HKMM.Interop
         public bool AllowToggle => package.AllowToggle;
         public bool AllowInstall => package.AllowInstall;
         public bool AllowUninstall => package.AllowUninstall;
-
+        public bool IsHidden => package.IsHidden;
         public Task Install()
         {
             return JS.ToCS(async () =>

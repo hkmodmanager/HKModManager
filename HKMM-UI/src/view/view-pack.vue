@@ -36,7 +36,7 @@ import { PackageDisplay, getRootPackageProvider, PackageProviderProxy } from 'co
 import { filterMods, prepareFilter } from '@/core/utils/modfilter';
 import { onBeforeMount, onUnmounted, ref, shallowRef } from 'vue';
 
-const filter = prepareFilter();
+const filter = prepareFilter(":nohide");
 const inited = ref(false);
 let checkInit: any = undefined;
 let autoRefresh: any = undefined;
@@ -60,7 +60,7 @@ function updateFilter(i: string | undefined) {
     localStorage.setItem("allAuthors", JSON.stringify([...authorNames.values()]));
 
     input.value = i;
-    const filter = prepareFilter(i);
+    const filter = prepareFilter(i + ":nohide");
     packages.value = filterMods(allpackages, filter);
 }
 

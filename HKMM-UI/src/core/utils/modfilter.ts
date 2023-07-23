@@ -42,6 +42,9 @@ const defaultFilters: Record<string, ModFilter> = {
     type(fparts, mod) {
         return [mod.type == fparts[1], 0];
     },
+    nohide(fparts, mod) {
+        return [!mod.isHidden, 0];
+    },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];
