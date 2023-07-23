@@ -36,6 +36,10 @@
 
 ## 相关链接
 
+[Hollow Knight Mod Manager Package Schema](https://github.com/hkmodmanager/hkmm-schema)
+
+[Hollow Knight PackageDef](https://github.com/hpackage/hpackage-schema)
+
 [Mod 相关信息对照](https://docs.qq.com/sheet/DSm90dmtWUUhhUmpP)
 
 [Modding API](https://github.com/hk-modding/api)
@@ -45,5 +49,7 @@
 [Scarab+](https://themulhima.github.io/Scarab/)
 
 [Github Proxy](https://github.com/hunshcn/gh-proxy)
+
+
 
 </div>

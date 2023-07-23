@@ -6,7 +6,6 @@ import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { appDir, appVersion, isPackaged, srcRoot } from "./remoteCache";
 import * as semver from "semver"
 import { hasOption } from "./settings";
-import { getModDate } from "./modlinks/modlinks";
 import { buildMetadata, IBuildMetadata } from "./exportGlobal";
 
 const w_any = window as any;
@@ -89,7 +88,7 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
                     version: sver,
                     url: durl,
                     size: (rsize ? (await getFileSize(durl)) : undefined),
-                    date: getModDate(release.created_at).valueOf(),
+                    date: new Date(release.created_at).valueOf(),
                     commit: tag?.commit.sha ?? '0000000000000000000000000000000000000000'
                 };
                 break;

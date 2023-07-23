@@ -16,3 +16,31 @@ export function ver_lg(a: string, b: string) {
     }
     return false;
 }
+
+export function getLatestVersion(versions: string[]) {
+    let l: string | undefined;
+    for (const key of versions) {
+        if (!l) {
+            l = key;
+        } else {
+            if (ver_lg(key, l)) {
+                l = key;
+            }
+        }
+    }
+    return l;
+}
+
+export function getOldestVersion(versions: string[]) {
+    let l: string | undefined;
+    for (const key of versions) {
+        if (!l) {
+            l = key;
+        } else {
+            if (!ver_lg(key, l) || !versions.includes(l)) {
+                l = key;
+            }
+        }
+    }
+    return l;
+}

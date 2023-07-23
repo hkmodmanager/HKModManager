@@ -20,24 +20,17 @@ export class HKMMSettings {
     public modsavepath: string = "";
     public modsavepathMode: ModSavePathMode = ModSavePathMode.UserDir;
     public inStore: boolean = false;
-    public modgroups: string[] = [];
-    public current_modgroup: string = 'default';
     public language?: string = '#';
     public options: SettingOptions[] = [];
-    public plugins: string[] = [];
     public cdn: CDN = 'GITHUB_RAW';
-    public maxConnection: number = 16;
-    public downloadRetry: number = 3;
-    public useDarkMode: boolean = matchMedia('(prefers-color-scheme: dark)').matches;
-    public customModLinks: string = "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml";
+    public modpackSources: string[] = [];
 }
 
 
 const localStorageName: string = "hkmm-settings";
 export const store = new Store<HKMMSettings>();
 
-
-
+(window as any).store = store;
 
 function GetSettingsLocal() {
     const s = localStorage.getItem(localStorageName);
@@ -62,17 +55,8 @@ function GetSettingsLocal() {
 })();
 
 (function(){
-    if(!store.store.modgroups) {
-        store.set('modgroups', []);
-    }
-    if(!store.store.current_modgroup) {
-        store.set('current_modgroup', 'default');
-    }
     if(!store.store.options) {
         store.set('options', []);
-    }
-    if(!store.store.plugins) {
-        store.set('plugins', []);
     }
     if(!store.store.cdn || store.store.cdn == 'JSDELIVR') {
         store.set('cdn', 'GITHUB_RAW');
@@ -87,27 +71,17 @@ function GetSettingsLocal() {
     if((store.store.mirror_github as any).items != undefined) {
         store.set('mirror_github', []);
     }
-    if(!store.store.maxConnection) {
-        store.set('maxConnection', 16);
-    }
-    if(!store.store.downloadRetry) {
-        store.set('downloadRetry', 3);
-    }
-    if(store.store.useDarkMode == undefined) {
-        store.set('useDarkMode', matchMedia('(prefers-color-scheme: dark)').matches);
-    }
-    if(!store.store.customModLinks || store.store.customModLinks == '') {
-        store.set('customModLinks', "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml");
-    }
     if(store.store.mirror_github.length == 0) {
         store.set('mirror_github', ["ghproxy.net"]);
+    }
+    if(store.store.modpackSources == undefined) {
+        store.set('modpackSources', []);
     }
 })();
 
 let optionsCache: SettingOptions[] | undefined = undefined;
 
 export function hasOption(name: SettingOptions) {
-    if(name == 'FAST_DOWNLOAD') return false;
     if(optionsCache == undefined) {
         optionsCache = store.get('options');
         setTimeout(() => optionsCache = undefined, 500);

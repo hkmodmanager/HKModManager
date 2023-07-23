@@ -32,8 +32,8 @@
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
-                <div class="task-state p-2 bg-dark text-white" style="border: 2px; border-color: white;">
-                    <div v-for="(val, index) in getLogs()"  :key="index" copyable>
+                <div class="task-state p-2 bg-dark text-white" style="border: 2px; border-color: white;" ref="logBody">
+                    <div v-for="(val, index) in logs" :key="index" copyable>
                         <span :class="`text-${val.color}`">{{ val.message }}</span>
                     </div>
                 </div>
@@ -61,62 +61,66 @@
 .task-item {
     --bs-border-radius: 0;
 }
-
-
 </style>
 
-<script lang="ts">
+<script setup lang="ts">
 import { Collapse } from 'bootstrap';
 import { TaskItem, TaskLogInfo } from 'core';
-import { defineComponent } from 'vue';
+import { nextTick, onBeforeMount, onMounted, onUnmounted, ref, shallowRef, triggerRef } from 'vue';
 
-export default defineComponent({
-    methods: {
-        toggleBody() {
-            const tgb = new Collapse(this.$refs.body as Element);
-            tgb.toggle();
-        },
-        isDone() {
-            return (this.task?.isFailed || this.task?.isSuccess) ?? true;
-        },
-        hideTask() {
-            // eslint-disable-next-line vue/no-mutating-props
-            if(this.task) this.task.isHidden = true;
-            this.$parent?.$forceUpdate();
-        },
-        getTaskTime() {
-            const task = this.task as TaskItem;
-            const s = task.getRunningTime();
-            return Math.round(s / 1000);
-        },
-        getLogs() {
-            const logs: TaskLogInfo[] = [];
-            for(let i = 0; i < this.task.logCount ; i++) {
-                logs.push(this.task.getLogAt(i));
-            }
-            return logs;
+const body = ref<Element>();
+const logBody = ref<HTMLDivElement>();
+const logs = ref<TaskLogInfo[]>([]);
+const task = shallowRef<TaskItem>();
+
+const props = defineProps<{
+    taskItem: TaskItem
+}>();
+function toggleBody() {
+    const tgb = new Collapse(body.value as Element);
+    tgb.toggle();
+}
+
+function hideTask() {
+    // eslint-disable-next-line vue/no-mutating-props
+    if (props.taskItem) props.taskItem.isHidden = true;
+}
+
+function getTaskTime() {
+    const task = props.taskItem;
+    const s = task.getRunningTime();
+    return Math.round(s / 1000);
+}
+
+function getLogs() {
+    const logs: TaskLogInfo[] = [];
+    for (let i = 0; i < props.taskItem.logCount; i++) {
+        logs.push(props.taskItem.getLogAt(i));
+    }
+    nextTick(() => {
+        if (logBody.value) {
+            logBody.value.scrollTop = logBody.value.scrollHeight;
         }
-    },
-    props: {
-        task: TaskItem
-    },
-    data() {
-        return {
-            checkTimer: setInterval(() => this.$forceUpdate(), 500),
-            checkTimerStop: false
-        }
-    },
-    mounted() {
-        if (this.task) {
-            (this.task as TaskItem).onChanged = () => {
-                this.$forceUpdate();
-            };
-        }
-    },
-    unmounted() {
-        if (this.task) {
-            (this.task as TaskItem).onChanged = undefined;
-        }
-    },
+    });
+
+    return logs;
+}
+
+onBeforeMount(() => {
+    task.value = props.taskItem;
+})
+
+onMounted(() => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.taskItem.onChanged = () => {
+        logs.value = getLogs();
+        triggerRef(task);
+    };
 });
+
+onUnmounted(() => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.taskItem.onChanged = undefined;
+});
+
 </script>

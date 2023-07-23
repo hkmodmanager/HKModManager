@@ -1,3 +1,6 @@
 [submodule "node-api-dotnet"]
 	path = node-api-dotnet
 	url = https://github.com/hkmodmanager/node-api-dotnet
+[submodule "hpackage-schema"]
+	path = hpackage-schema
+	url = https://github.com/hkmodmanager/hpackage-schema.git
