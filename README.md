@@ -1,6 +1,6 @@
 # **H**ollow **K**night **M**od **M**anager
 
-A Hollow Knight Mods Manager for version 1.5
+A Hollow Knight Mods Manager for version 1.5.
 
 ## Featured features
 
