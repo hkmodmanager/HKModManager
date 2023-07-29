@@ -15,36 +15,14 @@ using HKMM.Pack.Metadata.Providers;
 
 namespace HKMM.Pack.Metadata
 {
-    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-                                    IgnoreReadOnlyProperties = true,
-                                    IgnoreReadOnlyFields = true,
-                                    IncludeFields = false)]
-    [JsonSerializable(typeof(CSHollowKnightPackageDef))]
-    [JsonSerializable(typeof(PackCollection))]
-    [JsonSerializable(typeof(Dictionary<string, CSHollowKnightPackageDef>))]
-    [JsonSerializable(typeof(Dictionary<string, HKMMHollowKnightPackageDefV1>))]
-    [JsonSerializable(typeof(Dictionary<string, ReferenceVersion>))]
-    [JsonSerializable(typeof(string[]))]
-    [JsonSerializable(typeof(DateTimeOffset))]
-    [JsonSerializable(typeof(TimeOnly))]
-    [JsonSerializable(typeof(HKMMPackage))]
-    [JsonSerializable(typeof(HKMMHollowKnightPackageDefV1))]
-    [JsonSerializable(typeof(PackCollection))]
-    [JsonSerializable(typeof(LegacyLocalModInfo))]
-    [JsonSerializable(typeof(LegacyModInfoFull))]
-    [JsonSerializable(typeof(Settings))]
-    [JsonSerializable(typeof(RuntimeInitializeOnLoads))]
-    [JsonSerializable(typeof(ScriptingAssemblies))]
-    [JsonSerializable(typeof(GameInjectInstaller.Config))]
-    [JsonSerializable(typeof(HKMMProviderV1))]
-    public partial class CSPackSC : JsonSerializerContext { }
+    
 
  
     public partial class CSHollowKnightPackageDef : PackageBase
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("tags")]
-        public string[] Tags { get; set; } = null!;
+        public string[] Tags { get; set; } = Array.Empty<string>();
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("version")]
         public string Version { get; set; } = null!;
@@ -55,7 +33,11 @@ namespace HKMM.Pack.Metadata
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("authors")]
-        public string[] Authors { get; set; }
+        public string[] Authors { get; set; } = Array.Empty<string>();
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("icon")]
+        public string Icon { get; set; } = null!;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         [JsonPropertyName("dependencies")]
@@ -181,7 +163,7 @@ namespace HKMM.Pack.Metadata
         /// </summary>
         /// <returns>The ReferenceDef represented by this ReferenceVersion.</returns>
         /// <exception cref="InvalidOperationException">Thrown when both ReferenceDef and String versions are null.</exception>
-        public ReferenceDef GetReferenceDef()
+        public readonly ReferenceDef GetReferenceDef()
         {
             if (ReferenceDef != null)
             {

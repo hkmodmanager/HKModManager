@@ -3,6 +3,7 @@ using HKMM.Modules;
 using HKMM.Pack.Installer;
 using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
+using HKMM.Parser;
 using HKMM.Tasks;
 using HKMM.Utils;
 using System;
@@ -36,8 +37,7 @@ namespace HKMM.Pack.Provider
             var text = await WebModule.Instance.DownloadTextFile(
                 @"https://github.com/hk-modding/modlinks/raw/main/ApiLinks.xml");
 
-            var api = await JS.Api.ParseAPILink(text);
-            var pack = HKMMPackage.FromModLegacyToHKMM(api);
+            var pack = ApiLinksParser.ParseApiLinks(text);
             EditPackage(pack);
             CacheModule.Instance.SetObject("APP", "p.Info", pack);
             packages.Add(MODPACK_NAME_MODDING_API, pack);

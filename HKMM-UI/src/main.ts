@@ -50,6 +50,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./view/view-source.vue')
     },
     {
+        name: "groups",
+        path: "/groups",
+        component: () => import('./view/view-group.vue')
+    },
+    {
         name: 'settings',
         path: '/settings',
         component: () => import('./view/view-settings.vue')

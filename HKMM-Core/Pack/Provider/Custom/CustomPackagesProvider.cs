@@ -35,28 +35,34 @@ namespace HKMM.Pack.Provider.Custom
             }
             Logger.Log($"Provider Name: " + Info.Name);
             Logger.Log($"Packages: ");
+            var tasks = new List<Task>();
             foreach (var v in Info.Packages)
             {
-                PackageBase? pack = null;
-                if (v.PurpleUri != null)
+                tasks.Add(Task.Run(async () =>
                 {
-                    Logger.Log($"From URL: " + v.PurpleUri);
-                    var data = JsonUtils.ToObject<PackageBase>(
-                        await WebModule.Instance.DownloadTextFile(v.PurpleUri.ToString())
-                    ).ToHKMMPackageDef();
-                    Logger.Log($"Got package: {data.Name}(v{data.Version})");
-                    pack = data;
-                }
-                if(v.Pack != null)
-                {
-                    Logger.Log($"Got package: {v.Pack.Value.Name}");
-                    pack = v.Pack;
-                }
-                if(pack != null)
-                {
-                    packages[pack.Value.Name] = pack;
-                }
+                    PackageBase? pack = null;
+                    if (v.PurpleUri != null)
+                    {
+                        Logger.Log($"From URL: " + v.PurpleUri);
+                        var data = JsonUtils.ToObject<PackageBase>(
+                            await WebModule.Instance.DownloadTextFile(v.PurpleUri.ToString())
+                        ).ToHKMMPackageDef();
+                        Logger.Log($"Got package: {data.Name}(v{data.Version})");
+                        pack = data;
+                    }
+                    if (v.Pack != null)
+                    {
+                        Logger.Log($"Got package: {v.Pack.Value.Name}");
+                        pack = v.Pack;
+                    }
+                    if (pack != null)
+                    {
+                        packages[pack.Value.Name] = pack;
+                    }
+                }));
             }
+
+            await Task.WhenAll(tasks);
 
             return true;
         }

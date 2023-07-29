@@ -1,4 +1,4 @@
-﻿using PInvoke;
+using PInvoke;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,14 +28,11 @@ namespace HKMM.Interop
                     {
                         count = 10;
                     }
-                    try
+                    if (Task.Run(JS.Api.WatchDogCheck).Wait(500))
                     {
-                        Task.Run(JS.Api.WatchDogCheck).Wait(500);
                         count = 20;
-                    } catch(TimeoutException)
-                    {
-
                     }
+                        
                     if(Interlocked.Add(ref count, -1) <= 0)
                     {
                         Logger.LogWarning($"Will timeout !!!!");
@@ -43,8 +40,10 @@ namespace HKMM.Interop
                         if(count <= 0)
                         {
                             Logger.LogError($"Timeout!!!");
+#if DEBUG
                             User32.MessageBox(nint.Zero, "Crash", "Timeout",
                                 User32.MessageBoxOptions.MB_ICONERROR);
+#endif
                             throw new TimeoutException();
                         }
                     }

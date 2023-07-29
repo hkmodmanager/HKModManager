@@ -169,12 +169,6 @@ declare module "core" {
 	export function resetWatchDog(): void;
 
 	export class JSAPI extends unknown {
-		getModStorePath: () => string;
-
-		parseModLinks: (arg1: string) => Promise<LegacyModCollection>;
-
-		parseAPILink: (arg1: string) => Promise<LegacyModInfoFull>;
-
 		watchDogCheck: () => void;
 
 		gameInjectRoot: string;
@@ -188,6 +182,25 @@ declare module "core" {
 		startArgv: string;
 
 		electronExe: string;
+	}
+
+	export class LocalCustomPackagesProviderProxy extends unknown {
+		constructor();
+
+		static readonly provider: PackageProviderProxy;
+
+		static readonly current: PackageDisplay;
+
+		static createNew(): PackageDisplay;
+
+		static remove(pack: PackageDisplay): void;
+
+		static switchTo(pack: PackageDisplay): Promise<void>;
+
+		static rename(
+			pack: PackageDisplay,
+			name: string,
+		): void;
 	}
 
 	export class LocalPackageProxy extends unknown {
@@ -258,7 +271,7 @@ declare module "core" {
 
 		check(): PackageDisplay;
 
-		install(): Promise<void>;
+		install(setEnable: boolean): Promise<void>;
 	}
 
 	export class PackageProviderProxy extends unknown {

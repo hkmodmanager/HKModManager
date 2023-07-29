@@ -98,9 +98,6 @@ namespace HKMM.Interop
     [JSExport]
     public struct JSAPI
     {
-        public Func<string> GetModStorePath { get; set; }
-        public Func<string, Task<LegacyModCollection>> ParseModLinks { get; set; }
-        public Func<string, Task<LegacyModInfoFull>> ParseAPILink { get; set; }
         public Action WatchDogCheck { get; set; }
         public string GameInjectRoot { get; set; }
         public string InternalLibRoot { get; set; }

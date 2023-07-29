@@ -1,4 +1,4 @@
-﻿using HKMM.Pack;
+using HKMM.Pack;
 using HKMM.Pack.Installer;
 using System;
 using System.Collections.Generic;
@@ -29,10 +29,11 @@ namespace HKMM.Utils
         }
         public readonly static Dictionary<string, PackInstaller> nameToInstaller = new()
         {
-                [INSTALLER_MAPI_NAME] = MAPIInstaller.Instance,
-                [INSTALLER_GAMEINJECT_NAME] = GameInjectInstaller.Instance,
-                [INSTALLER_DEFAULT_NAME] = PackInstaller.DefaultInstaller,
-                [INSTALLER_LOCAL_PACK_MANAGER] = LocalPackManager.Instance
+            [INSTALLER_MAPI_NAME] = MAPIInstaller.Instance,
+            [INSTALLER_GAMEINJECT_NAME] = GameInjectInstaller.Instance,
+            [INSTALLER_DEFAULT_NAME] = PackInstaller.DefaultInstaller,
+            [INSTALLER_LOCAL_PACK_MANAGER_NAME] = LocalPackManager.Instance,
+            [INSTALLER_LOCAL_CUSTOM_PACK_NAME] = LocalPackInstaller.Instance
         };
         public readonly static Dictionary<PackInstaller, string> installerToName;
 

@@ -19,14 +19,12 @@ namespace HKMM.Pack.Metadata.HKMM
         public override TypeEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var value = reader.GetString();
-            switch (value)
+            return value switch
             {
-                case "Mod":
-                    return TypeEnum.Mod;
-                case "ModPack":
-                    return TypeEnum.ModPack;
-            }
-            throw new Exception("Cannot unmarshal type TypeEnum");
+                "Mod" => TypeEnum.Mod,
+                "ModPack" => TypeEnum.ModPack,
+                _ => throw new Exception("Cannot unmarshal type TypeEnum"),
+            };
         }
 
         public override void Write(Utf8JsonWriter writer, TypeEnum value, JsonSerializerOptions options)
@@ -67,6 +65,8 @@ namespace HKMM.Pack.Metadata.HKMM
             Description = def.Description;
             Name = def.Name;
             Tags = def.Tags;
+            Authors = def.Authors;
+            Icon = def.Icon;
         }
 
         protected virtual int PACKAGE_VERSION => 1;
@@ -81,9 +81,6 @@ namespace HKMM.Pack.Metadata.HKMM
         [JsonPropertyName("publishDate")]
         public string PublishDate { get; set; } = null!;
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        [JsonPropertyName("icon")]
-        public string Icon { get; set; } = null!;
 
         [JsonPropertyName("type")]
         public TypeEnum Type { get; set; }

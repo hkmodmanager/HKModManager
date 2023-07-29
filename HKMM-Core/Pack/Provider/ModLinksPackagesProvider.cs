@@ -1,5 +1,6 @@
 using HKMM.Interop;
 using HKMM.Modules;
+using HKMM.Parser;
 using HKMM.Tasks;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,8 @@ namespace HKMM.Pack.Provider
         {
             var text = await WebModule.Instance.DownloadTextFile(
                 @"https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml");
-            var mods = await JS.Api.ParseModLinks(text);
-            foreach (var mod in mods.mods)
+            var mods = ModLinksParser.ParseModLinks(text);
+            foreach (var mod in mods)
             {
                 var pack = mod.ToHKMMPackageDef();
                 packages.Add(mod.Value.Name, pack);

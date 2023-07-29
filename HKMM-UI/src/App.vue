@@ -35,6 +35,9 @@
       <ul class="nav nav-pnavills flex-column mb-auto">
         <navitem viewpath="/pack"><i class="bi bi-layers"></i> {{ $t("tabs.allpacks") }}</navitem>
         <navitem viewpath="/sources"><i class="bi bi-cloud-download"></i> {{ $t("tabs.sources") }}</navitem>
+        <!--
+        <navitem viewpath="/groups"><i class="bi bi-cloud-download"></i> {{ $t("tabs.groups") }}</navitem>
+      -->
         <li class="nav-item">
           <a class="nav-link text-nav-item-auto" @click="taskNavGroupCollapse?.toggle()" href="javascript:;">
             <i class="bi bi-list-task"></i> {{ $t("tabs.tasks.title") }}

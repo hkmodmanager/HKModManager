@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Pack.Installer;
 using HKMM.Pack.Legacy;
@@ -101,7 +101,7 @@ namespace HKMM.Pack
         }
         public static async Task<HKMMPackage?> From(string name, bool noThrow = false)
         {
-            var root = Path.Combine(JS.Api.GetModStorePath(), name);
+            var root = Path.Combine(Settings.Instance.GetModStorePath(), name);
 
             var p = Path.Combine(root, HKMMPACK_VERSION_NAME);
             FileModule.Instance.CreateDirectory(p);

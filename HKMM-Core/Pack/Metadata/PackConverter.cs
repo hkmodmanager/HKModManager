@@ -1,4 +1,4 @@
-﻿using HKMM.Pack.Metadata;
+using HKMM.Pack.Metadata;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json.Serialization;
@@ -6,6 +6,7 @@ using System.Text.Json;
 using System;
 using Microsoft.JavaScript.NodeApi;
 using HKMM.Pack.Metadata.Providers;
+using HKMM.Utils;
 
 namespace HKMM.Pack.Metadata;
 
@@ -26,7 +27,7 @@ internal static class Converter
                 PackageConverter.Singleton,
             },
         PropertyNameCaseInsensitive = true,
-        TypeInfoResolver = CSPackSC.Default,
+        TypeInfoResolver = JsonSerializableContext.Default,
         WriteIndented = true
     };
 }

@@ -35,14 +35,17 @@ import PackItem from './pack/c-pack-item.vue';
 import { PackageDisplay, getRootPackageProvider, PackageProviderProxy } from 'core';
 import { filterMods, prepareFilter } from '@/core/utils/modfilter';
 import { onBeforeMount, onUnmounted, ref, shallowRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const filter = prepareFilter(":nohide");
 const inited = ref(false);
+const i18n = useI18n();
 let checkInit: any = undefined;
 let autoRefresh: any = undefined;
 let packages = shallowRef(filterMods(getRootPackageProvider().getAllPackages(false) as PackageDisplay[], filter));
 
 const input = ref<string>();
+
 
 function updateFilter(i: string | undefined) {
     
@@ -60,7 +63,14 @@ function updateFilter(i: string | undefined) {
     localStorage.setItem("allAuthors", JSON.stringify([...authorNames.values()]));
 
     input.value = i;
-    const filter = prepareFilter(i + ":nohide");
+    const filter = prepareFilter(i + ":nohide", undefined, mod => {
+        const key = `mods.nameAlias.${mod.name.toLowerCase().replaceAll(' ', '')}`;
+        const result = i18n.t(key, [], {
+            fallbackWarn: false,
+            missingWarn: false
+        });
+        return result == key ? "" : result;
+    });
     packages.value = filterMods(allpackages, filter);
 }
 

@@ -16,6 +16,10 @@ namespace HKMM.Pack
     public class LocalPackManager : PackInstaller<LocalPackManager>
     {
         public readonly Dictionary<string, HKMMPackage> mods = new();
+        public LPM_Provider provider = new();
+        public class LPM_Provider : PackContext
+        {
+        }
         public Task LoadLocalPacks()
         {
             Logger.Where();
@@ -42,16 +46,20 @@ namespace HKMM.Pack
                 Logger.LogFine($"Successfully loaded {m.Count} modpacks");
                 lock (mods)
                 {
-                    mods.Clear();
-                    foreach (var mod in m)
+                    lock (provider.packages)
                     {
-                        if (mod == null) continue;
-                        if(mods.ContainsKey(mod.Info.Name))
+                        provider.packages.Clear();
+                        mods.Clear();
+                        foreach (var mod in m)
                         {
-                            //Logger.LogWarning("Duplicate local modpack: " + mod.Info.Name);
-                            continue;
+                            if (mod == null) continue;
+                            if (mods.ContainsKey(mod.Info.Name))
+                            {
+                                continue;
+                            }
+                            provider.packages[mod.Info.Name] = mod.Info;
+                            mods[mod.Info.Name] = mod;
                         }
-                        mods[mod.Info.Name] = mod;
                     }
                 }
                 
@@ -59,7 +67,7 @@ namespace HKMM.Pack
         }
         public override async Task<List<HKMMPackage>> GetInstalledPackage(List<HKMMPackage> pack)
         {
-            var msp = JS.Api.GetModStorePath();
+            var msp = Settings.Instance.GetModStorePath();
             FileModule.Instance.CreateDirectory(msp);
             Logger.Log("Find mods in " + msp);
             foreach (var mod in Directory.GetDirectories(msp))
@@ -91,7 +99,7 @@ namespace HKMM.Pack
         }
         public override bool IsInstalled(CSHollowKnightPackageDef pack)
         {
-            return mods.TryGetValue(pack.Name, out var p) && p.Version >= new Version(pack.ToHKMMPackageDef().Version); 
+            return mods.TryGetValue(pack.Name, out var p) && p.Version == new Version(pack.ToHKMMPackageDef().Version); 
         }
     }
 }

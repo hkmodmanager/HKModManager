@@ -10,14 +10,12 @@ using HKMM.Tasks;
 using HKMM;
 using HKMM.Modules.Upload;
 using HKMM.Pack.Provider.Custom;
+using HKMM.Modules;
 
 var msp = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, "..", "..", "..", "ModStore"));
 
 JS.InitJSAPI(new()
 {
-    GetModStorePath = () => msp,
-    ParseAPILink = async _ => new HKMM.Pack.Legacy.LegacyModInfoFull(),
-    ParseModLinks = async _ => new HKMM.Pack.Legacy.LegacyModCollection(),
     GameInjectRoot =  "F:\\HKLab\\HKMM\\gameinject\\Output",
     CacheDir = "Cache"
 });
@@ -38,6 +36,13 @@ await installer.LoadLocalPacks();
 
 var test1 = PackContext.rootContext.FindPack("test.Test1");
 
-var p = await PackInstaller.DefaultInstaller.InstallHKPackage(false, test1.ToHKMMPackageDef());
+var builder = new PackBuilder();
+builder.AddDependency(test1!.ToHKMMPackageDef());
+builder.AddDependency(PackContext.rootContext.FindPack("Test")!.ToHKMMPackageDef());
+builder.AddDependency(PackContext.rootContext.FindPack("Test.12")!.ToHKMMPackageDef());
+
+var result = builder.Build();
+
+CacheModule.Instance.SetObject("P-Test-A", result);
 
 Debugger.Break();

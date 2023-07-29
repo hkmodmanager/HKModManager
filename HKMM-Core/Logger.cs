@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using HKMM.Modules;
 using HKMM.Tasks;
 using Microsoft.JavaScript.NodeApi;
@@ -63,7 +63,7 @@ namespace HKMM
                 }
                 else
                 {
-                    Task.Run(() => value(msg)).Wait(100);
+                    //Task.Run(() => value(msg)).Wait(100);
                 }
             }
             var output = Console.Out;

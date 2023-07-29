@@ -1,4 +1,5 @@
-﻿using HKMM.Pack.Metadata.HKMM;
+using HKMM.Pack.Metadata.HKMM;
+using HKMM.Utils;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace HKMM.Pack.Metadata
     [JsonConverter(typeof(PackageBaseConverter))]
     public partial class PackageBase
     {
+        [JsonIgnore]
         public CSHollowKnightPackageDef Value => (CSHollowKnightPackageDef)this;
         public PackageBase Clone() => (PackageBase)MemberwiseClone();
         public HKMMHollowKnightPackageDefV1 ToHKMMPackageDef()
@@ -49,7 +51,7 @@ namespace HKMM.Pack.Metadata
         }
         public static JsonTypeInfo GetJsonTypeInfo(int? packVersion)
         {
-            var jtr = CSPackSC.Default;
+            var jtr = JsonSerializableContext.Default;
             if (!packVersion.HasValue) return jtr.CSHollowKnightPackageDef;
             return packVersion.Value switch
             {
@@ -65,7 +67,7 @@ namespace HKMM.Pack.Metadata
         }
         public JsonTypeInfo GetJsonTypeInfo()
         {
-            var jtr = CSPackSC.Default;
+            var jtr = JsonSerializableContext.Default;
             if (this is not HKMMHollowKnightPackageDefV1 def) return jtr.CSHollowKnightPackageDef;
             return GetJsonTypeInfo(def.PackageVersion);
         }

@@ -1,5 +1,5 @@
 using HKMM.Pack.Metadata;
-
+using HKMM.Pack.Provider;
 using HKMM.Tasks;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 #if BUILD_NODE_NATIVE
 using HKMM.Pack.Provider.Custom;
-using HKMM.Pack.Provider;
 #endif
 
 namespace HKMM.Pack
@@ -23,20 +22,28 @@ namespace HKMM.Pack
         {
             fallback =
             {
-#if BUILD_NODE_NATIVE
                 ModLinksPackagesProvider.instance,
                 ApiLinksPackageProvider.instance,
+#if BUILD_NODE_NATIVE
                 InternalPackageProvider.instance,
                 LocalCustomPackagesProvider.instance,
 #endif
-                customProviders
+                customProviders,
+
+
+
+
+
+
+                //Fallback
+                LocalPackManager.Instance.provider
             }
         };
         public bool IsHidden = false;
         public readonly PackCollection packages = new();
         public readonly List<PackContext> fallback = new();
 
-        public static int _initCount = 0;
+        private static int _initCount = 0;
         public static int InitCount => _initCount;
 
         private bool _inited = false;
@@ -51,17 +58,30 @@ namespace HKMM.Pack
         {
             this.packages = packages;
         }
-        public virtual IEnumerable<PackageBase> GetAllPackages()
+        public virtual IEnumerable<PackageBase> GetAllPackages(HashSet<string>? includeNames = null)
         {
-            foreach (var v in packages) yield return v.Value;
+            includeNames ??= new();
+            foreach (var v in packages)
+            {
+                if(includeNames.Add(v.Key))
+                {
+                    yield return v.Value;
+                }
+            }
             foreach (var fb in fallback)
             {
-                foreach (var v in fb.GetAllPackages()) yield return v;
+                foreach (var v in fb.GetAllPackages(includeNames)) yield return v;
             }
         }
         public virtual List<PackageBase> GetAllPackages(List<PackageBase> list)
         {
-            list.AddRange(packages.Values);
+            foreach (var v in packages)
+            {
+                if(list.All(x => x.Value.Name != v.Key))
+                {
+                    list.Add(v.Value);
+                }
+            }
             foreach(var fb in fallback)
             {
                 fb.GetAllPackages(list);

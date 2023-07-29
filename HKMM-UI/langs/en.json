@@ -82,7 +82,12 @@
                 "enabled": "Whether it is enabled",
                 "installed": "whether it is installed",
                 "type": "Type",
-                "author": "Author"
+                "author": "Author",
+                "requireUpdate": "Updatable"
+            },
+            "ru": {
+                "yes": "Yes",
+                "no": "No"
             },
             "installed": {
                 "installed": "Installed",
@@ -141,14 +146,9 @@
             "custom": "Custom"
         },
         "options": {
-            "show_deleted_mods": "Displays mods that have been deleted by the author",
-            "show_mod_short_name": "Display the mod short name",
-            "fastdownload": "Multi-threaded download",
-            "fastdownload_od": "Use multithreading whenever possible to download oversized mods, which in some cases may result in slow download speeds.",
-            "show_licence": "Displays the license for the mods",
+            "show_mod_short_name": "Display the modpack short name",
             "accept_pre_release": "Receive preview updates",
-            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)",
-            "verify_mods_auto": "Automatic verification of mods"
+            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)"
         },
         "cdn": {
             "title": "CDN",

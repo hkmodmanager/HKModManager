@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell, crashReporter } from 'electron'
+import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell, crashReporter, nativeTheme } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -60,6 +60,7 @@ url_args.push("--");
 url_args.push("--url");
 
 app.setAsDefaultProtocolClient("hkmm", undefined, url_args);
+nativeTheme.themeSource = "dark";
 
 export let mainWindow: BrowserWindow | undefined;
 
@@ -106,6 +107,8 @@ function registerAppScheme() {
   });
 }
 
+
+
 async function createWindow() {
   // Create the browser window.
   const win = mainWindow = new BrowserWindow({
@@ -119,6 +122,8 @@ async function createWindow() {
       devTools: true
     }
   });
+
+
 
   remote.enable(win.webContents);
   

@@ -88,7 +88,8 @@
                 "enabled": "是否启用",
                 "installed": "是否安装",
                 "type": "类型",
-                "author": "作者"
+                "author": "作者",
+                "requireUpdate": "是否需要更新"
             },
             "installed": {
                 "installed": "已安装",
@@ -97,6 +98,10 @@
             "type": {
                 "mod": "Mod",
                 "modpack": "ModPack"
+            },
+            "ru": {
+                "yes": "是",
+                "no": "否"
             },
             "title": "标签：",
             "None": "无",
@@ -152,15 +157,10 @@
             "custom": "自定义"
         },
         "options": {
-            "show_deleted_mods": "显示已废弃的Mods",
-            "show_mod_short_name": "显示Mod短名称",
-            "hide_mod_alias": "隐藏Mod别称",
-            "fastdownload": "多线程下载",
-            "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。",
-            "show_licence": "显示Mods的许可证",
+            "show_mod_short_name": "显示Modpack短名称",
+            "hide_mod_alias": "隐藏Modpack别称",
             "accept_pre_release": "接收预览版更新",
             "accept_alpha_release": "接收Alpha更新 (这通常包括尚未完全测试的新功能)",
-            "verify_mods_auto": "自动校验Mods",
             "use_gh_proxy": "使用gh-proxy"
         },
         "cdn": {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -124,6 +124,7 @@ namespace HKMM.UACHelper
                             fs.Read(buffer);
                             WriteBytes(BitConverter.GetBytes(buffer.Length));
                             WriteBytes(buffer);
+                            WriteString(path);
                         }catch(Exception e)
                         {
                             WriteBytes(BitConverter.GetBytes(0));

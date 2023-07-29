@@ -1,4 +1,4 @@
-﻿global using static HKMM.Consts;
+global using static HKMM.Consts;
 
 namespace HKMM
 {
@@ -20,7 +20,8 @@ namespace HKMM
         public const string INSTALLER_MAPI_NAME = "ModdingAPI";
         public const string INSTALLER_DEFAULT_NAME = "Default";
         public const string INSTALLER_GAMEINJECT_NAME = "GameInject";
-        public const string INSTALLER_LOCAL_PACK_MANAGER = "LocalPackManager";
+        public const string INSTALLER_LOCAL_PACK_MANAGER_NAME = "LocalPackManager";
+        public const string INSTALLER_LOCAL_CUSTOM_PACK_NAME = "LocalCustomPack";
 
         public const string GAMEINJECT_DLL_NAME = "GameInject.dll";
     }

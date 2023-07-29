@@ -1,4 +1,4 @@
-﻿using HKMM.Interop;
+using HKMM.Interop;
 using PInvoke;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace HKMM.UACHelper
 
         internal static void CheckUACProcess()
         {
-            
+
             UACHelperSyncContext.instance.Send(_ =>
             {
                 if (uacProcess != null)
@@ -58,17 +58,14 @@ namespace HKMM.UACHelper
                     {
                         throw new InvalidProgramException();
                     }
-                    try
-                    {
-                        pipeServerIn.WaitForConnectionAsync().Wait(1000);
-                    }
-                    catch (TimeoutException)
+                    if (!pipeServerIn.WaitForConnectionAsync().Wait(1000))
                     {
                         uacProcess?.Kill();
                         uacProcess = null;
-                        throw;
+                        throw new TimeoutException();
                     }
-                } finally
+                }
+                finally
                 {
                     JSWatchDog.disabled = false;
                 }

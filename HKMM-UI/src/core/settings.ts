@@ -63,7 +63,6 @@ function GetSettingsLocal() {
     }
     if(store.store.cdn == 'SCARABCN') {
         store.set('cdn', 'GH_PROXY');
-        //store.set('options', [...store.store.options, 'USE_GH_PROXY']);
     }
     if(!store.store.mirror_github) {
         store.set('mirror_github', []);
@@ -73,6 +72,11 @@ function GetSettingsLocal() {
     }
     if(store.store.mirror_github.length == 0) {
         store.set('mirror_github', ["ghproxy.net"]);
+    }
+    if(!store.store.modpackSources || store.store.modpackSources.length == 0) {
+        store.set('modpackSources', [ 
+            'https://raw.githubusercontent.com/hkmodmanager/ModpackSource/source/Default%20Modpacks%20Source.json'
+        ]);
     }
     if(store.store.modpackSources == undefined) {
         store.set('modpackSources', []);

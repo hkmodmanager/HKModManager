@@ -35,7 +35,7 @@ namespace HKMM.Pack.Installer
         {
             get
             {
-                return string.IsNullOrEmpty(_modsRoot) ? JS.Api.GetModStorePath() : _modsRoot;
+                return string.IsNullOrEmpty(_modsRoot) ? Settings.Instance.GetModStorePath() : _modsRoot;
             }
             set
             {

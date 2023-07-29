@@ -17,10 +17,6 @@
     <!--Options-->
     <div class="p-3">
       <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
-        <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
-      </div>
-      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_MOD_SHORT_NAME" />
         <label class="form-check-label">{{ $t("settings.options.show_mod_short_name") }}</label>
       </div>
@@ -31,10 +27,6 @@
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_APLHA_RELEASE" />
         <label class="form-check-label">{{ $t("settings.options.accept_alpha_release") }}</label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="VERIFY_MODS_AUTO" />
-        <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
       <div v-if="$i18n.locale == 'zh'">
 
@@ -100,10 +92,7 @@
         </div>
       </div>
       <RequireExpmode>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
-          <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
-        </div>
+
       </RequireExpmode>
     </div>
   </form>

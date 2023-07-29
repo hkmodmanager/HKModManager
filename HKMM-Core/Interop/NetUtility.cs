@@ -1,4 +1,4 @@
-﻿using HKMM.UACHelper;
+using HKMM.UACHelper;
 using Microsoft.JavaScript.NodeApi;
 using System;
 using System.Collections.Generic;

@@ -6,7 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace HKMM.Modules
 {
@@ -29,7 +31,6 @@ namespace HKMM.Modules
         public static HttpClient Client { get; } = new(Handler);
         public virtual async Task<(string, byte[], bool)> DownloadRawFileDirect(string uri, bool noThrow = false)
         {
-            //TODO:
             if (localFiles.TryGetValue(uri, out var lf))
             {
                 return (Path.GetFileName(lf), FileModule.Instance.ReadBytes(lf), true);
@@ -86,8 +87,25 @@ namespace HKMM.Modules
                 var p = uri[6..];
                 return (Path.GetFileName(p), FileModule.Instance.ReadBytes(p));
             }
+            if(uri.StartsWith("data:"))
+            {
+                //Data URL
+                var dataStart = uri.IndexOf(',');
+                var header = uri[..dataStart];
+                var isBase64 = header.Contains(";base64");
+                var data = uri[(dataStart + 1)..]!;
+                if(isBase64)
+                {
+                    return ("", Convert.FromBase64String(data));
+                }
+                else
+                {
+                    return ("", HttpUtility.UrlDecodeToBytes(data));
+                }
+            }
             var uri_inst = new Uri(uri);
-            if (githubHost.Contains(uri_inst.Host, StringComparer.OrdinalIgnoreCase))
+            if (Settings.Instance.CDN == "GH_PROXY" &&
+                githubHost.Contains(uri_inst.Host, StringComparer.OrdinalIgnoreCase))
             {
                 foreach (var v in Settings.Instance.MirrorGithub)
                 {
@@ -125,7 +143,7 @@ namespace HKMM.Modules
                     CacheModule.Instance.SetString("TextCache", uri, result);
                 }
                 return result;
-            } catch(IOException ex)
+            } catch(Exception ex)
             {
                 Logger.LogError(ex.ToString());
                 var data = saveCache ? CacheModule.Instance.GetString("TextCache", uri) : null;

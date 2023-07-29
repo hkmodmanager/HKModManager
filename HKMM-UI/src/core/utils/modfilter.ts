@@ -1,5 +1,4 @@
 import { LocalPackageProxy, PackageDisplay } from "core";
-import { ModTag } from "../interop/parser/modlinks";
 import { getModRepo, getShortName } from "./utils";
 
 function processingModName(name: string) {
@@ -10,7 +9,7 @@ export type ModFilterInfo = [string, ((mod: PackageDisplay) => [boolean, number]
 export type ModFilter = (parts: string[], mod: PackageDisplay) => [boolean, number];
 const defaultFilters: Record<string, ModFilter> = {
     tag(fparts, mod) {
-        return [mod.tags.includes(fparts[1] as ModTag), 0];
+        return [mod.tags.includes(fparts[1]), 0];
     },
     author(fparts, mod){
         const authorName = fparts[1]?.toLowerCase();
@@ -44,6 +43,15 @@ const defaultFilters: Record<string, ModFilter> = {
     },
     nohide(fparts, mod) {
         return [!mod.isHidden, 0];
+    },
+    requireupdate(fparts, mod) {
+        if(fparts.length == 1) return [false, 0];
+        const ru = fparts[1] == 'true';
+        const local = LocalPackageProxy.getMod(mod.name);
+        if(!local) {
+            return [!ru, 0];
+        }
+        return [(mod.version == local.info.version) == !ru, 0];
     },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);

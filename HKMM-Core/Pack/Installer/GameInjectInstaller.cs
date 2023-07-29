@@ -47,7 +47,7 @@ namespace HKMM.Pack.Installer
             }
             var c = Config.Load();
             if (string.IsNullOrEmpty(c.modsPath) || string.IsNullOrEmpty(c.internalLibPath)) return null;
-            if(Path.GetFullPath(c.modsPath) != Path.GetFullPath(JS.Api.GetModStorePath())) return null;
+            if(Path.GetFullPath(c.modsPath) != Path.GetFullPath(Settings.Instance.GetModStorePath())) return null;
             if (Path.GetFullPath(c.internalLibPath) != Path.GetFullPath(JS.Api.InternalLibRoot)) return null;
             Logger.Where();
             var p = new HKMMPackage()
@@ -107,7 +107,7 @@ namespace HKMM.Pack.Installer
             var config = new Config
             {
                 internalLibPath = JS.Api.InternalLibRoot,
-                modsPath = JS.Api.GetModStorePath()
+                modsPath = Settings.Instance.GetModStorePath()
             };
             config.Save();
 

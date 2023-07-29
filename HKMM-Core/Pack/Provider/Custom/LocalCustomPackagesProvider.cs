@@ -1,5 +1,7 @@
 using HKMM.Interop;
 using HKMM.Modules;
+using HKMM.Pack.Installer;
+using HKMM.Pack.Metadata;
 using HKMM.Pack.Metadata.HKMM;
 using HKMM.Utils;
 using K4os.Hash.xxHash;
@@ -20,7 +22,6 @@ namespace HKMM.Pack.Provider.Custom
             FileModule.Instance.CreateDirectory(SaveDir);
             return Path.Combine(SaveDir, XXH64.DigestOf(Encoding.UTF8.GetBytes(name)) + ".pack.json");
         }
-        
         public void LoadPackages()
         {
             packages.Clear();
@@ -29,7 +30,10 @@ namespace HKMM.Pack.Provider.Custom
             {
                 var p = JsonUtils.ToObject<HKMMHollowKnightPackageDefV1>(
                     FileModule.Instance.ReadText(pack));
+                
                 p.IsHidden = true;
+                p.Installer = LocalPackInstaller.Instance;
+                p.AllowToggle = false;
                 packages[p.Name] = p;
             }
         }
@@ -40,8 +44,57 @@ namespace HKMM.Pack.Provider.Custom
             foreach (var pack in packages)
             {
                 var p = GetPath(pack.Key);
-                FileModule.Instance.WriteText(p, JsonUtils.ToJSON(pack));
+                FileModule.Instance.WriteText(p, JsonUtils.ToJSON(pack.Value));
             }
+        }
+        public HKMMHollowKnightPackageDefV1 CreateNew()
+        {
+            var pack = new HKMMHollowKnightPackageDefV1
+            {
+                Name = "$lcp." + Guid.NewGuid().ToString(),
+                DisplayName = "New ModPack",
+                Type = TypeEnum.ModPack,
+                Installer = LocalPackInstaller.Instance,
+                IsHidden = true,
+                AllowToggle = false,
+                Version = "0.0.0.0",
+                Description = ""
+            };
+            packages[pack.Name] = pack;
+            SavePackages();
+            return pack;
+        }
+        public HKMMHollowKnightPackageDefV1 GetCurrent()
+        {
+            HKMMHollowKnightPackageDefV1? result;
+            var id = LocalPackManager.Instance.mods.Keys.FirstOrDefault(x => x.StartsWith("$lcp."));
+            if(string.IsNullOrEmpty(id) || (result = FindPack(id)?.ToHKMMPackageDef()) == null)
+            {
+                result = CreateNew();
+                _ = LocalPackInstaller.Instance.InstallHKPackage(false, result);
+                return result;
+            }
+            return result;
+        }
+        public void AddModpack(string name)
+        {
+            var cur = GetCurrent();
+            var dep = cur.Dependencies ?? new();
+            dep.StringArray ??= Array.Empty<string>();
+            if (dep.StringArray.Contains(name)) return;
+            dep.StringArray = dep.StringArray.Append(name).ToArray();
+            cur.Dependencies = dep;
+            SavePackages();
+        }
+        public void RemoveModpack(string name)
+        {
+            var cur = GetCurrent();
+            var dep = cur.Dependencies ?? new();
+            dep.StringArray ??= Array.Empty<string>();
+            if (!dep.StringArray.Contains(name)) return;
+            dep.StringArray = dep.StringArray.Where(x => x != name).ToArray();
+            cur.Dependencies = dep;
+            SavePackages();
         }
         public static readonly LocalCustomPackagesProvider instance = new();
         protected override Task<bool> TryInit()
