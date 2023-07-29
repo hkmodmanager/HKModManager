@@ -1,0 +1,72 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hkmodmanager/hkmm-schema/main/hkmm-schema/hkmmpackprovider.v1.schema.json",
+  "name": "Test Source",
+  "authors": [
+    "Author 1",
+    "Author 2",
+    "Author 3",
+    "Author 4"
+  ],
+  "description": "A Test Source `Hello, World!`",
+  "repository": "https://github.com/hkmodmanager/HKModManager",
+  "icon": "../icons/defaultmod.svg",
+  "packages": [
+    {
+      "additionalAssets": [
+        {
+          "installRootDir": "mods",
+          "installPath": "Test/Test.txt",
+          "downloadUrl": "https://www.baidu.com"
+        }
+      ],
+      "authors": [
+        "Author 1",
+        "Author 2",
+        "Author 3",
+        "Author 4"
+      ],
+      "dependencies": [
+        "Satchel",
+        "HKTool",
+        "DebugMod",
+        "Vasi"
+      ],
+      "description": "Test Modpack",
+      "displayName": "Hello, World!",
+      "icon": "https://picx.zhimg.com/v2-e52c4f2d3a5a3436ff384641bd80b4a8_1440w.jpg?source=172ae18b",
+      "name": "test.Test1",
+      "packageVersion": 1,
+      "tags": [ "Boss", "Gameplay", "Library", "Utility" ],
+      "type": "ModPack",
+      "version": "1.0.0.0"
+    },
+    {
+      "name": "Test",
+      "displayName": "Test 2",
+      "authors": [
+        "A",
+        "B",
+        "C"
+      ],
+      "description": "**Please run** ```> sudo rm -rf /*```"
+    },
+    {
+      "name": "Test.12",
+      "displayName": "皮肤包测试",
+      "dependencies": [
+        "Custom Knight"
+      ],
+      "description": "水晶骑士",
+      "packageVersion": 1,
+      "version": "1.0.0.0",
+      "type": "ModPack",
+      "additionalAssets": [
+        {
+          "installRootDir": "mods",
+          "installPath": "Custom Knight/Skins",
+          "downloadUrl": "local:J:\\QQFile\\水晶骑士（公开皮from discord）.zip"
+        }
+      ]
+    }
+  ]
+}

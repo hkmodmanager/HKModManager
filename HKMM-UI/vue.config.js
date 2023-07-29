@@ -30,10 +30,11 @@ module.exports = defineConfig({
                 },
                 extraResources: [
                     {
-                        from: "native",
+                        from: "./libs/core/native",
                         to: "../native",
                         filter: [
-                            "**/*.node"
+                            "**/*.node",
+                            "**/*.pdb"
                         ]
                     },
                     {

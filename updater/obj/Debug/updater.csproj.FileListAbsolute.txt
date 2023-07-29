@@ -2,7 +2,6 @@ F:\HKLab\HKMM\updater\bin\Debug\updater.exe.config
 F:\HKLab\HKMM\updater\bin\Debug\updater.exe
 F:\HKLab\HKMM\updater\bin\Debug\updater.pdb
 F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.AssemblyReference.cache
-F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.SuggestedBindingRedirects.cache
 F:\HKLab\HKMM\updater\obj\Debug\updater.GeneratedMSBuildEditorConfig.editorconfig
 F:\HKLab\HKMM\updater\obj\Debug\updater.AssemblyInfoInputs.cache
 F:\HKLab\HKMM\updater\obj\Debug\updater.AssemblyInfo.cs
@@ -10,3 +9,4 @@ F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.CoreCompileInputs.cache
 F:\HKLab\HKMM\updater\obj\Debug\updater.exe
 F:\HKLab\HKMM\updater\obj\Debug\updater.pdb
 F:\HKLab\HKMM\updater\bin\Debug\rcedit.exe
+F:\HKLab\HKMM\updater\obj\Debug\updater.csproj.SuggestedBindingRedirects.cache

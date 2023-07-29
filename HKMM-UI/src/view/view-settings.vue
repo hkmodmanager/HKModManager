@@ -17,10 +17,6 @@
     <!--Options-->
     <div class="p-3">
       <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
-        <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
-      </div>
-      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_MOD_SHORT_NAME" />
         <label class="form-check-label">{{ $t("settings.options.show_mod_short_name") }}</label>
       </div>
@@ -31,10 +27,6 @@
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_APLHA_RELEASE" />
         <label class="form-check-label">{{ $t("settings.options.accept_alpha_release") }}</label>
-      </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="VERIFY_MODS_AUTO" />
-        <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
       </div>
       <div v-if="$i18n.locale == 'zh'">
 
@@ -80,13 +72,6 @@
         <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.advanced.warning") }}
       </div>
 
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="CUSTOM_MODLINKS" />
-        <label class="form-check-label">{{ $t("settings.advanced.custom_modlinks") }}</label>
-      </div>
-      <div class="input-group p-1" v-if="enableOption('CUSTOM_MODLINKS')">
-        <input class="form-control" type="url" v-model="customModLinksUrl"/>
-      </div>
     </div>
     <!--Exp Mode-->
     <hr />
@@ -107,10 +92,7 @@
         </div>
       </div>
       <RequireExpmode>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
-          <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
-        </div>
+
       </RequireExpmode>
     </div>
   </form>
@@ -128,7 +110,7 @@ import { join } from "path";
 import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
-import { getModLinks, refreshModLinksProvider } from "@/core/modlinks/modlinks";
+import { syncInvoke } from "@/core/interop/cs";
 
 export default defineComponent({
   components: {
@@ -152,18 +134,10 @@ export default defineComponent({
       return new Popover(popoverTriggerEl)
     })
   },
-  unmounted() {
-    if (store.store.customModLinks !== this.customModLinksUrl) {
-      store.set('customModLinks', this.customModLinksUrl);
-      refreshModLinksProvider();
-      getModLinks();
-    }
-  },
   data() {
     return {
       options: store.get('options', []),
       cdn: store.get('cdn', 'JSDELIVR'),
-      customModLinksUrl: store.store.customModLinks
     }
   },
   watch: {
@@ -207,11 +181,13 @@ export default defineComponent({
       return hasOption(option);
     },
     selectModsSavePath() {
-      const result = remote.dialog.showOpenDialogSync({
-        properties: ["dontAddToRecent", "openDirectory"]
+      syncInvoke(() => {
+        const result = remote.dialog.showOpenDialogSync({
+          properties: ["dontAddToRecent", "openDirectory"]
+        });
+        if (!result) return;
+        store.set("modsavepath", result[0]);
       });
-      if (!result) return;
-      store.set("modsavepath", result[0]);
     },
     changeModsSavePathMode() {
       const select = this.$refs.modssavepathmode as SelectHTMLAttributes;

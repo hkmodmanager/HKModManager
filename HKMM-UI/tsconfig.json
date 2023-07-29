@@ -37,7 +37,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "libs/core/netutils.cjs"  ],
   "exclude": [
     "node_modules",
     "src/electron",

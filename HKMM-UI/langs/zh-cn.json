@@ -39,22 +39,12 @@
             "aff": "无法自动寻找游戏文件"
         }
     },
-    "whatsnew": {
-        "new_week": "一周内的新Mods",
-        "new_month": "一个月内的新Mods",
-        "update_week": "一周内有更新的Mods",
-        "update_month": "一个月内有更新的Mods"
-    },
     "tabs": {
-        "allmods": "下载Mods",
-        "localmods": "本地Mods",
-        "requireUpdateMods": "更新Mods",
         "settings": "设置",
-        "modgroups": "Mods分组",
         "api": "MAPI管理",
-        "plugins": "插件管理",
-        "whatsnew": "Mods动态",
         "about": "关于",
+        "allpacks": "ModPacks",
+        "sources": "Modpacks源",
         "tasks": {
             "title": "任务",
             "all": "全部",
@@ -63,115 +53,57 @@
             "running": "进行中"
         }
     },
-    "groups": {
-        "current": "当前",
-        "create": "创建",
-        "newtitle": "创建新的组",
-        "name": "组名",
-        "use": "使用当前组",
-        "remove": "删除组",
-        "deleteMsg": "你确定要删除这个组吗？这不可恢复",
-        "rename": "重命名组",
-        "download": "补充缺失的Mods",
-        "ready": "已准备好",
-        "unready": "未准备好",
-        "copyShareMsg": "复制分享链接",
-        "packShareMsg": "导出一键包",
-        "export": "导出一键包",
-        "exportOptions": {
-            "always_full_path": "总是使用完整路径",
-            "include_api": "包含Modding API",
-            "only_mod_files": "不包含额外的文件"
-        }
-    },
-    "mods": {
-        "updateAll": "全部更新",
-        "authors": "贡献者",
-        "owner": "所有者",
-        "ownerOtherMods": "查看其他Mods",
-        "repo": "代码仓库",
-        "version": "版本",
-        "dep": "依赖Mods",
-        "size": "大小",
-        "depInstall": "已安装",
-        "installDep": "安装依赖",
-        "enabled": "已启用",
-        "disabled": "未启用",
-        "install": "安装",
-        "uninstall": "卸载",
-        "requireUpdate": "需要更新",
-        "update": "更新",
-        "use": "启用",
-        "unuse": "禁用",
-        "desc": "描述",
-        "verifyMod": "验证Mods完整性",
-        "repairMod": "修复Mods文件",
-        "lastVerify": "上次校验：{date}",
-        "badge_scarabInstalled": "Scarab已安装",
-        "badge_localInstalled": "本地已安装",
-        "missingDep": "未安装",
-        "depOnThis": "以下Mods依赖于该Mod",
-        "integrateWithThis": "以下Mods与该Mod协调工作",
-        "isDeleted": "已废弃",
-        "noSource": "无下载源",
-        "publishTime": "发布时间",
-        "installTime": "安装时间",
-        "badge_importFromScarab": "从Scarab导入",
-        "badge_importFromLocal": "从本地导入",
-        "badge_nonExclusiveImport": "非独占式导入",
-        "badge_missingFileLevel0": "非关键文件缺失",
-        "badge_missingFileLevel1": "资源文件缺失",
-        "badge_missingFileLevel2": "关键文件缺失",
-        "badge_missingFileLevel_full": "无文件缺失",
-        "alert_nonExclusiveImport": "非独占式导入的Mods在日后可能会和原始Mod出现版本冲突或其他问题\nHKMM中的操作不会影响到原始Mod",
-        "exportToScarab": "导出到Scarab",
-        "releasePath": "发布页面",
-        "openDataFolder": "打开Mod文件夹",
-        "openDllFolder": "打开Dll文件夹\n这是为开发者准备的，请不要轻易更改里面的任何一个文件",
-        "license": "许可证",
-        "shareUrl": "复制安装链接",
-        "importScarab": {
-            "title": "从Scarab导入Mods",
-            "alertMsg_exclusive": "注意：导入后的Mods将被Scarab视为未安装",
-            "alertMsg_nonexclusive": "注意：导入后的Mods在日后可能会和Scarab所管理的Mods出现版本冲突或其他问题",
-            "confirmTitle": "确认操作",
-            "confirmBtn": "确认",
-            "cancelBtn": "取消",
-            "import": "导入",
-            "btn": "从Scarab导入",
-
-            "exclusive": "独占式导入",
-            "nonexclusive": "非独占式导入"
+    "modpack": {
+        "details": "详情",
+        "status": {
+            "title": "状态：",
+            "enabled": "已启用",
+            "disabled": "已禁用",
+            "uninstalled": "未安装",
+            "installed": "已安装"
         },
-        "importLocal": {
-            "title": "从本地导入",
-            "alertMsg_exclusive": "注意：导入后的Mods将被完全转交HKMM管理",
-            "alertMsg_nonexclusive": "注意：导入后的Mods在日后可能会和原始Mods出现版本冲突或其他问题",
-            "confirmTitle": "确认操作",
-            "confirmBtn": "确认",
-            "cancelBtn": "取消",
-            "import": "导入",
-            "btn": "导入手动安装的Mods",
-
-            "exclusive": "独占式导入",
-            "nonexclusive": "非独占式导入",
-
-            "missing_files": "丢失了以下的文件",
-
-            "alert_dllnotfull": "丢失了关键的Mod文件，可能根本无法使用",
-            "alert_dllfull": "丢失了一些资源文件，可能会影响正常使用",
-            "alert_resourcefull": "丢失了一些非必要的文件，一般不会影响使用",
-            "alert_full": "Mod文件完整"
+        "operate": {
+            "install": "安装",
+            "uninstall": "卸载",
+            "enable": "启用",
+            "disable": "禁用",
+            "update": "更新",
+            "refresh": "刷新",
+            "remove": "删除"
         },
-        "exportScarab": {
-            "title": "导出到Scarab",
-            "alertMsg": "注意：导出后的Mod在日后可能会和HKMM所管理的Mod出现版本冲突或其他问题",
-            "dontAsk": "不再提示",
-            "confirmTitle": "确认操作",
-            "confirmBtn": "确认",
-            "cancelBtn": "取消"
+        "dep": {
+            "title": "依赖项"
         },
+        "tips": {
+            "importantUninstalled": "请安装该Modpack否则可能无法正常使用Mods"
+        },
+        "source": "来源：",
+        "author": "作者：",
+        "repo": "代码仓库：",
+        "version": "版本：",
+        "lastUpdate": "最后一次更新：{days}",
         "tags": {
+            "groups": {
+                "mul_tags": "标签",
+                "enabled": "是否启用",
+                "installed": "是否安装",
+                "type": "类型",
+                "author": "作者",
+                "requireUpdate": "是否需要更新"
+            },
+            "installed": {
+                "installed": "已安装",
+                "uninstalled": "未安装"
+            },
+            "type": {
+                "mod": "Mod",
+                "modpack": "ModPack"
+            },
+            "ru": {
+                "yes": "是",
+                "no": "否"
+            },
+            "title": "标签：",
             "None": "无",
             "Gameplay": "玩法",
             "Boss": "Boss",
@@ -225,15 +157,10 @@
             "custom": "自定义"
         },
         "options": {
-            "show_deleted_mods": "显示已废弃的Mods",
-            "show_mod_short_name": "显示Mod短名称",
-            "hide_mod_alias": "隐藏Mod别称",
-            "fastdownload": "多线程下载",
-            "fastdownload_od": "尽可能使用多线程下载过大的Mods，在某些情况下可能会造成下载速度降低。",
-            "show_licence": "显示Mods的许可证",
+            "show_mod_short_name": "显示Modpack短名称",
+            "hide_mod_alias": "隐藏Modpack别称",
             "accept_pre_release": "接收预览版更新",
             "accept_alpha_release": "接收Alpha更新 (这通常包括尚未完全测试的新功能)",
-            "verify_mods_auto": "自动校验Mods",
             "use_gh_proxy": "使用gh-proxy"
         },
         "cdn": {

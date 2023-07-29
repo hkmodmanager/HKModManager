@@ -1,0 +1,73 @@
+{
+	"inStore": true,
+	"mirror_github": [
+		"ghproxy.net"
+	],
+	"mirror_githubapi": {
+		"items": []
+	},
+	"enabled_exp_mode": true,
+	"gamepath": "E:\\SteamLibrary\\steamapps\\common\\Hollow Knight",
+	"modsavepath": "E:\\SteamLibrary\\steamapps\\common\\Hollow Knight\\HKSource",
+	"modsavepathMode": 3,
+	"modgroups": [
+		"default",
+		"6fa17fa6-d425-0022-10c2-ff4faa318e0c",
+		"b3a75be4-62d5-dee7-95e1-aebd4472fdce",
+		"a5e21a70-8c6a-4539-a96f-d5573ed0032c",
+		"75ce208f-ccf2-4a97-6acd-a2e457e31a98",
+		"05c04d1f-36bc-0590-4142-4d02e110d4ba",
+		"1f04f79e-4120-eb99-c29f-ad9451dac260",
+		"624d7a64-6cb1-cf58-d1f5-b749d6f321ab",
+		"7e8e252e-2975-acfb-6d0f-89200f363d67",
+		"38a75ea3-63f4-fa37-fe3e-ca62b19b040d",
+		"672d6145-c9c2-c059-0524-52a0a093758a",
+		"f6a7d352-41c9-6a96-faeb-eb8800d04508",
+		"35dd63f0-02b0-9220-1cfc-33d2ea14c6d3",
+		"d403cc1d-5e44-bdc0-9b5f-b2710cb67df1",
+		"aff9b3ad-aa53-882d-0ac2-6d654d3aee4b",
+		"9ab8f192-17ab-6ced-86e5-a2d064c7d209",
+		"4514e3d3-8f85-dae2-e617-70afc0cf8f64",
+		"00d55d1f-16f3-a92f-32c6-aae8e0e9421c",
+		"f326a192-8eff-4524-6cf6-3f3a9ddbfde6",
+		"8707df0f-273c-e558-40d9-53b7bb8e2500",
+		"233f5078-c6da-093c-9113-2573fa2189a3",
+		"586691f3-64b4-e9b0-8b7e-05acc5e21454",
+		"442c2cde-e0cc-77a5-ff64-fd17bca8d047",
+		"805b115f-dead-7092-8971-f5f6aa3d8a58",
+		"a0789805-f301-45b1-eb63-5f180e90be5e",
+		"b589b70f-8180-bb68-0ed3-1c1d0518883a",
+		"6b22a3da-ec4f-0a7c-d8df-ca319fce6701",
+		"e793e63b-df81-c100-e274-89dd30872df3",
+		"e93dd5e4-5a04-6021-c1df-618d3faabe53",
+		"1206b58c-6a6f-a290-c514-0268151eea52",
+		"a142e8ba-c7ce-a31e-0df8-97df774eb834",
+		"c3fb5ec5-6a24-a567-25a4-ad8a714e1d9d"
+	],
+	"current_modgroup": "default",
+	"language": "zh",
+	"options": [
+		"HIDE_ALERT_EXPORT_TO_SCARAB",
+		"FAST_DOWNLOAD",
+		"VERIFY_MODS_ON_START",
+		"ACCEPT_APLHA_RELEASE",
+		"ACCEPT_PRE_RELEASE",
+		"SHOW_DELETED_MODS",
+		"SHOW_MOD_SHORT_NAME",
+		"USE_GH_PROXY",
+		"USE_GH_PROXY",
+		"USE_GH_PROXY",
+		"USE_GH_PROXY"
+	],
+	"plugins": [],
+	"pluginsStatus": {
+		"hklab-plugin-bckd": {
+			"enabled": false
+		}
+	},
+	"cdn": "GITHUB_RAW",
+	"maxConnection": 16,
+	"downloadRetry": 3,
+	"useDarkMode": true,
+	"customModLinks": "https://github.com/hk-modding/modlinks/raw/main/ModLinks.xml"
+}

@@ -2,8 +2,19 @@
     border: 0px;
 }
 
+.card-img {
+    vertical-align:middle;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
 hr {
     border-top: 0px;
+}
+
+.hr-default {
+    border-top: var(--bs-border-width) solid;
 }
 
 .link-auto {
@@ -37,6 +48,11 @@ hr {
     --bs-btn-border-radius: 0px;
 }
 
+.form-check-input, .form-check {
+    --bs-form-check-bg: rgba(0,0,0,0);    
+    padding-left: 0;
+}
+
 .form-control, .form-select {
     border-radius: 0px;
 }
@@ -46,4 +62,12 @@ hr {
     border-bottom-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
     border-top-left-radius: 0 !important;
+}
+
+.card {
+    border-radius: 0;
+}
+
+.form-check-input {
+    margin-left: 0 !important;
 }

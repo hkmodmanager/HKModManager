@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>GameInject</AssemblyName>
     <TargetFramework>net472</TargetFramework>
-    <Version>3.0.0.0</Version>
+    <Version>3.3.12.0</Version>
     <NoWarn>CS0436</NoWarn>
     <Nullable>enable</Nullable>
     <ExportDir>Output</ExportDir>
@@ -12,11 +12,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="HKBuildUtils" Version="0.5.52">
+    <PackageReference Include="HKBuildUtils" Version="0.6.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <ReflectHelper Include="Assembly-CSharp" />
+    <MonoModHook Include="mscorlib" />
+    <MonoModHook Include="System" />
   </ItemGroup>
 </Project>
