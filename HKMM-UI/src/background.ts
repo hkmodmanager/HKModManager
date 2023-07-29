@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell } from 'electron'
+import { app, protocol, BrowserWindow, dialog, ipcMain, Menu, net, shell, crashReporter, nativeTheme } from 'electron'
 import { initRenderer } from 'electron-store'
 import * as path from 'path';
 import { parseCmd } from './electron/cmdparse'
@@ -10,8 +10,10 @@ import { spawn } from 'child_process';
 import { dirname, join } from 'path';
 import * as semver from 'semver';
 import * as remote from '@electron/remote/main';
-import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer';
+import { checkNetUtility } from './electron/netutility';
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+checkNetUtility();
 
 const singleLock = app.requestSingleInstanceLock();
 if (!singleLock) {
@@ -29,6 +31,10 @@ if (existsSync(join(appDir, 'update.zip')) || existsSync(join(appDir, '_update')
     app.exit();
   }
 }
+
+crashReporter.start({
+  uploadToServer: false
+});
 
 remote.initialize();
 
@@ -54,11 +60,12 @@ url_args.push("--");
 url_args.push("--url");
 
 app.setAsDefaultProtocolClient("hkmm", undefined, url_args);
+nativeTheme.themeSource = "dark";
 
 export let mainWindow: BrowserWindow | undefined;
 
 function registerAppScheme() {
-  protocol.registerBufferProtocol("app", async (request, callback) => {
+  protocol.handle("app", async request => {
     try {
       let pathName = (decodeURI(request.url)).substring(6);
 
@@ -84,13 +91,23 @@ function registerAppScheme() {
         mimeType = 'application/wasm'
       }
 
-      callback({ mimeType, data })
+      return new Response(data, {
+        headers: {
+          "Content-Type": mimeType
+        }
+      })
     } catch (e) {
       console.error(e);
       dialog.showErrorBox("Error!", e.toString());
+      return new Response((e?.stack ?? e)?.toString() ?? "Error!", {
+        status: 504,
+        statusText: "Error"
+      });
     }
   });
 }
+
+
 
 async function createWindow() {
   // Create the browser window.
@@ -106,7 +123,18 @@ async function createWindow() {
     }
   });
 
+
+
   remote.enable(win.webContents);
+  
+  win.webContents.on('render-process-gone', (ev, details) => {
+    win.close();
+    if(details.reason == 'crashed' || details.reason == 'launch-failed'
+      || details.reason == 'abnormal-exit') {
+      dialog.showErrorBox("Crashed", "Sorry, HKMM has encountered an unrecoverable error, please restart the program.");
+      app.exit(-1);
+    }
+  });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -126,18 +154,21 @@ async function createWindow() {
       shell.openExternal(url);
     }
   });
+
+  
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));
+export const rquireElectronVer = "25.3.1";
 
 const startAfterQuit: Set<string> = new Set<string>();
 
 app.on('ready', async () => {
-  if (semver.lt(process.versions.electron, "22.0.0")) {
+  if (semver.lt(process.versions.electron, rquireElectronVer)) {
     const result = dialog.showMessageBoxSync({
       title: "Breaking update",
-      message: `Electron需要更新(${process.versions.electron}->22.0.2)
-Electron needs to be updated (${process.versions.electron}->22.0.2)`,
+      message: `Electron需要更新(${process.versions.electron}->${rquireElectronVer})
+Electron needs to be updated (${process.versions.electron}->${rquireElectronVer})`,
       buttons: ['下载 Download', '关闭 Close'],
       defaultId: 2
     });
@@ -148,8 +179,8 @@ Electron needs to be updated (${process.versions.electron}->22.0.2)`,
 The program will start automatically after the Electron update is complete, please do not start the program manually again`
       });
       const url = app.getLocaleCountryCode() == 'CN' ?
-        'https://cdn.npmmirror.com/binaries/electron/v22.0.2/electron-v22.0.2-win32-x64.zip'
-        : 'https://github.com/electron/electron/releases/download/v22.0.2/electron-v22.0.2-win32-x64.zip';
+        `https://cdn.npmmirror.com/binaries/electron/v${rquireElectronVer}/electron-v${rquireElectronVer}-win32-x64.zip`
+        : `https://github.com/electron/electron/releases/download/v${rquireElectronVer}/electron-v${rquireElectronVer}-win32-x64.zip`;
       console.log("Download from " + url);
       const req = net.request(url);
       req.on('error', (e) => {
@@ -189,8 +220,6 @@ The program will start automatically after the Electron update is complete, plea
       return;
     }
   }
-
-  installExtension(VUEJS3_DEVTOOLS);
 
   registerAppScheme()
 

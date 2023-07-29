@@ -9,9 +9,6 @@
                     <div class="spinner-border" v-if="!(task?.isFailed || task?.isSuccess)"></div>
                     <div class="p-1">
                         {{ task?.name }}
-                        <span v-if="task?.category" class="badge bg-primary">
-                            {{ task.category }}
-                        </span>
                     </div>
 
                 </div>
@@ -21,7 +18,7 @@
             </button>
 
         </h2>
-        <div class="accordion-collapse collapse "  ref="body">
+        <div class="accordion-collapse collapse " ref="body">
             <div class="accordion-body">
                 <!--accordion body-->
                 <div v-if="task?.progress != undefined" class="progress">
@@ -29,16 +26,15 @@
                 </div>
                 <div class="fs-6 p-1 d-flex link-auto">
                     <div class="flex-grow-1">
-                        Guid: <i copyable> {{ task?.taskGuid }}</i>
+                        Guid: <i copyable> {{ task?.guid }}</i>
                     </div>
                     <a class="btn btn-danger" v-if="(task?.isFailed || task?.isSuccess)" @click="hideTask()">
                         <i class="bi bi-trash3"></i>
                     </a>
                 </div>
-                <div class="task-state p-2 bg-secondary">
-                    <div v-for="(val, index) in task?.taskState" :key="index" copyable>
-                        <span v-if="!task?.isFailed || index !== 0">{{ val }}</span>
-                        <span v-else class="text-danger">{{ val }}</span>
+                <div class="task-state p-2 bg-dark text-white" style="border: 2px; border-color: white;" ref="logBody">
+                    <div v-for="(val, index) in logs" :key="index" copyable>
+                        <span :class="`text-${val.color}`">{{ val.message }}</span>
                     </div>
                 </div>
                 <!--accordion body end-->
@@ -49,7 +45,6 @@
 </template>
 
 <style>
-
 .task-state-icon {
     font-size: 2rem;
     display: block;
@@ -62,72 +57,70 @@
     max-height: 15em;
     overflow: auto;
 }
+
+.task-item {
+    --bs-border-radius: 0;
+}
 </style>
 
-<script lang="ts">
-import { getTask, TaskInfo } from '@/core/taskManager';
+<script setup lang="ts">
 import { Collapse } from 'bootstrap';
-import { defineComponent } from 'vue';
+import { TaskItem, TaskLogInfo } from 'core';
+import { nextTick, onBeforeMount, onMounted, onUnmounted, ref, shallowRef, triggerRef } from 'vue';
 
-export default defineComponent({
-    methods: {
-        toggleBody() {
-            const tgb = new Collapse(this.$refs.body as Element);
-            tgb.toggle();
-        },
-        updateTask() {
-            this.task = getTask(this.taskguid ?? "");
-        },
-        isDone() {
-            this.updateTask();
-            return (this.task?.isFailed || this.task?.isSuccess) ?? true;
-        },
-        hideTask() {
-            (getTask(this.taskguid ?? "") as TaskInfo).isHidden = true;
-            this.$parent?.$forceUpdate();
-        },
-        getTaskTime() {
-            this.updateTask();
-            const task = this.task as TaskInfo;
-            const et = task.stopTime ?? new Date().valueOf();
-            const s = et - task.startTime;
-            return Math.round(s / 1000);
-        }
-    },
-    props: {
-        taskguid: String
-    },
-    data() {
-        return {
-            task: getTask(this.taskguid ?? ""),
-            checkTimer: setInterval(() => this.$forceUpdate(), 500),
-            checkTimerStop: false
-        }
-    },
-    created() {
-        let task = getTask(this.taskguid ?? "");
-        if (!task) return;
-        task.updateHandler = () => {
-            this.$forceUpdate();
-        };
-    },
-    mounted() {
-        if (this.checkTimerStop) {
-            this.checkTimer = setInterval(() => this.$forceUpdate(), 500);
-        }
-    },
-    unmounted() {
-        if (!this.checkTimerStop) {
-            clearInterval(this.checkTimer);
-            this.checkTimerStop = true;
-        }
-    },
-    updated() {
-        this.updateTask();
-        if (this.isDone() && !this.checkTimerStop) {
-            this.checkTimerStop = true;
-            clearInterval(this.checkTimer);
-        }
+const body = ref<Element>();
+const logBody = ref<HTMLDivElement>();
+const logs = ref<TaskLogInfo[]>([]);
+const task = shallowRef<TaskItem>();
+
+const props = defineProps<{
+    taskItem: TaskItem
+}>();
+function toggleBody() {
+    const tgb = new Collapse(body.value as Element);
+    tgb.toggle();
+}
+
+function hideTask() {
+    // eslint-disable-next-line vue/no-mutating-props
+    if (props.taskItem) props.taskItem.isHidden = true;
+}
+
+function getTaskTime() {
+    const task = props.taskItem;
+    const s = task.getRunningTime();
+    return Math.round(s / 1000);
+}
+
+function getLogs() {
+    const logs: TaskLogInfo[] = [];
+    for (let i = 0; i < props.taskItem.logCount; i++) {
+        logs.push(props.taskItem.getLogAt(i));
     }
+    nextTick(() => {
+        if (logBody.value) {
+            logBody.value.scrollTop = logBody.value.scrollHeight;
+        }
+    });
+
+    return logs;
+}
+
+onBeforeMount(() => {
+    task.value = props.taskItem;
+})
+
+onMounted(() => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.taskItem.onChanged = () => {
+        logs.value = getLogs();
+        triggerRef(task);
+    };
 });
+
+onUnmounted(() => {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.taskItem.onChanged = undefined;
+});
+
 </script>

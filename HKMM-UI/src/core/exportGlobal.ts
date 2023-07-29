@@ -15,10 +15,10 @@ export interface IBuildMetadata {
 }
 
 export const cdn_modlinks: Record<CDN, string> = {
-    "GITHUB_RAW": "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json",
-    "JSDELIVR": "https://cdn.jsdelivr.net/gh/HKLab/modlinks-archive@latest/modlinks.json",
+    "GITHUB_RAW": "https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/master/modlinks.json",
+    "JSDELIVR": "https://cdn.jsdelivr.net/gh/hkmodmanager/modlinks-archive@latest/modlinks.json",
     "SCARABCN": "https://hk-modlinks.clazex.net/ModLinks.xml",
-    "GH_PROXY": "https://raw.githubusercontent.com/HKLab/modlinks-archive/master/modlinks.json"
+    "GH_PROXY": "https://raw.githubusercontent.com/hkmodmanager/modlinks-archive/master/modlinks.json"
 };
 
 export const cdn_api: Record<CDN, string> = {
@@ -34,3 +34,6 @@ export const buildMetadata: IBuildMetadata = readJSONSync(join(publicDir, "build
 
 //@ts-ignore
 gl.exportGlobal = __webpack_exports__;
+
+
+export const currentPlatform: string = "Windows";

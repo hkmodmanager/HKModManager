@@ -33,22 +33,12 @@
             "aff": "Game files cannot be found automatically"
         }
     },
-    "whatsnew": {
-        "new_week": "New mods from last week",
-        "new_month": "New mods from last month",
-        "update_week": "Mods updated last week",
-        "update_month": "Mods updated last month"
-    },
     "tabs": {
-        "allmods": "New Mods",
-        "localmods": "Local Mods",
-        "requireUpdateMods": "Updatable mods",
         "settings": "Settings",
-        "modgroups": "Mods Group",
         "api": "MAPI",
-        "plugins": "Plugins",
-        "whatsnew": "What's new",
         "about": "About",
+        "allpacks": "ModPacks",
+        "sources": "ModPacks Sources",
         "tasks": {
             "title": "Tasks",
             "all": "All",
@@ -57,113 +47,57 @@
             "running": "Running"
         }
     },
-    "groups": {
-        "current": "Current",
-        "create": "Create",
-        "newtitle": "New group",
-        "name": "Name of group",
-        "use": "Use the this group",
-        "remove": "Delete group",
-        "deleteMsg": "Are you sure you want to delete this group? This is irreversible.",
-        "rename": "Rename the group",
-        "download": "Download the missing mods",
-        "ready": "Ready",
-        "unready": "Unready",
-        "copyShareMsg": "Copy the share link",
-        "packShareMsg": "Export as zip",
-        "export": "Export as zip",
-        "exportOptions": {
-            "always_full_path": "Always use the full path",
-            "include_api": "Includes the MAPI",
-            "only_mod_files": "Contains only mods files"
-        }
-    },
-    "mods": {
-        "updateAll": "Update all",
-        "authors": "Authors",
-        "owner": "Owner",
-        "ownerOtherMods": "Look at other mods",
-        "repo": "Repository",
-        "version": "Version",
-        "dep": "Dependencies",
-        "size": "Size",
-        "depInstall": "Installed",
-        "installDep": "Install dependencies",
-        "enabled": "Enabled",
-        "disabled": "Disabled",
-        "install": "Install",
-        "uninstall": "Uninstall",
-        "requireUpdate": "Require Update",
-        "update": "Update",
-        "use": "Enable",
-        "unuse": "Disable",
-        "desc": "Description",
-        "verifyMod": "Verify mods integrity",
-        "lastVerify": "Last checked: {date}",
-        "badge_scarabInstalled": "Installed in Scarab",
-        "badge_localInstalled": "Installed locally",
-        "missingDep": "Not installed",
-        "depOnThis": "The following mods depend on this mod",
-        "integrateWithThis": "The following mods are integrated with this mod",
-        "isDeleted": "Deprecated",
-        "noSource": "No download source",
-        "publishTime": "Publish",
-        "installTime": "Install",
-        "badge_importFromScarab": "Import from Scarab",
-        "badge_importFromLocal": "Import from Local",
-        "badge_nonExclusiveImport": "Non-exclusive import",
-        "badge_missingFileLevel0": "Non-critical files missing",
-        "badge_missingFileLevel1": "Resource files missing",
-        "badge_missingFileLevel2": "Critical files missing",
-        "alert_nonExclusiveImport": "Non-exclusive imported mods may have version conflicts or other issues with the original mod in the future\nOperations in HKMM do not affect the original mod",
-        "exportToScarab": "Export mod to Scarab",
-        "releasePath": "Release",
-        "openDataFolder": "Open the Mod folder",
-        "openDllFolder": "Open the Dll folder\nThis is for developers, please do not easily change any of the files inside",
-        "license": "License",
-        "shareUrl": "Copy install link",
-        "importScarab": {
-            "title": "Import mods from Scarab",
-            "alertMsg_exclusive": "Warning: Imported mods will be considered uninstalled by Scarab",
-            "alertMsg_nonexclusive": "Warning: Imported mods may have version conflicts or other issues with mods managed by Scarab in the future",
-            "confirmTitle": "Confirm",
-            "confirmBtn": "Confirm",
-            "cancelBtn": "Cancel",
-            "import": "Import",
-            "btn": "Import from Scarab",
-
-            "exclusive": "Exclusive import",
-            "nonexclusive": "Non-exclusive import"
+    "modpack": {
+        "details": "Details",
+        "status": {
+            "title": "Status:",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "uninstalled": "Uninstalled",
+            "installed": "Installed"
         },
-        "importLocal": {
-            "title": "Import manually installed mods",
-            "alertMsg_exclusive": "Warning: The imported mods will be fully transferred to HKMM for management",
-            "alertMsg_nonexclusive": "Warning: Imported mods may have version conflicts or other issues with the original mods in the future",
-            "confirmTitle": "Confirm",
-            "confirmBtn": "Confirm",
-            "cancelBtn": "Cancel",
-            "import": "Import",
-            "btn": "Import from Local",
-
-            "exclusive": "Exclusive import",
-            "nonexclusive": "Non-exclusive import",
-
-            "missing_files": "The following files are missing",
-
-            "alert_dllnotfull": "Missing critical mod files that may not be available at all",
-            "alert_dllfull": "Some resource files are missing, which may affect normal use",
-            "alert_resourcefull": "Some non-essential files are missing, which generally do not affect the use",
-            "alert_full": "Mod file is not missing"
+        "operate": {
+            "install": "Install",
+            "uninstall": "Uninstall",
+            "enable": "Enable",
+            "disable": "Disable",
+            "update": "Update",
+            "refresh": "Refresh",
+            "remove": "Remove"
         },
-        "exportScarab": {
-            "title": "Export to Scarab",
-            "alertMsg": "Warning: Exported mods may have version conflicts or other issues with mods managed by HKMM in the future",
-            "dontAsk": "Ask no more",
-            "confirmTitle": "Confirm",
-            "confirmBtn": "Confirm",
-            "cancelBtn": "Cancel"
+        "dep": {
+            "title": "Dependencies"
         },
+        "tips": {
+            "importantUninstalled": "Please install this modpack or you may not be able to use mods normally"
+        },
+        "source": "Source: ",
+        "author": "Authors: ",
+        "repo": "Repository: ",
+        "version": "Version: ",
+        "lastUpdate": "Last updated {days} ago",
         "tags": {
+            "groups": {
+                "mul_tags": "Tags",
+                "enabled": "Whether it is enabled",
+                "installed": "whether it is installed",
+                "type": "Type",
+                "author": "Author",
+                "requireUpdate": "Updatable"
+            },
+            "ru": {
+                "yes": "Yes",
+                "no": "No"
+            },
+            "installed": {
+                "installed": "Installed",
+                "uninstalled": "Uninstalled"
+            },
+            "type": {
+                "mod": "Mod",
+                "modpack": "ModPack"
+            },
+            "title": "Tags: ",
             "None": "None",
             "Gameplay": "Gameplay",
             "Boss": "Boss",
@@ -185,6 +119,11 @@
         "uninstall_title": "Uninstall"
     },
     "settings": {
+        "advanced": {
+            "title": "Advanced",
+            "warning": "Warning: Changing these options may cause program errors",
+            "custom_modlinks": "Custom ModLinks"
+        },
         "mirror": {
             "githubmirror": "Github 镜像"
         },
@@ -207,14 +146,9 @@
             "custom": "Custom"
         },
         "options": {
-            "show_deleted_mods": "Displays mods that have been deleted by the author",
-            "show_mod_short_name": "Display the mod short name",
-            "fastdownload": "Multi-threaded download",
-            "fastdownload_od": "Use multithreading whenever possible to download oversized mods, which in some cases may result in slow download speeds.",
-            "show_licence": "Displays the license for the mods",
+            "show_mod_short_name": "Display the modpack short name",
             "accept_pre_release": "Receive preview updates",
-            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)",
-            "verify_mods_auto": "Automatic verification of mods"
+            "accept_alpha_release": "Receive alpha updates (this usually includes new features that have not been fully tested)"
         },
         "cdn": {
             "title": "CDN",

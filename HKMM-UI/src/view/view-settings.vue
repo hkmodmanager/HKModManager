@@ -17,10 +17,6 @@
     <!--Options-->
     <div class="p-3">
       <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_DELETED_MODS" />
-        <label class="form-check-label">{{ $t("settings.options.show_deleted_mods") }}</label>
-      </div>
-      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_MOD_SHORT_NAME" />
         <label class="form-check-label">{{ $t("settings.options.show_mod_short_name") }}</label>
       </div>
@@ -29,21 +25,13 @@
         <label class="form-check-label">{{ $t("settings.options.hide_mod_alias") }}</label>
       </div>
       <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_PRE_RELEASE" />
-        <label class="form-check-label">{{ $t("settings.options.accept_pre_release") }}</label>
-      </div>
-      <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" v-model="options" value="ACCEPT_APLHA_RELEASE" />
         <label class="form-check-label">{{ $t("settings.options.accept_alpha_release") }}</label>
       </div>
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" v-model="options" value="VERIFY_MODS_AUTO" />
-        <label class="form-check-label">{{ $t("settings.options.verify_mods_auto") }}</label>
-      </div>
       <div v-if="$i18n.locale == 'zh'">
-        
+
         <hr />
-        
+
       </div>
       <!--div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" v-model="options" value="FAST_DOWNLOAD" />
@@ -57,24 +45,33 @@
     <div class="p-3">
       <h3 class="form-label">{{ $t("settings.cdn.title") }}</h3>
       <CCdnRadio value="GITHUB_RAW" :displayname='$t("settings.cdn.githubraw")' v-model:cdnProp="cdn"></CCdnRadio>
-      <CCdnRadio v-if="$i18n.locale == 'zh'" value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")' v-model:cdnProp="cdn"></CCdnRadio>
+      <CCdnRadio v-if="$i18n.locale == 'zh'" value="GH_PROXY" :displayname='$t("settings.cdn.gh_proxy")'
+        v-model:cdnProp="cdn"></CCdnRadio>
       <div v-if="cdn == 'GH_PROXY'">
-          <div class="form-group">
-            <label class="form-label">{{
-              $t("settings.mirror.githubmirror")
-            }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建" href="https://github.com/hunshcn/gh-proxy"
-                ></a></label>
-            <mirrorlist key-name="mirror_github"></mirrorlist>
-          </div>
+        <div class="form-group">
+          <label class="form-label">{{
+            $t("settings.mirror.githubmirror")
+          }}<a class="bi bi-info-circle p-1 link-light" title="自行搭建"
+              href="https://github.com/hunshcn/gh-proxy"></a></label>
+          <mirrorlist key-name="mirror_github"></mirrorlist>
         </div>
-        <div class="alert alert-warning" v-if="shouldShowAlertRestartCDN()">
-          {{ $t("settings.exp.applyOnRestart") }}
-        </div>
-        <!--
+      </div>
+      <div class="alert alert-warning" v-if="shouldShowAlertRestartCDN()">
+        {{ $t("settings.exp.applyOnRestart") }}
+      </div>
+      <!--
       <CCdnRadio value="SCARABCN" :displayname='$t("settings.cdn.clazex")' v-model:cdnProp="cdn">
         <a class="bi bi-info-circle p-1 link-light" data-bs-container="body" data-bs-toggle="popover"
           data-bs-placement="right" :data-bs-content="$t('settings.cdn.popover.clazex')"></a>
       </CCdnRadio> -->
+    </div>
+    <!--Advanced settings-->
+    <div class="p-3">
+      <h3 class="form-label">{{ $t("settings.advanced.title") }}</h3>
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.advanced.warning") }}
+      </div>
+
     </div>
     <!--Exp Mode-->
     <hr />
@@ -88,17 +85,14 @@
           <label class="form-check-label">{{ $t("settings.exp.enable") }}</label>
         </div>
         <div class="alert alert-warning" v-if="isEnableExpMode()">
-          {{ $t("settings.exp.warning") }}
+          <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.exp.warning") }}
         </div>
         <div class="alert alert-warning" v-if="shouldShowAlertRestart()">
-          {{ $t("settings.exp.applyOnRestart") }}
+          <i class="bi bi-exclamation-triangle"></i> {{ $t("settings.exp.applyOnRestart") }}
         </div>
       </div>
       <RequireExpmode>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" v-model="options" value="SHOW_LICENCE" />
-          <label class="form-check-label">{{ $t("settings.options.show_licence") }}</label>
-        </div>
+
       </RequireExpmode>
     </div>
   </form>
@@ -116,6 +110,7 @@ import { join } from "path";
 import { userData } from "@/core/remoteCache";
 import { Popover } from "bootstrap";
 import CCdnRadio from "./settings/c-cdn-radio.vue";
+import { syncInvoke } from "@/core/interop/cs";
 
 export default defineComponent({
   components: {
@@ -142,7 +137,7 @@ export default defineComponent({
   data() {
     return {
       options: store.get('options', []),
-      cdn: store.get('cdn', 'JSDELIVR')
+      cdn: store.get('cdn', 'JSDELIVR'),
     }
   },
   watch: {
@@ -164,6 +159,9 @@ export default defineComponent({
       this.$forceUpdate();
       this.$root?.$forceUpdate();
     },
+    enableOption(option: SettingOptions) {
+      return hasOption(option);
+    },
     shouldShowCustomModSavePath() {
       return store.get("modsavepathMode") == ModSavePathMode.Custom;
     },
@@ -183,11 +181,13 @@ export default defineComponent({
       return hasOption(option);
     },
     selectModsSavePath() {
-      const result = remote.dialog.showOpenDialogSync({
-        properties: ["dontAddToRecent", "openDirectory"]
+      syncInvoke(() => {
+        const result = remote.dialog.showOpenDialogSync({
+          properties: ["dontAddToRecent", "openDirectory"]
+        });
+        if (!result) return;
+        store.set("modsavepath", result[0]);
       });
-      if (!result) return;
-      store.set("modsavepath", result[0]);
     },
     changeModsSavePathMode() {
       const select = this.$refs.modssavepathmode as SelectHTMLAttributes;

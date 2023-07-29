@@ -1,0 +1,6 @@
+{
+    "name": "core",
+    "version": "0.0.0",
+    "types": "./native/core.d.ts",
+    "main": "./netutils.cjs"
+}

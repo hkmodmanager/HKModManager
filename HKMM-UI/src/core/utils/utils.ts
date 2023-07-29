@@ -1,4 +1,11 @@
-import { existsSync, readdirSync } from "fs";
+import { existsSync, mkdirSync, readdirSync } from "fs";
+import MarkdownIt from "markdown-it";
+import { join } from "path";
+import { store } from "../settings";
+
+export const commonMarkdown : MarkdownIt = MarkdownIt({
+    html: true
+});
 
 export function ConvertSize(bytes: number) {
     if (!bytes) return "0 KB";
@@ -37,3 +44,17 @@ export function getShortName(name: string) {
     }
     return abbr;
 }
+
+export function getRealModPath(name: string = '', disabled = false) {
+    const p = join(store.store.gamepath, 'hollow_knight_Data', 'Managed', 'Mods', disabled ? 'Disabled' : '', name);
+    if (!existsSync(p)) mkdirSync(p, { recursive: true });
+    return p;
+}
+
+export function getModRepo(repo: string): [string, string] | undefined {
+    const url = new URL(repo);
+    if (url.hostname != "github.com") return undefined;
+    const parts = url.pathname.split('/');
+    return [parts[1], parts[2]];
+}
+

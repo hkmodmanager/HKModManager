@@ -1,11 +1,12 @@
 <template>
     <div class="accordion">
-        <CTasksItem v-for="(task) in getTasks()" :key="task.taskGuid" :taskguid="task.taskGuid"></CTasksItem>
+        <CTasksItem v-for="(task) in getTasks()" :key="task.guid" :task-item="task"></CTasksItem>
     </div>
 </template>
 
 <script lang="ts">
-import { allTasks, TaskInfo } from '@/core/taskManager';
+import { getAllTasks } from '@/core/taskManager';
+import { TaskItem } from 'core';
 import { defineComponent } from 'vue';
 import CTasksItem from './tasks/c-tasks-item.vue';
 
@@ -16,9 +17,8 @@ export default defineComponent({
     },
     methods: {
         getTasks() {
-            const arr: TaskInfo[] = [];
-            for (let i = 0; i < allTasks.length; i++) {
-                const e = allTasks[i];
+            const arr: TaskItem[] = [];
+            for (const e of getAllTasks()) {
                 if(e.isHidden) continue;
                 if(e.isFailed && this.filter === 'failed') arr.push(e);
                 if(e.isSuccess && this.filter === 'done') arr.push(e);
@@ -35,9 +35,6 @@ export default defineComponent({
     },
     created() {
         this.$watch(() => this.$route.params, () => {
-            this.$forceUpdate();
-        });
-        this.$watch(() => allTasks, () => {
             this.$forceUpdate();
         });
     },

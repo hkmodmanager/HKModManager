@@ -1,3 +1,6 @@
-[submodule "HKMM-UI/libs/EdgeJs"]
-	path = HKMM-UI/libs/EdgeJs
-	url = https://github.com/HKLab/hkmm-electron-edge-js.git
+[submodule "node-api-dotnet"]
+	path = node-api-dotnet
+	url = https://github.com/hkmodmanager/node-api-dotnet
+[submodule "hpackage-schema"]
+	path = hpackage-schema
+	url = https://github.com/hkmodmanager/hpackage-schema.git

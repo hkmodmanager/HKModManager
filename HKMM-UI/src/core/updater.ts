@@ -6,7 +6,6 @@ import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { appDir, appVersion, isPackaged, srcRoot } from "./remoteCache";
 import * as semver from "semver"
 import { hasOption } from "./settings";
-import { getModDate } from "./modlinks/modlinks";
 import { buildMetadata, IBuildMetadata } from "./exportGlobal";
 
 const w_any = window as any;
@@ -50,9 +49,9 @@ export interface UpdateInfo {
 }
 
 async function checkUpdateAsync(rsize = false): Promise<UpdateInfo | undefined> {
-    const alpha: IBuildMetadata = JSON.parse(await downloadText(`https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/hkmm.json`));
+    const alpha: IBuildMetadata = JSON.parse(await downloadText(`https://raw.githubusercontent.com/hkmodmanager/HKModManager/alpha-binary/hkmm.json`));
     if (alpha.buildTime < buildMetadata.buildTime || alpha.headCommit == buildMetadata.headCommit) return undefined;
-    const durl = `https://raw.githubusercontent.com/HKLab/HKModManager/alpha-binary/update.zip`;
+    const durl = `https://raw.githubusercontent.com/hkmodmanager/HKModManager/alpha-binary/update.zip`;
     return {
         version: `${alpha.version}-alpha-${alpha.headCommit.substring(0, 7)}`,
         url: durl,
@@ -72,24 +71,24 @@ export async function checkUpdate(rsize = false): Promise<UpdateInfo | undefined
         console.error(e);
     }
     try {
-        const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/releases'));
+        const releases: ReleaseInfo[] = JSON.parse(await downloadText('https://api.github.com/repos/hkmodmanager/HKModManager/releases'));
         for (const release of releases) {
             if (!release) continue;
             const cver = appVersion;
             const sver = semver.clean(release.name);
             if (!sver) continue;
             const pre = semver.prerelease(sver);
-            if ((pre?.length ?? 0) > 0 && !hasOption('ACCEPT_PRE_RELEASE')) continue;
+            if ((pre?.length ?? 0) > 0 && (!hasOption('ACCEPT_PRE_RELEASE') && appVersion.prerelease.length == 0)) continue;
             if (semver.gt(sver, cver)) {
-                const durl = release.assets.find(x => x.name == 'update.zip')?.browser_download_url;
+                const durl = release.assets.find(x => x.name == 'update-v3.zip')?.browser_download_url;
                 if (!durl) continue;
-                const tags: TagInfo[]= JSON.parse(await downloadText('https://api.github.com/repos/HKLab/HKModManager/tags'));
+                const tags: TagInfo[]= JSON.parse(await downloadText('https://api.github.com/repos/hkmodmanager/HKModManager/tags'));
                 const tag = tags.find(x => x.name == release.tag_name);
                 releaseUpdate= {
                     version: sver,
                     url: durl,
                     size: (rsize ? (await getFileSize(durl)) : undefined),
-                    date: getModDate(release.created_at).valueOf(),
+                    date: new Date(release.created_at).valueOf(),
                     commit: tag?.commit.sha ?? '0000000000000000000000000000000000000000'
                 };
                 break;

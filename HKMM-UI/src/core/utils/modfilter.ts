@@ -1,16 +1,15 @@
-import { getModDate, getModRepo, modlinksCache, ModLinksManifestData, ModTag } from "../modlinks/modlinks";
-import { getLocalMod, getOldestVersion, getOrAddLocalMod } from "../modManager";
-import { getShortName } from "./utils";
+import { LocalPackageProxy, PackageDisplay } from "core";
+import { getModRepo, getShortName } from "./utils";
 
 function processingModName(name: string) {
     return name.trim().toLowerCase().replaceAll(' ', '');
 }
 
-export type ModFilterInfo = [string, ((mod: ModLinksManifestData) => [boolean, number])][];
-export type ModFilter = (parts: string[], mod: ModLinksManifestData) => [boolean, number];
+export type ModFilterInfo = [string, ((mod: PackageDisplay) => [boolean, number])][];
+export type ModFilter = (parts: string[], mod: PackageDisplay) => [boolean, number];
 const defaultFilters: Record<string, ModFilter> = {
     tag(fparts, mod) {
-        return [mod.tags.includes(fparts[1] as ModTag), 0];
+        return [mod.tags.includes(fparts[1]), 0];
     },
     author(fparts, mod){
         const authorName = fparts[1]?.toLowerCase();
@@ -24,53 +23,48 @@ const defaultFilters: Record<string, ModFilter> = {
         return [repo[0]?.toLowerCase() == authorName, 0];
     },
     enabled(fparts, mod){
-        const lg = getLocalMod(mod.name);
+        const lg = LocalPackageProxy.getMod(mod.name);
         if (!lg) return [false, 0];
-        return [lg.isEnabled(), 0];
+        return [lg.enabled, 0];
     },
     disabled(fparts, mod){
-        const lg = getLocalMod(mod.name);
+        const lg = LocalPackageProxy.getMod(mod.name);
         if (!lg) return [false, 0];
-        return [!lg.isEnabled(), 0];
+        return [!lg.enabled, 0];
+    },
+    installed(fparts, mod) {
+        return [LocalPackageProxy.getMod(mod.name) != undefined, 0];
+    },
+    uninstalled(fparts, mod) {
+        return [LocalPackageProxy.getMod(mod.name) == undefined, 0];
+    },
+    type(fparts, mod) {
+        return [mod.type == fparts[1], 0];
+    },
+    nohide(fparts, mod) {
+        return [!mod.isHidden, 0];
+    },
+    requireupdate(fparts, mod) {
+        if(fparts.length == 1) return [false, 0];
+        const ru = fparts[1] == 'true';
+        const local = LocalPackageProxy.getMod(mod.name);
+        if(!local) {
+            return [!ru, 0];
+        }
+        return [(mod.version == local.info.version) == !ru, 0];
     },
     "update-in-days": (fparts, mod) => {
         const day = Number.parseInt(fparts[1]);
         if(!Number.isInteger(day)) return [false, 0];
-        const date = getModDate(mod.date);
+        const date = mod.date;
         const span = (Date.now() - date.valueOf()) / 1000 / 60 / 60 / 24;
         return [span <= day, 0];
-    },
-    "new-in-days": (fparts, mod) =>
-    {
-        const day = Number.parseInt(fparts[1]);
-        if(!Number.isInteger(day)) return [false, 0];
-        let firstPublish: Date | undefined;
-        if(modlinksCache) {
-            const mg = modlinksCache.mods.mods[mod.name];
-            if(mg) {
-                const oldest = mg[getOldestVersion(Object.keys(mg)) ?? ''];
-                if(oldest) {
-                    firstPublish = getModDate(oldest.date);
-                }
-            }
-        }
-        if(!firstPublish) {
-            const lg = getOrAddLocalMod(mod.name);
-            const oldest = lg.versions[getOldestVersion(Object.keys(lg.versions)) ?? ''];
-            if(oldest) {
-                firstPublish = getModDate(oldest.info.modinfo.date);
-            }
-        }
-
-        if(!firstPublish) return [false, 0];
-        const span = (Date.now() - firstPublish.valueOf()) / 1000 / 60 / 60 / 24;
-        return [span <= day, -Date.now() + firstPublish.valueOf()];
     }
 };
 
 export function prepareFilter(input?: string,
     customFilter?: Record<string, ModFilter>,
-    aliasGetter?: (mod: ModLinksManifestData) => string) {
+    aliasGetter?: (mod: PackageDisplay) => string) {
     if (!input) return [];
     const filters: ModFilterInfo = [];
     const mix = {...defaultFilters, ...customFilter};
@@ -108,19 +102,11 @@ export function prepareFilter(input?: string,
             if (sortMode) {
                 if (sortMode == 'lastupdate') {
                     filters.push(['sort-lastUpdate', (mod) => {
-                        return [true, mod.date ? (getModDate(mod.date).valueOf()) : 0];
+                        return [true, mod.date ? (mod.date) : 0];
                     }]);
                 } else if (sortMode == 'lastupdate-reverse') {
                     filters.push(['sort-lastUpdate', (mod) => {
-                        return [true, mod.date ? (-getModDate(mod.date).valueOf()) : 0];
-                    }]);
-                } else if (sortMode == 'size') {
-                    filters.push(['sort-size', (mod) => {
-                        return [true, mod.ei_files?.size ?? 0];
-                    }]);
-                } else if (sortMode == 'size-reverse') {
-                    filters.push(['sort-size', (mod) => {
-                        return [true, -(mod.ei_files?.size ?? 0)];
+                        return [true, mod.date ? (-mod.date) : 0];
                     }]);
                 }
             }
@@ -133,10 +119,10 @@ export function prepareFilter(input?: string,
     return filters;
 }
 
-export function filterMods<T = ModLinksManifestData>(inmods: (T | undefined)[],
+export function filterMods<T = PackageDisplay>(inmods: (T | undefined)[],
     filters: ModFilterInfo,
-    convert: ((mod: T) => ModLinksManifestData | undefined) = (mod: T) => (mod as any as ModLinksManifestData)) {
-    const result: [T, ModLinksManifestData, number][] = [];
+    convert: ((mod: T) => PackageDisplay | undefined) = (mod: T) => (mod as any as PackageDisplay)) {
+    const result: [T, PackageDisplay, number][] = [];
     for (const mod of inmods) {
         if (!mod) continue;
         const modinfo = convert(mod);
@@ -159,8 +145,6 @@ export function filterMods<T = ModLinksManifestData>(inmods: (T | undefined)[],
         const bm = b[1];
         return (
             am.name.localeCompare(bm.name) +
-            (am.isDeleted ? 1000 : 0) +
-            (bm.isDeleted ? -1000 : 0) +
             b[2] - a[2]
         );
     }).map(x => x[0]);

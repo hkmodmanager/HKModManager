@@ -1,7 +1,7 @@
 <div align="center">
 
 <div align="center">
-    <a href="https://github.com/HKLab/HKModManager">
+    <a href="https://github.com/hkmodmanager/HKModManager">
         <img src="../img/logo.svg" width="200" height="200" />
     </a>
 </div>
@@ -35,6 +35,10 @@
 ------------
 
 ## Links
+
+[Hollow Knight Mod Manager Package Schema](https://github.com/hkmodmanager/hkmm-schema)
+
+[Hollow Knight PackageDef](https://github.com/hpackage/hpackage-schema)
 
 [Modding API](https://github.com/hk-modding/api)
 

@@ -37,7 +37,6 @@ export default defineComponent({
             if (!result) return false;
             const modal = (this.$refs.modal as any).getModal() as Modal;
             modal.show();
-            this.$forceUpdate();
         },
         hideModal() {
             const modal = (this.$refs.modal as any).getModal() as Modal;

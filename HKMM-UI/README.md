@@ -1,5 +1,5 @@
 # hkmm
-![GitHub](https://img.shields.io/github/license/HKLab/HKModManager?style=flat-square) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/HKLab/HKModManager/build.yml?event=push&style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/HKLab/HKModManager?style=flat-square) ![GitHub all releases](https://img.shields.io/github/downloads/HKLab/HKModManager/total?style=flat-square)
+![GitHub](https://img.shields.io/github/license/hkmodmanager/HKModManager?style=flat-square) ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/hkmodmanager/HKModManager/build.yml?event=push&style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/hkmodmanager/HKModManager?style=flat-square) ![GitHub all releases](https://img.shields.io/github/downloads/hkmodmanager/HKModManager/total?style=flat-square)
 
 ## Project setup
 ```
