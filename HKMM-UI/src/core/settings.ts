@@ -78,9 +78,6 @@ function GetSettingsLocal() {
             'https://raw.githubusercontent.com/hkmodmanager/ModpackSource/source/Default%20Modpacks%20Source.json'
         ]);
     }
-    if(store.store.modpackSources == undefined) {
-        store.set('modpackSources', []);
-    }
 })();
 
 let optionsCache: SettingOptions[] | undefined = undefined;

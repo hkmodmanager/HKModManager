@@ -16,7 +16,7 @@ import { URL } from 'url'
 import { store } from './core/settings'
 import { appVersion, publicDir } from './core/remoteCache'
 import { join } from 'path'
-import { onSettingChanged } from 'core'
+import { CustomPackageProviderProxy, getRootPackageProvider, LocalPackageProxy, onSettingChanged } from 'core'
 
 import "@/core/interop/cs"
 
@@ -123,10 +123,61 @@ export const i18n = createI18n({
 
 remote.getCurrentWindow().setIcon(join(publicDir, "logo.ico"));
 
-ipcRenderer.on("on-url-emit", (event, urlStr: string) => {
+ipcRenderer.on("on-url-emit", async (event, urlStr: string) => {
     const url = new URL(urlStr);
-    console.dir(url);
+    const params = url.searchParams;
+    const part = url.hostname.toLowerCase();
+    if (part == "modpack.source") {
+        const action = params.get("op")?.toLowerCase();
+        if (!action) return;
+        if (action == 'import') {
+            let name = params.get("url")?.toLowerCase();
+            if (!name) return;
+            if (!name.startsWith("local:") && !name.startsWith("https://")) {
+                name = "https://" + name;
+            }
+            CustomPackageProviderProxy.addCustomProvider(name);
+            store.set('modpackSources', [...store.store.modpackSources, name]);
+            return;
+        } else if(action == 'clear') {
+            for(const p of CustomPackageProviderProxy.getAllCustomProviders()) {
+                p.remove();
+            }
+            store.set('modpackSources', []);
+            return;
+        }
+    } else if(part == "modpack") {
+        const action = params.get("op")?.toLowerCase();
+        if (!action) return;
+        const name = params.get("name");
+        if(!name) return;
+        if(action == 'install') {
+            const source = params.get("source");
+            if(source) {
+                CustomPackageProviderProxy.addCustomProvider(source);
+            }
+            const pack = getRootPackageProvider().getPackage(name);
+            if(pack) {
+                pack.install(true);
+            }
+        } else if(action == 'uninstall') {
+            const pack = LocalPackageProxy.getMod(name);
+            if(pack) {
+                pack.uninstall();
+            }
+        } else if(action == 'enable') {
+            const pack = LocalPackageProxy.getMod(name);
+            if(pack) {
+                pack.enabled = true;
+            }
+        } else if(action == 'disable') {
+            const pack = LocalPackageProxy.getMod(name);
+            if(pack) {
+                pack.enabled = false;
+            }
+        }
+    }
 });
 
 //document.body.setAttribute("data-bs-theme", store.get('useDarkMode', false) ? "dark" : "light");
-document.body.setAttribute("data-bs-theme","dark");
+document.body.setAttribute("data-bs-theme", "dark");
