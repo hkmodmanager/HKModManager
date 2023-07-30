@@ -47,6 +47,14 @@ protocol.registerSchemesAsPrivileged([
       supportFetchAPI: true,
       bypassCSP: true
     }
+  },
+  {
+    scheme: 'app-ext', privileges: {
+      secure: true,
+      standard: true,
+      supportFetchAPI: true,
+      bypassCSP: true
+    }
   }
 ]);
 
@@ -64,45 +72,65 @@ nativeTheme.themeSource = "dark";
 
 export let mainWindow: BrowserWindow | undefined;
 
+async function schemaHandler(url: string, root: string) {
+  let pathName: string | undefined;
+  try {
+    pathName = (decodeURI(url)).substring(url.indexOf("://") + 3);
+
+    const hash = pathName.lastIndexOf('#');
+    if (hash > 0) {
+      pathName = pathName.substring(0, hash);
+    }
+    const query = pathName.lastIndexOf('?');
+    if (query > 0) {
+      pathName = pathName.substring(0, query);
+    }
+    if(pathName.startsWith("index.html/")) {
+      pathName = pathName.substring(11);
+    }
+    if(pathName == '' || pathName == '.' || pathName == '/' || pathName == './') pathName = "index.html";
+    const data = await readFile(path.join(root, pathName));
+    const extension = path.extname(pathName).toLowerCase()
+    let mimeType = ''
+
+    if (extension === '.js') {
+      mimeType = 'text/javascript'
+    } else if (extension === '.html') {
+      mimeType = 'text/html'
+    } else if (extension === '.css') {
+      mimeType = 'text/css'
+    } else if (extension === '.svg' || extension === '.svgz') {
+      mimeType = 'image/svg+xml'
+    } else if (extension === '.json') {
+      mimeType = 'application/json'
+    } else if (extension === '.wasm') {
+      mimeType = 'application/wasm'
+    }
+
+    return new Response(data, {
+      headers: {
+        "Content-Type": mimeType
+      }
+    })
+  } catch (e) {
+    console.error(e);
+    dialog.showErrorBox("Error!", e.toString());
+    return new Response(((e?.stack ?? e)?.toString() ?? "Error!") + `\n${pathName}`, {
+      status: 504,
+      statusText: "Error"
+    });
+  }
+}
+
 function registerAppScheme() {
   protocol.handle("app", async request => {
-    try {
-      let pathName = (decodeURI(request.url)).substring(6);
-
-      const hash = pathName.lastIndexOf('#');
-      if (hash > 0) {
-        pathName = pathName.substring(0, hash);
-      }
-      const data = await readFile(path.join(__dirname, pathName));
-      const extension = path.extname(pathName).toLowerCase()
-      let mimeType = ''
-
-      if (extension === '.js') {
-        mimeType = 'text/javascript'
-      } else if (extension === '.html') {
-        mimeType = 'text/html'
-      } else if (extension === '.css') {
-        mimeType = 'text/css'
-      } else if (extension === '.svg' || extension === '.svgz') {
-        mimeType = 'image/svg+xml'
-      } else if (extension === '.json') {
-        mimeType = 'application/json'
-      } else if (extension === '.wasm') {
-        mimeType = 'application/wasm'
-      }
-
-      return new Response(data, {
-        headers: {
-          "Content-Type": mimeType
-        }
-      })
-    } catch (e) {
-      console.error(e);
-      dialog.showErrorBox("Error!", e.toString());
-      return new Response((e?.stack ?? e)?.toString() ?? "Error!", {
-        status: 504,
-        statusText: "Error"
-      });
+    return schemaHandler(request.url, __dirname);
+  });
+  protocol.handle("app-ext", async request => {
+    if(app.isPackaged) {
+      return schemaHandler(request.url, join(dirname(__dirname), 'app.ext.asar'));
+    } else {
+      return schemaHandler(request.url, join(srcRoot, 'temp', 'app.ext.asar'));
     }
   });
 }
@@ -119,17 +147,17 @@ async function createWindow() {
       contextIsolation: false,
       webSecurity: false,
       allowRunningInsecureContent: true,
-      devTools: true
+      devTools: true,
+      webviewTag: true
     }
   });
 
 
-
   remote.enable(win.webContents);
-  
+
   win.webContents.on('render-process-gone', (ev, details) => {
     win.close();
-    if(details.reason == 'crashed' || details.reason == 'launch-failed'
+    if (details.reason == 'crashed' || details.reason == 'launch-failed'
       || details.reason == 'abnormal-exit') {
       dialog.showErrorBox("Crashed", "Sorry, HKMM has encountered an unrecoverable error, please restart the program.");
       app.exit(-1);
@@ -145,17 +173,30 @@ async function createWindow() {
     win.loadURL('app://./index.html');
   }
 
-  win.webContents.on('will-navigate', (ev, url) =>
-  {
+  win.webContents.on('will-navigate', (ev, url) => {
     const purl = new URL(url);
-    if(!url.startsWith("app://") && purl.hostname != "localhost")
-    {
+    if (!url.startsWith("app://") && purl.hostname != "localhost") {
       ev.preventDefault();
+      if (url.startsWith("hkmm://")) {
+        win.webContents.send("on-url-emit", url);
+        return;
+      }
+      shell.openExternal(url);
+    }
+  });
+  win.webContents.on('will-frame-navigate', (ev) => {
+    const url = ev.url;
+    const purl = new URL(url);
+    if (!url.startsWith("app-ext://") && purl.hostname != "localhost") {
+      ev.preventDefault();
+      if (url.startsWith("hkmm://")) {
+        win.webContents.send("on-url-emit", url);
+        return;
+      }
       shell.openExternal(url);
     }
   });
 
-  
 }
 
 export const srcRoot = dirname(dirname(dirname(dirname(app.getPath('exe')))));

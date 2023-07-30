@@ -56,7 +56,7 @@ async function check() {
         appVue = (await import('@/App.vue')).default;
         throughCheck.value = true;
         router.replace({
-            name: "pack"
+            name: "home"
         });
         return true;
     }

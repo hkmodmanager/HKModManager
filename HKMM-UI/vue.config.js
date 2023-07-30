@@ -38,6 +38,10 @@ module.exports = defineConfig({
                         ]
                     },
                     {
+                        from: "./temp/app.ext.asar",
+                        to: "app.ext.asar"
+                    },
+                    {
                         from: "../gameinject/Output",
                         to: "../managed",
                         filter: [

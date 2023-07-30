@@ -9,7 +9,7 @@
       fill-height
       flex-shrink-0
     ">
-      <RouterLink to="/about" class="nav-link">
+      <RouterLink to="/home" class="nav-link">
         <h3>
           HKMM
           <span :style="{ 'font-size': '1rem' }">v{{ `${appVersion.major}.${appVersion.minor}.${appVersion.patch}`

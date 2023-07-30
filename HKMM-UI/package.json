@@ -1,6 +1,6 @@
 {
   "name": "hkmm",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "private": true,
   "description": "A Hollow Knight Mod Manager",
   "repository": {
@@ -28,6 +28,7 @@
     "release": "vue-cli-service electron:build",
     "build:update": "node ./tools/bundleUpdate.cjs",
     "build:offlineModLinks": "node ./tools/fetchOfflineModLinks.mjs",
+    "get:website": "node ./tools/getWebsite.mjs",
     "build:metadata": "node ./tools/buildMetadata.cjs"
   },
   "dependencies": {

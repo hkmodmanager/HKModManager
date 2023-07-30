@@ -24,6 +24,7 @@ pnpm-debug.log*
 
 #Electron-builder output
 /dist_electron
+/temp
 
 /public/offline
 /public/build-metadata.json

@@ -65,7 +65,7 @@ jobs:
           cd HKMM-UI
           npm ci
           npm run build:metadata
-          npm run build:offlineModLinks
+          npm run get:website
           npm run electron:build
           npm run build:update
           copy ./dist_electron/update.zip ./dist_electron/update-v3.zip

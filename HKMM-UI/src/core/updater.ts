@@ -3,7 +3,7 @@ import { copyFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { downloadRaw, downloadText, getFileSize } from "./utils/downloadFile";
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import { appDir, appVersion, isPackaged, srcRoot } from "./remoteCache";
+import { appDir, appVersion, isPackaged } from "./remoteCache";
 import * as semver from "semver"
 import { hasOption } from "./settings";
 import { buildMetadata, IBuildMetadata } from "./exportGlobal";
@@ -117,11 +117,10 @@ export async function installUpdate() {
     const result = await checkUpdate();
     if (!result) return;
     const raw = await downloadRaw(result.url, undefined, undefined, undefined, 'Download Setup', 'Download');
-    const updateFile = isPackaged ? join(appDir, 'update.zip') : join(srcRoot, 'dist_electron', 'win-unpacked', 'update.zip');
+    const updateFile = join(appDir, 'update.zip');
     writeFileSync(updateFile, raw);
     const updater = join(dirname(updateFile), 'updater.exe');
-    copyFileSync(isPackaged ? join(appDir, 'updater', 'updater.exe') : join(srcRoot, '..', 'updater', 'bin', 'Debug', 'updater.exe'),
-        updater);
+    copyFileSync(join(appDir, 'updater', 'updater.exe'), updater);
     console.log(updateFile);
     console.log(updater);
     const n_spawn = node_import<typeof spawn>('child_process', 'spawn');
