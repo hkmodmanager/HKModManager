@@ -16,9 +16,6 @@ Currently supported filters:
 
 :tag=<Tag Name>   Filter Mods categories, valid values: Boss | Cosmetic | Expansion | Gameplay | Library | Utility
 
-:sort=size    Sort the filtered results by mod size
-
-:sort=lastupdate    Sort the filtered results by when the mod was last updated
 
 ```
 
@@ -28,6 +25,4 @@ HKMM will strip the Mods files from the `hollow_knight_Data/Managed/Mods` folder
 
 **For users, the additional mods file placement remains the same as before.**
 
-### 3. Import Mods from Local/Scarab
-
-To help users migrate from Scarab to HKMM, the ability to import Mods from local/Scarab is provided.When importing Mods, HKMM checks the integrity of the Mods, and users can decide whether to complete the Mods file.
+### 3. Support Modpack
