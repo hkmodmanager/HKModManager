@@ -40,7 +40,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 19.x
           cache: 'npm'
           cache-dependency-path: HKMM-UI/package-lock.json
       - name: Setup .NET

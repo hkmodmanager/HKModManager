@@ -1,7 +1,6 @@
 
 import { readJSONSync } from "fs-extra";
 import { join } from "path";
-import { modfilesOffline } from "./offlineFileCache";
 import { publicDir } from "./remoteCache";
 import { CDN } from "./settings";
 
