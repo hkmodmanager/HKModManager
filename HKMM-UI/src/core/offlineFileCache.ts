@@ -40,8 +40,5 @@ export class OfflineFileCache {
     }
 }
 
-export const modlinksOffline: OfflineFileCache = new OfflineFileCache("modlinks.json");
-export const modfilesOffline: OfflineFileCache = new OfflineFileCache("modfiles-cache.txt");
-
 //@ts-ignore
 window.offlineData = __webpack_exports__;
