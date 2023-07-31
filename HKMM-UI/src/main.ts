@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { I18nLanguages, searchLanguages, SupportedLanguages } from './lang/langs'
 import { createI18n } from 'vue-i18n'
 import { log, error } from 'electron-log'
@@ -45,9 +45,9 @@ const routes: RouteRecordRaw[] = [
         component: () => import('./view/view-pack.vue')
     },
     {
-        name: "home",
-        path: "/home",
-        component: () => import('./view/view-home.vue')
+        name: "ext",
+        path: "/ext/:path(.*)*",
+        component: () => import('./view/view-ext.vue')
     },
     {
         name: "sources",
@@ -82,7 +82,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const route = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes
 });
 

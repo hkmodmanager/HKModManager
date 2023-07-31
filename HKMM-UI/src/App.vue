@@ -9,7 +9,7 @@
       fill-height
       flex-shrink-0
     ">
-      <RouterLink to="/home" class="nav-link">
+      <RouterLink to="/ext" class="nav-link">
         <h3>
           HKMM
           <span :style="{ 'font-size': '1rem' }">v{{ `${appVersion.major}.${appVersion.minor}.${appVersion.patch}`
@@ -76,7 +76,7 @@
       </ul>
     </div>
     <!--Body-->
-    <div class="flex-grow-1 app-body">
+    <div class="flex-grow-1 app-body d-flex flex-column">
       <ModalUpdate />
       <router-view></router-view>
     </div>

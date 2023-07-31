@@ -1,6 +1,6 @@
 
 <template>
-    <div class="alert alert-warning alert-dismissible collapse" ref="alert" v-show="updateInfo">
+    <div class="alert alert-warning alert-dismissible collapse mb-0" ref="alert" v-show="updateInfo">
         <a href="javascript:;" :style="{ 'textDecoration': 'none' }" @click="showModal()">
             {{ $t('hasUpdate') }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $t('clickHere') }})
         </a>

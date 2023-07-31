@@ -117,6 +117,7 @@ import { Collapse } from 'bootstrap';
 import { hasOption } from '@/core/settings';
 import { getShortName } from '@/core/utils/utils'
 import { useI18n } from "vue-i18n";
+import { mdConvertURL } from "@/core/utils/urlParser";
 
 const bodyCollapse = ref<HTMLDivElement>();
 const packIconS = ref<HTMLImageElement>();
@@ -194,7 +195,7 @@ onBeforeMount(async () => {
     packItem.value = props.package;
     days = getLastUpdate();
     desc = commonMarkdown.renderInline(
-        props.package.description.replace(/\b(?:https?:\/\/|www\.)\S+\b/ig, ($0) => `<${$0}>`)
+        mdConvertURL(props.package.description)
     );
     update();
 });
