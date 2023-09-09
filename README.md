@@ -1,5 +1,8 @@
 # **H**ollow **K**night **M**od **M**anager
 
+# 已停止维护，请使用[Scarab+](https://themulhima.github.io/Scarab/)
+# Maintenance has been stopped, please use [Scarab+](https://themulhima.github.io/Scarab/)
+
 A Hollow Knight Mods Manager for version 1.5
 
 ## Featured features
